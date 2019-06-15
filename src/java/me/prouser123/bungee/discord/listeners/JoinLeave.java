@@ -18,7 +18,7 @@ public class JoinLeave implements Listener {
 
 	public JoinLeave(TextChannel logChannel) {
 		JoinLeave.logChannel = logChannel;
-		verificationManager = Main.inst().getVerifiedRoleManager();
+		verificationManager = Main.inst().getVerificationManager();
 	}
 	
 	@EventHandler
@@ -29,19 +29,21 @@ public class JoinLeave implements Listener {
 			logChannel.sendMessage("`" + player.getName() + "` has joined the network.");
 		}
 
-		VerificationResult result = verificationManager.checkVerificationStatus(player);
+		if(verificationManager != null) {
+			VerificationResult result = verificationManager.checkVerificationStatus(player);
 
-		switch(result) {
-			case NOT_LINKED:
-				player.sendMessage(new TextComponent("NOT_LINKED"));
-				return;
+			switch(result) {
+				case NOT_LINKED:
+					player.sendMessage(new TextComponent("NOT_LINKED"));
+					return;
 
-			case LINKED_NOT_VERIFIED:
-				player.sendMessage(new TextComponent("LINKED_NOT_VERIFIED"));
-				return;
+				case LINKED_NOT_VERIFIED:
+					player.sendMessage(new TextComponent("LINKED_NOT_VERIFIED"));
+					return;
 
-			case VERIFIED:
-				player.sendMessage(new TextComponent("VERIFIED"));
+				case VERIFIED:
+					player.sendMessage(new TextComponent("VERIFIED"));
+			}
 		}
 	}
 	

@@ -1,4 +1,4 @@
-package me.prouser123.bungee.discord.botcommands;
+package me.prouser123.bungee.discord.bot.commands;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -9,7 +9,6 @@ import org.javacord.api.event.message.MessageCreateEvent;
 import org.javacord.api.listener.message.MessageCreateListener;
 
 import me.prouser123.bungee.discord.Main;
-import me.prouser123.bungee.discord.base.BaseCommand;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 
 public class Players implements MessageCreateListener, BaseCommand {

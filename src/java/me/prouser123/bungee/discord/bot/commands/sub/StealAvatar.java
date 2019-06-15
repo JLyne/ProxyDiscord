@@ -1,10 +1,8 @@
-package me.prouser123.bungee.discord.botcommands.sub;
+package me.prouser123.bungee.discord.bot.commands.sub;
 
 import me.prouser123.bungee.discord.Main;
 import org.javacord.api.event.message.MessageCreateEvent;
 import org.javacord.api.listener.message.MessageCreateListener;
-
-import me.prouser123.bungee.discord.base.BaseSubCommand;
 
 import java.util.concurrent.ExecutorService;
 

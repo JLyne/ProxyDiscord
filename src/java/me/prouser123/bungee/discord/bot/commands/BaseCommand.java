@@ -1,7 +1,7 @@
-package me.prouser123.bungee.discord.base;
+package me.prouser123.bungee.discord.bot.commands;
 
 import me.prouser123.bungee.discord.Main;
-import me.prouser123.bungee.discord.botcommands.MainCommand;
+import me.prouser123.bungee.discord.bot.commands.MainCommand;
 
 public interface BaseCommand {
 	

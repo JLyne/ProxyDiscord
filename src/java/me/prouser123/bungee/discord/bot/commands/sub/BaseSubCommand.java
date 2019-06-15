@@ -1,7 +1,8 @@
-package me.prouser123.bungee.discord.base;
+package me.prouser123.bungee.discord.bot.commands.sub;
 
 import me.prouser123.bungee.discord.Main;
-import me.prouser123.bungee.discord.botcommands.MainCommand;
+import me.prouser123.bungee.discord.bot.commands.BaseCommand;
+import me.prouser123.bungee.discord.bot.commands.MainCommand;
 
 public interface BaseSubCommand extends BaseCommand {
 	

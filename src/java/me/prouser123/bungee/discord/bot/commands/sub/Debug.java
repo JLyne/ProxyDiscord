@@ -1,4 +1,4 @@
-package me.prouser123.bungee.discord.botcommands.sub;
+package me.prouser123.bungee.discord.bot.commands.sub;
 
 import org.javacord.api.Javacord;
 import org.javacord.api.entity.message.embed.EmbedBuilder;
@@ -7,7 +7,6 @@ import org.javacord.api.listener.message.MessageCreateListener;
 
 import me.prouser123.bungee.discord.Constants;
 import me.prouser123.bungee.discord.Discord;
-import me.prouser123.bungee.discord.base.BaseSubCommand;
 
 public class Debug implements MessageCreateListener, BaseSubCommand {
 	

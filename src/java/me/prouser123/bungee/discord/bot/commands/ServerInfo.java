@@ -1,4 +1,4 @@
-package me.prouser123.bungee.discord.botcommands;
+package me.prouser123.bungee.discord.bot.commands;
 
 import java.lang.management.ManagementFactory;
 import java.text.SimpleDateFormat;
@@ -11,7 +11,6 @@ import org.javacord.api.listener.message.MessageCreateListener;
 import me.prouser123.bungee.discord.Constants;
 import me.prouser123.bungee.discord.Discord;
 import me.prouser123.bungee.discord.Main;
-import me.prouser123.bungee.discord.base.BaseCommand;
 
 public class ServerInfo implements MessageCreateListener, BaseCommand {
 	

@@ -1,5 +1,11 @@
 package me.prouser123.bungee.discord;
 
+import me.prouser123.bungee.discord.bot.commands.Link;
+import me.prouser123.bungee.discord.bot.commands.MainCommand;
+import me.prouser123.bungee.discord.bot.commands.Players;
+import me.prouser123.bungee.discord.bot.commands.ServerInfo;
+import me.prouser123.bungee.discord.bot.commands.listeners.UserRoleAdd;
+import me.prouser123.bungee.discord.bot.commands.listeners.UserRoleRemove;
 import me.prouser123.bungee.discord.listeners.JoinLeave;
 import me.prouser123.bungee.discord.listeners.PlayerChat;
 import net.md_5.bungee.api.plugin.Plugin;
@@ -13,9 +19,8 @@ import java.util.Optional;
 
 import com.google.common.io.ByteStreams;
 
-// Since we need all the botcommands here, this is fine.
-import me.prouser123.bungee.discord.botcommands.*;
-import me.prouser123.bungee.discord.botcommands.sub.*;
+// Since we need all the bot here, this is fine.
+import me.prouser123.bungee.discord.bot.commands.sub.*;
 import org.javacord.api.entity.channel.TextChannel;
 import org.javacord.api.entity.permission.Role;
 
@@ -49,7 +54,7 @@ public class Main extends Plugin {
 		return linkingManager;
 	}
 
-	public VerificationManager getVerifiedRoleManager() {
+	public VerificationManager getVerificationManager() {
 		return verificationManager;
 	}
 
@@ -68,7 +73,7 @@ public class Main extends Plugin {
 			getLogger().severe("Error loading config.yml");
 		}
 		
-		// Setup bot botcommands config
+		// Setup bot bot config
 		loadResource(this, "bot-command-options.yml");
 		try {
 			botCommandConfiguration = ConfigurationProvider.getProvider(YamlConfiguration.class).load(new File(getDataFolder(), "bot-command-options.yml"));
@@ -84,27 +89,24 @@ public class Main extends Plugin {
         
         // Cache a maximum of 10 messages per channel for and remove messages older than 1 hour
         Discord.api.setMessageCacheSize(10, 60*60);
-		
-		// Register customizable bot botcommands from the config, falling back to hard-coded defaults
+
+		Main.registerListeners.verification();
+
 		Main.registerListeners.botCommands();
 		Main.registerListeners.subCommands();
-		
-		// Register Bungee Player Join/Leave Listeners
+
 		Main.registerListeners.playerJoinLeave();
 		Main.registerListeners.playerChat();
 
 		getProxy().getPluginManager().registerCommand(this, new me.prouser123.bungee.discord.commands.Link());
+		getProxy().getPluginManager().registerCommand(this, new me.prouser123.bungee.discord.commands.Unlink());
 	}
 	
 	private static class registerListeners {
-		
-		private static void playerJoinLeave() {
-			// Register Bungee Player Join/Leave Listeners
-			String logChannelId = getConfig().getString("log-channel-id");
+    	private static void verification() {
 			String verifyRoleId = getConfig().getString("verify-role-id");
-			String verifiedGroup = getConfig().getString("verified-group");
+			String verifiedGroup = getConfig().getString("verified-permission");
 
-			Optional<TextChannel> logChannel = Discord.api.getTextChannelById(logChannelId);
 			Optional<Role> verifyRole = Discord.api.getRoleById(verifyRoleId);
 
 			if(!verifyRole.isPresent()) {
@@ -112,14 +114,18 @@ public class Main extends Plugin {
 			} else {
 				verificationManager = new VerificationManager(verifyRole.get(), verifiedGroup);
 			}
+		}
+		
+		private static void playerJoinLeave() {
+			// Register Bungee Player Join/Leave Listeners
+			String logChannelId = getConfig().getString("log-channel-id");
+			Optional<TextChannel> logChannel = Discord.api.getTextChannelById(logChannelId);
 
 			if(!logChannel.isPresent()) {
 				Main.inst().getLogger().info("Join/Leave logging disabled. Did you put a valid channel ID in the config?");
 			}
 
-			JoinLeave listener = new JoinLeave(logChannel.orElse(null));
-
-			Main.inst().getProxy().getPluginManager().registerListener(Main.inst(), listener);
+			Main.inst().getProxy().getPluginManager().registerListener(Main.inst(),  new JoinLeave(logChannel.orElse(null)));
 			Main.inst().getLogger().info("Join Leave Chat enabled for channel: #" + logChannel.toString().replaceAll(".*\\[|\\].*", "") + " (id: " + logChannelId + ")");
 		}
 
@@ -136,14 +142,14 @@ public class Main extends Plugin {
 		}
 		
 		private static void botCommands() {
-			Main.inst().getLogger().info("Registering botcommands...");
+			Main.inst().getLogger().info("Registering bot...");
 			
 			// Register Main Command Class
 			Discord.api.addMessageCreateListener(new MainCommand());
 			
 			// Attempt to register server-info from the config, falling back to the defaults.
 			if (getConfigBotCommand().contains("server-info")) {
-				Discord.api.addMessageCreateListener(new ServerInfo(0, getConfigBotCommand().getString("server-info.command"), getConfigBotCommand().getString("server-info.description")));	
+				Discord.api.addMessageCreateListener(new ServerInfo(0, getConfigBotCommand().getString("server-info.command"), getConfigBotCommand().getString("server-info.description")));
 			} else {
 				Main.inst().getLogger().warning("[Bot Command Options] Missing the server-info path. You will not be able to customize the !serverinfo command.");
 				Discord.api.addMessageCreateListener(new ServerInfo(0, "!serverinfo", "Show server information."));
@@ -161,7 +167,7 @@ public class Main extends Plugin {
 		}
 		
 		private static void subCommands() {
-			Main.inst().getLogger().info("Registering sub-botcommands...");
+			Main.inst().getLogger().info("Registering sub-bot...");
 
 			Discord.api.addMessageCreateListener(new BotInfo(0, "!bd botinfo", "Show bot information."));
 			Discord.api.addMessageCreateListener(new Debug(1, "!bd debug", "Show debug information."));

@@ -11,7 +11,7 @@ verify-role-id: '123456789'
 verify-channel-id: '123456789'
 
 # Group to grant users who have verified
-verified-group: 'group.verified'
+verified-permission: 'group.verified'
 
 # Channel to log joins/leaves/chats etc in
 log-channel-id: '123456789'

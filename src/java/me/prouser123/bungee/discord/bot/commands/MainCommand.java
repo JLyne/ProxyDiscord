@@ -1,4 +1,4 @@
-package me.prouser123.bungee.discord.botcommands;
+package me.prouser123.bungee.discord.bot.commands;
 
 import java.util.ArrayList;
 
@@ -8,10 +8,8 @@ import org.javacord.api.listener.message.MessageCreateListener;
 
 import me.prouser123.bungee.discord.listeners.JoinLeave;
 import me.prouser123.bungee.discord.Main;
-import me.prouser123.bungee.discord.base.BaseCommand;
-import me.prouser123.bungee.discord.base.GenerateOnDemand;
 
-public class MainCommand implements MessageCreateListener, BaseCommand, GenerateOnDemand {
+public class MainCommand implements MessageCreateListener, BaseCommand {
 	
 	//public static EmbedBuilder CommandEmbed = null;
 	public static ArrayList<String> array;
@@ -63,7 +61,7 @@ public class MainCommand implements MessageCreateListener, BaseCommand, Generate
     		// Debug information
     		Main.inst().getDebugLogger().info("[MainCommand@OnMessage] Command: " + split[0] + ", HelpText: " + split[1]);
     		
-    		// Currently not required as there are no main botcommands that require it.
+    		// Currently not required as there are no main bot that require it.
     		// Instead we will just add the field.
     		
     		//if (this.isGoD(split[1])) {
@@ -87,12 +85,8 @@ public class MainCommand implements MessageCreateListener, BaseCommand, Generate
     		
     		// Debug information
     		Main.inst().getDebugLogger().info("[MainCommand@OnMessage] Command: " + split[0] + ", HelpText: " + split[1]);
-    		
-    		if (this.isGoD(split[1])) {
-    			this.runGoD(split, embed, event);
-    		} else {
-        		embed.addField(split[0], split[1]);
-    		}
+
+    		embed.addField(split[0], split[1]);
     	}
     	
     	// return the embed
