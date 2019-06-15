@@ -4,7 +4,7 @@
 
   <groupId>me.prouser123.bungee</groupId>
   <artifactId>BungeeDiscord</artifactId>
-  <version>2.0-rc2-STABLE</version>
+  <version>RTGAME</version>
 
   <name>discord</name>
   <url>http://maven.apache.org</url>
@@ -65,6 +65,7 @@
                   <include>com.neovisionaries:nv-websocket-client</include>
                   <include>org.apache.logging.log4j:log4j-api</include>
                   <include>me.prouser123:bstatsplus</include>
+                  <include>com.google.guava:guava</include>
                 </includes>
               </artifactSet>
             </configuration>
@@ -101,6 +102,19 @@
       <groupId>me.prouser123</groupId>
       <artifactId>bstatsplus</artifactId>
       <version>1.4.0.1</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+      <version>28.0-jre</version>
+    </dependency>
+
+    <dependency>
+      <groupId>me.lucko.luckperms</groupId>
+      <artifactId>luckperms-api</artifactId>
+      <version>4.4</version>
+      <scope>provided</scope>
     </dependency>
   </dependencies>
   <properties>

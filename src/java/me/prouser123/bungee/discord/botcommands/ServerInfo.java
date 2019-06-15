@@ -1,4 +1,4 @@
-package me.prouser123.bungee.discord.commands;
+package me.prouser123.bungee.discord.botcommands;
 
 import java.lang.management.ManagementFactory;
 import java.text.SimpleDateFormat;

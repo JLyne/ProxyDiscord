@@ -1,4 +1,4 @@
-package me.prouser123.bungee.discord.commands.sub;
+package me.prouser123.bungee.discord.botcommands.sub;
 
 import org.javacord.api.Javacord;
 import org.javacord.api.entity.message.embed.EmbedBuilder;

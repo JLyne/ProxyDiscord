@@ -1,4 +1,4 @@
-package me.prouser123.bungee.discord.commands.sub;
+package me.prouser123.bungee.discord.botcommands.sub;
 
 import org.javacord.api.event.message.MessageCreateEvent;
 import org.javacord.api.listener.message.MessageCreateListener;

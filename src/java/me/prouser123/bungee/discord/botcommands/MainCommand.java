@@ -1,4 +1,4 @@
-package me.prouser123.bungee.discord.commands;
+package me.prouser123.bungee.discord.botcommands;
 
 import java.util.ArrayList;
 
@@ -6,7 +6,7 @@ import org.javacord.api.entity.message.embed.EmbedBuilder;
 import org.javacord.api.event.message.MessageCreateEvent;
 import org.javacord.api.listener.message.MessageCreateListener;
 
-import me.prouser123.bungee.discord.JoinLeave;
+import me.prouser123.bungee.discord.listeners.JoinLeave;
 import me.prouser123.bungee.discord.Main;
 import me.prouser123.bungee.discord.base.BaseCommand;
 import me.prouser123.bungee.discord.base.GenerateOnDemand;
@@ -42,7 +42,7 @@ public class MainCommand implements MessageCreateListener, BaseCommand, Generate
         	
         	EmbedBuilder embed2 = new EmbedBuilder();
         	
-        	if (JoinLeave.channel != null) {
+        	if (JoinLeave.logChannel != null) {
             	embed2.setTitle("Enabled Features");
             	embed2.addField("Join / Leave Messages", "Message to a channel when a player joins the network.");
         	} else {
@@ -63,7 +63,7 @@ public class MainCommand implements MessageCreateListener, BaseCommand, Generate
     		// Debug information
     		Main.inst().getDebugLogger().info("[MainCommand@OnMessage] Command: " + split[0] + ", HelpText: " + split[1]);
     		
-    		// Currently not required as there are no main commands that require it.
+    		// Currently not required as there are no main botcommands that require it.
     		// Instead we will just add the field.
     		
     		//if (this.isGoD(split[1])) {

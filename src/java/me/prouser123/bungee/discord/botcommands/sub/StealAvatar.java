@@ -1,9 +1,12 @@
-package me.prouser123.bungee.discord.commands.sub;
+package me.prouser123.bungee.discord.botcommands.sub;
 
+import me.prouser123.bungee.discord.Main;
 import org.javacord.api.event.message.MessageCreateEvent;
 import org.javacord.api.listener.message.MessageCreateListener;
 
 import me.prouser123.bungee.discord.base.BaseSubCommand;
+
+import java.util.concurrent.ExecutorService;
 
 public class StealAvatar implements MessageCreateListener, BaseSubCommand {
 	
@@ -29,9 +32,14 @@ public class StealAvatar implements MessageCreateListener, BaseSubCommand {
                 return;
             }
 
+            ExecutorService executor = Main.inst().getExecutorService();
+
             event.getApi()
                     .updateAvatar(event.getMessage().getAuthor().getAvatar()) // Update the avatar
-                    .thenAccept(aVoid -> event.getChannel().sendMessage("Now using the avatar of: " + event.getMessage().getAuthor().getName())) // Send the user a message if the update was successful
+                    .thenAcceptAsync(
+                            aVoid -> event.getChannel().sendMessage("Now using the avatar of: " + event.getMessage().getAuthor().getName()),
+                            executor
+                    ) // Send the user a message if the update was successful
                     .exceptionally(throwable -> {
                         // Send the user a message, if the update failed
                         event.getChannel().sendMessage("Something went wrong: " + throwable.getMessage());
