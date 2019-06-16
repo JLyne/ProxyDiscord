@@ -2,7 +2,8 @@ package me.prouser123.bungee.discord.commands;
 
 import me.prouser123.bungee.discord.LinkingManager;
 import me.prouser123.bungee.discord.Main;
-import me.prouser123.bungee.discord.exceptions.AlreadyLinkedException;
+import me.prouser123.bungee.discord.ChatMessages;
+import me.prouser123.bungee.discord.VerificationManager;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
@@ -19,10 +20,13 @@ public class Unlink extends BaseCommand {
     @Override
     public void execute(CommandSender commandSender, String[] strings) {
         if(linker.isLinked((ProxiedPlayer) commandSender)) {
+            VerificationManager verificationManager = Main.inst().getVerificationManager();
+
             linker.unlink((ProxiedPlayer) commandSender);
-            commandSender.sendMessage(new TextComponent("Your discord account has been unlinked."));
+            verificationManager.checkVerificationStatus((ProxiedPlayer) commandSender);
+            commandSender.sendMessage(new TextComponent(ChatMessages.getMessage("unlink-success")));
         } else {
-            commandSender.sendMessage(new TextComponent("You have not linked a discord account."));
+            commandSender.sendMessage(new TextComponent(ChatMessages.getMessage("unlink-unlink-not-linked")));
         }
     }
 }

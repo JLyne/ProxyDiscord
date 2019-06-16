@@ -4,14 +4,22 @@
 # Bot token
 token: bot-token-here
 
+link-url: 'https://minecraft.rtgame.co.uk/linking/[token]'
+
 # Role id the user needs to have to be allowed in
 verify-role-id: '123456789'
 
 # Channel to accept verify requests from
 verify-channel-id: '123456789'
 
-# Group to grant users who have verified
+# Permission to grant users who have verified
 verified-permission: 'group.verified'
+
+# Permission to allow bypassing the verification requirements
+bypass-permission: 'discord.bypass'
+
+# Server unverified players are allowed on to link/verify
+unverified-server: 'waiting'
 
 # Channel to log joins/leaves/chats etc in
 log-channel-id: '123456789'

@@ -64,7 +64,6 @@
                   <include>com.fasterxml.jackson.core:jackson-core</include>
                   <include>com.neovisionaries:nv-websocket-client</include>
                   <include>org.apache.logging.log4j:log4j-api</include>
-                  <include>me.prouser123:bstatsplus</include>
                   <include>com.google.guava:guava</include>
                 </includes>
               </artifactSet>

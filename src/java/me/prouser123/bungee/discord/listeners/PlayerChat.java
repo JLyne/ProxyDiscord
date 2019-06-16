@@ -11,12 +11,12 @@ import net.md_5.bungee.event.EventPriority;
 import org.javacord.api.entity.channel.TextChannel;
 
 public class PlayerChat implements Listener {
-    private static TextChannel channel = null;
-    private static LinkingManager linker = null;
+    private static TextChannel logChannel = null;
+    private static LinkingManager linkingManager = null;
 
-    public PlayerChat(String id) {
-        PlayerChat.channel = Discord.api.getTextChannelById(id).get();
-        PlayerChat.linker = Main.inst().getLinkingManager();
+    public PlayerChat(TextChannel logChannel) {
+        PlayerChat.logChannel = logChannel;
+        PlayerChat.linkingManager = Main.inst().getLinkingManager();
     }
 
     @EventHandler(priority = EventPriority.LOW)
@@ -25,12 +25,12 @@ public class PlayerChat implements Listener {
         if (!(e.getSender() instanceof ProxiedPlayer)) return;
 
         ProxiedPlayer sender = (ProxiedPlayer) e.getSender();
-        Long discordId = linker.getLinked(sender);
+        Long discordId = linkingManager.getLinked(sender);
 
         if(discordId != null) {
-            channel.sendMessage(sender.getName() + " (<@!" + discordId.toString() + ">): " + e.getMessage());
+            logChannel.sendMessage(sender.getName() + " (<@!" + discordId.toString() + ">): " + e.getMessage());
         } else {
-            channel.sendMessage(sender.getName() + ": " + e.getMessage());
+            logChannel.sendMessage(sender.getName() + ": " + e.getMessage());
         }
     }
 }

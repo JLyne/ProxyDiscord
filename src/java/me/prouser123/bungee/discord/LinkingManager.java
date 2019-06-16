@@ -3,6 +3,11 @@ package me.prouser123.bungee.discord;
 import com.google.common.collect.HashBiMap;
 import me.prouser123.bungee.discord.exceptions.AlreadyLinkedException;
 import me.prouser123.bungee.discord.exceptions.InvalidTokenException;
+import net.md_5.bungee.api.ChatColor;
+import net.md_5.bungee.api.chat.ClickEvent;
+import net.md_5.bungee.api.chat.ComponentBuilder;
+import net.md_5.bungee.api.chat.HoverEvent;
+import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import org.javacord.api.entity.user.User;
 
@@ -11,8 +16,10 @@ import java.util.Base64;
 public class LinkingManager {
     private HashBiMap<String, Long> links;
     private HashBiMap<String, String> pendingLinks;
+    private String linkingUrl;
 
-    public LinkingManager() {
+    public LinkingManager(String linkingUrl) {
+        this.linkingUrl = linkingUrl;
         this.links = HashBiMap.create(1024);
         this.pendingLinks = HashBiMap.create(1024);
     }
@@ -41,7 +48,7 @@ public class LinkingManager {
         return this.links.inverse().get(discordId);
     }
 
-    public String getLinked(User user) {
+    String getLinked(User user) {
         return this.links.inverse().get(user.getId());
     }
 
@@ -49,13 +56,34 @@ public class LinkingManager {
         return this.links.get(player.getUniqueId().toString());
     }
 
-    public String startLink(String uuid) throws AlreadyLinkedException {
+    public String startLink(ProxiedPlayer player) {
+        String uuid = player.getUniqueId().toString();
+
         if(this.links.containsKey(uuid)) {
-            throw new AlreadyLinkedException("Discord account is already linked to a Minecraft player");
+            TextComponent message = new TextComponent(ChatMessages.getMessage("link-already-linked"));
+            message.setColor(ChatColor.RED);
+
+            player.sendMessage(message);
+
+            return null;
         }
 
+        String token = getLinkingToken(uuid);
+        String url = linkingUrl.replace("[token]", token);
+
+        TextComponent message = new TextComponent(ChatMessages.getMessage("link"));
+        message.setColor(ChatColor.LIGHT_PURPLE);
+        message.setClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, url));
+        message.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Discord account linking instructions").create()));
+
+        player.sendMessage(message);
+
+        return token;
+    }
+
+    private String getLinkingToken(String uuid) {
         if (this.pendingLinks.containsValue(uuid)) {
-           return this.pendingLinks.inverse().get(uuid);
+            return this.pendingLinks.inverse().get(uuid);
         }
 
         String token;
@@ -70,10 +98,6 @@ public class LinkingManager {
         this.pendingLinks.put(token, uuid);
 
         return token;
-    }
-
-    public String startLink(ProxiedPlayer player) throws AlreadyLinkedException {
-        return startLink(player.getUniqueId().toString());
     }
 
     public void completeLink(String token, Long discordId) throws AlreadyLinkedException, InvalidTokenException {

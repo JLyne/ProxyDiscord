@@ -3,6 +3,9 @@ package me.prouser123.bungee.discord.listeners;
 import me.prouser123.bungee.discord.Main;
 import me.prouser123.bungee.discord.VerificationManager;
 import me.prouser123.bungee.discord.VerificationResult;
+import me.prouser123.bungee.discord.ChatMessages;
+import net.md_5.bungee.api.ChatColor;
+import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import org.javacord.api.entity.channel.TextChannel;
@@ -30,19 +33,22 @@ public class JoinLeave implements Listener {
 		}
 
 		if(verificationManager != null) {
+			String text;
 			VerificationResult result = verificationManager.checkVerificationStatus(player);
 
 			switch(result) {
 				case NOT_LINKED:
-					player.sendMessage(new TextComponent("NOT_LINKED"));
+					text = ChatMessages.getMessage("join-welcome");
+					player.sendMessage(new ComponentBuilder(text).color(ChatColor.GREEN).create());
+
+					text = ChatMessages.getMessage("join-not-linked");
+					player.sendMessage(new ComponentBuilder(text).color(ChatColor.YELLOW).create());
 					return;
 
 				case LINKED_NOT_VERIFIED:
-					player.sendMessage(new TextComponent("LINKED_NOT_VERIFIED"));
-					return;
+					text = ChatMessages.getMessage("join-linked-not-verified");
 
-				case VERIFIED:
-					player.sendMessage(new TextComponent("VERIFIED"));
+					player.sendMessage(new ComponentBuilder(text).color(ChatColor.YELLOW).create());
 			}
 		}
 	}
