@@ -1,9 +1,6 @@
 package me.prouser123.bungee.discord.listeners;
 
-import me.prouser123.bungee.discord.Main;
-import me.prouser123.bungee.discord.VerificationManager;
-import me.prouser123.bungee.discord.VerificationResult;
-import me.prouser123.bungee.discord.ChatMessages;
+import me.prouser123.bungee.discord.*;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.TextComponent;
@@ -18,10 +15,12 @@ import net.md_5.bungee.event.EventHandler;
 public class JoinLeave implements Listener {
 	public static TextChannel logChannel = null;
 	private static VerificationManager verificationManager = null;
+	private static KickManager kickManager = null;
 
 	public JoinLeave(TextChannel logChannel) {
 		JoinLeave.logChannel = logChannel;
 		verificationManager = Main.inst().getVerificationManager();
+		kickManager = Main.inst().getKickManager();
 	}
 	
 	@EventHandler
@@ -43,18 +42,22 @@ public class JoinLeave implements Listener {
 
 					text = ChatMessages.getMessage("join-not-linked");
 					player.sendMessage(new ComponentBuilder(text).color(ChatColor.YELLOW).create());
+
+					kickManager.addPlayer(player);
 					return;
 
 				case LINKED_NOT_VERIFIED:
 					text = ChatMessages.getMessage("join-linked-not-verified");
-
 					player.sendMessage(new ComponentBuilder(text).color(ChatColor.YELLOW).create());
+
+					kickManager.addPlayer(player);
 			}
 		}
 	}
 	
 	@EventHandler
 	public void onPlayerLeave(PlayerDisconnectEvent event) {
+		kickManager.removePlayer(event.getPlayer());
 		logChannel.sendMessage("`" + event.getPlayer().getName() + "` has left the network.");
 	}
 }

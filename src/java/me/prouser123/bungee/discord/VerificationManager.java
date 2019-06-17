@@ -22,6 +22,7 @@ import java.util.UUID;
 
 public class VerificationManager {
     private static LinkingManager linkingManager = null;
+    private static KickManager kickManager = null;
 
     private static String verifiedPermission = null;
     private static String bypassPermission = null;
@@ -34,6 +35,7 @@ public class VerificationManager {
     VerificationManager(Role verifiedRole, String verifiedPermission, String bypassPermission, ServerInfo unverifiedServer) {
         verifiedRoleUsers = new ArrayList<>();
         linkingManager = Main.inst().getLinkingManager();
+        kickManager = Main.inst().getKickManager();
 
         VerificationManager.verifiedPermission = verifiedPermission;
         VerificationManager.bypassPermission = bypassPermission;
@@ -169,6 +171,7 @@ public class VerificationManager {
         me.lucko.luckperms.api.User user = luckPermsApi.getUserManager().getUser(player.getUniqueId());
         Node node = luckPermsApi.getNodeFactory().newBuilder(verifiedPermission).build();
         user.setTransientPermission(node);
+        kickManager.removePlayer(player);
     }
 
     private void removeVerifiedPermission(ProxiedPlayer player, RemovalReason reason) {
@@ -203,8 +206,6 @@ public class VerificationManager {
 
         message.setColor(ChatColor.RED);
 
-        player.sendMessage(message);
-
         if(unverifiedServer == null) {
             Main.inst().getDebugLogger().info("No unverified server defined. Kicking " + player.getName());
             player.disconnect(message);
@@ -231,9 +232,11 @@ public class VerificationManager {
             }, ServerConnectEvent.Reason.PLUGIN);
 
             player.sendMessage(message);
-        } else {
+        } else if(reason != RemovalReason.UNLINKED) {
             player.sendMessage(message);
         }
+
+        kickManager.addPlayer(player);
     }
 
     public boolean canJoinServer(ServerInfo server, ProxiedPlayer player) {

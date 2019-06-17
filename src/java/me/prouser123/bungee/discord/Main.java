@@ -1,6 +1,7 @@
 package me.prouser123.bungee.discord;
 
 import me.prouser123.bungee.discord.commands.Link;
+import me.prouser123.bungee.discord.commands.Save;
 import me.prouser123.bungee.discord.commands.Unlink;
 import me.prouser123.bungee.discord.listeners.JoinLeave;
 import me.prouser123.bungee.discord.listeners.PlayerChat;
@@ -24,8 +25,10 @@ public class Main extends Plugin {
 	private static Configuration messagesConfiguration;
 	private static Configuration botCommandConfiguration;
 	private static DebugLogger debugLogger;
+
 	private static LinkingManager linkingManager;
 	private static VerificationManager verificationManager;
+	private static KickManager kickManager;
 
     public static Main inst() {
     	  return instance;
@@ -45,6 +48,10 @@ public class Main extends Plugin {
 
 	public VerificationManager getVerificationManager() {
 		return verificationManager;
+	}
+
+	public KickManager getKickManager() {
+		return kickManager;
 	}
 
 	@Override
@@ -82,6 +89,8 @@ public class Main extends Plugin {
 		// Setup Debug Logging
 		debugLogger = new DebugLogger();
 
+		kickManager = new KickManager(getConfig().getInt("unverified-kick-time"));
+
 		String linkingUrl = getConfig().getString("linking-url");
 		linkingManager = new LinkingManager(linkingUrl);
 
@@ -92,6 +101,7 @@ public class Main extends Plugin {
 
 		getProxy().getPluginManager().registerCommand(this, new Link());
 		getProxy().getPluginManager().registerCommand(this, new Unlink());
+		getProxy().getPluginManager().registerCommand(this, new Save());
 	}
 
 	private static class registerListeners {
@@ -148,6 +158,8 @@ public class Main extends Plugin {
 	
 	@Override
 	public void onDisable() {
+    	linkingManager.saveLinks();
+
 		if (Discord.api != null) {
 			Discord.api.disconnect();
 		}

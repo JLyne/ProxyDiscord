@@ -4,7 +4,7 @@
 # Bot token
 token: bot-token-here
 
-link-url: 'https://minecraft.rtgame.co.uk/linking/[token]'
+linking-url: 'https://minecraft.rtgame.co.uk/linking?token=[token]'
 
 # Role id the user needs to have to be allowed in
 verify-role-id: '123456789'
@@ -26,3 +26,6 @@ log-channel-id: '123456789'
 
 # Enable debug logging? Only useful if you are developing this plugin.
 debug-enabled: false
+
+# Time in seconds to wait before kicking unverified players
+unverified-kick-time: 10

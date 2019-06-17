@@ -7,22 +7,22 @@ join-welcome: 'Welcome to the RTGame Subscriber Minecraft Server!'
 # When player joins without a discord account linked
 join-not-linked: |-
   You need to link your Discord account and have the [role] role to play on this server.
-  Please use /link and follow the instructions to link your Discord account.
+  Please type /link and follow the instructions to link your Discord account.
 
 # When player joins with a discord account like, but lacks the required role
 join-linked-not-verified: |-
   Your Discord account has been linked, but you don't appear to have the [role] role.
-  Please double check your Twitch subscription and Discord connection settings, or wait for Discord to grant you the role.
+  Please double check your Twitch subscription and Discord connections, or wait for Discord to grant you the role.
 
 # When a player tries to join a server requiring linking/role, without a discord account linked
 server-change-not-linked: |-
   You need to link your Discord account and have the [role] role to join this server.
-  Please use /link and follow the instructions to link your Discord account.
+  Please type /link and follow the instructions to link your Discord account.
 
 # When a player tries to join a server requiring linking/role, with a discord account linked, but lacking the required role
 server-change-linked-not-verified: |-
-  You need to have the [role] role to join this server.
-  Please double check your Twitch subscription and Discord connection settings, or wait for Discord to grant you the role.
+  You need to have the [role] role on your Discord account to join this server.
+  Please double check your Twitch subscription and Discord connections, or wait for Discord to grant you the role.
 
 # When a player uses /link
 link: 'Click here and follow the instructions to link your Discord account.'
@@ -35,7 +35,7 @@ link-success: |-
 
 link-not-verified: |-
   Your Discord account has been linked, but you don't appear to have the [role] role.
-  Please double check your Twitch subscription and Discord connection settings, or wait for Discord to grant you the role.
+  Please double check your Twitch subscription and Discord connections, or wait for Discord to grant you the role.
 
 # When a player uses /unlink
 unlink-success: 'Your discord account has been unlinked.'
@@ -44,9 +44,13 @@ unlink-success: 'Your discord account has been unlinked.'
 unlink-not-linked: 'You have not linked a discord account.'
 
 # When a player loses their access due to their discord account losing the required role
+verification-gained-role: |-
+  Your Discord account has gained the [role] role - Enjoy the server!
+
+# When a player loses their access due to their discord account losing the required role
 verification-lost-role: |-
   Your Discord account appears to have lost the [role] role.
-  Please check your Twitch subscription and Discord connections, or wait a while for discord to update your roles.
+  Please check your Twitch subscription and Discord connections, or wait for discord to update your roles.
 
 # When a player loses their access due unlinking their discord account
 verification-lost-unlinked: 'Your Discord account has been unlinked, use /link to re-link it.'
@@ -56,13 +60,13 @@ verification-lost-moved: 'You have been moved back to the [server] server.'
 
 # When a player is kicked for not linking their discord account in time
 kicked-not-linked: |-
-  You didn't link your account in time!
-  Please reconnect and continue.
+  You didn't link your Discord account in time!
+  Please reconnect to continue linking.
 
 # When a player is kicked for not gaining the required role on their linked discord account in time
 kicked-linked-not-verified: |-
-  Your Discord account has been linked, but you don't appear to have the [role] role.
-  Please double check your Twitch subscription and Discord connection settings, or wait for Discord to grant you the role.
+  Your Discord account didn't gain the [role] role in time!
+  Please double check your Twitch subscription and Discord connections, or wait for Discord to grant you the role.
 
 # Discord bot response for successful link
 discord-link-success: 'Hey [user], your accounts have been linked successfully.'
@@ -74,3 +78,7 @@ discord-link-invalid-token: |-
 # Discord bot response for link attempt with another account already linked
 discord-link-already-linked: |-
   Sorry [user], your account is already linked to [account]. Please unlink it in-game first.
+
+# Discord bot response for link attempt with another account already linked
+discord-link-error: |-
+    Sorry [user], an error occured while linking your accounts. Please try again later.

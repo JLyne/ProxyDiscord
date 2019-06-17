@@ -1,9 +1,12 @@
 package me.prouser123.bungee.discord;
 
+import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
+import com.google.gson.Gson;
 import me.prouser123.bungee.discord.exceptions.AlreadyLinkedException;
 import me.prouser123.bungee.discord.exceptions.InvalidTokenException;
 import net.md_5.bungee.api.ChatColor;
+import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
@@ -11,8 +14,11 @@ import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import org.javacord.api.entity.user.User;
 
+import java.io.*;
 import java.security.SecureRandom;
 import java.util.Base64;
+import java.util.UUID;
+
 public class LinkingManager {
     private HashBiMap<String, Long> links;
     private HashBiMap<String, String> pendingLinks;
@@ -20,8 +26,8 @@ public class LinkingManager {
 
     public LinkingManager(String linkingUrl) {
         this.linkingUrl = linkingUrl;
-        this.links = HashBiMap.create(1024);
-        this.pendingLinks = HashBiMap.create(1024);
+
+        this.loadLinks();
     }
 
     public boolean isLinked(String uuid) {
@@ -111,7 +117,24 @@ public class LinkingManager {
 
         String player = this.pendingLinks.get(token);
 
+        if(player == null) {
+            throw new InvalidTokenException("No player found for token");
+        }
+
         this.links.put(player, discordId);
+        this.pendingLinks.remove(token);
+
+        ProxiedPlayer onlinePlayer = ProxyServer.getInstance().getPlayer(UUID.fromString(player));
+
+        if(onlinePlayer != null) {
+            if(Main.inst().getVerificationManager().checkVerificationStatus(discordId) == VerificationResult.VERIFIED) {
+                onlinePlayer.sendMessage(new ComponentBuilder(ChatMessages.getMessage("link-success"))
+                        .color(ChatColor.GREEN).create());
+            } else {
+                onlinePlayer.sendMessage(new ComponentBuilder(ChatMessages.getMessage("link-not-verified"))
+                        .color(ChatColor.YELLOW).create());
+            }
+        }
     }
 
     public void unlink(String uuid) {
@@ -120,5 +143,48 @@ public class LinkingManager {
 
     public void unlink(ProxiedPlayer player) {
         this.links.remove(player.getUniqueId().toString());
+    }
+
+    public void saveLinks() {
+        try {
+            File folder = new File(Main.inst().getProxy().getPluginsFolder(), "BungeeDiscord");
+            File saveFile = new File(folder, "links.sav");
+
+            if (!saveFile.exists() && !saveFile.createNewFile()) {
+                throw new IOException("Could not create " + saveFile);
+            }
+
+            FileOutputStream saveStream = new FileOutputStream(saveFile);
+            ObjectOutputStream save = new ObjectOutputStream(saveStream);
+
+            save.writeObject(this.links);
+            save.writeObject(this.pendingLinks);
+        } catch (IOException e) {
+            Main.inst().getLogger().warning("Could not save linked accounts to disk");
+        }
+    }
+
+    public void loadLinks() {
+        try {
+            File folder = new File(Main.inst().getProxy().getPluginsFolder(), "BungeeDiscord");
+            File saveFile = new File(folder, "links.sav");
+
+            if (!saveFile.exists()) {
+                this.links = HashBiMap.create(1024);
+                this.pendingLinks = HashBiMap.create(1024);
+
+                return;
+            }
+
+            FileInputStream saveStream = new FileInputStream(saveFile);
+            ObjectInputStream save = new ObjectInputStream(saveStream);
+
+            this.links = (HashBiMap<String, Long>) save.readObject();
+            this.pendingLinks = (HashBiMap<String, String>) save.readObject();
+        } catch (IOException | ClassNotFoundException | ClassCastException e) {
+            this.links = HashBiMap.create(1024);
+            this.pendingLinks = HashBiMap.create(1024);
+            Main.inst().getLogger().warning("Could not load linked accounts from disk");
+        }
     }
 }
