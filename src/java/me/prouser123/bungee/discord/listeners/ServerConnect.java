@@ -15,16 +15,16 @@ import net.md_5.bungee.api.chat.TextComponent;
 
 public class ServerConnect implements Listener {
     private static VerificationManager verificationManager = null;
-    private static ServerInfo unverifiedServer = null;
 
-    public ServerConnect(ServerInfo unverifiedServer) {
+    public ServerConnect() {
         ServerConnect.verificationManager = Main.inst().getVerificationManager();
-        ServerConnect.unverifiedServer = unverifiedServer;
     }
 
     @EventHandler(priority = EventPriority.LOW)
     public void onServerConnect(ServerConnectEvent e) {
         if (e.isCancelled()) return;
+
+        ServerInfo unverifiedServer = verificationManager.getUnverifiedServer();
 
         if(e.getTarget().equals(unverifiedServer)) {
             return;
@@ -36,7 +36,7 @@ public class ServerConnect implements Listener {
             return;
         }
 
-        TextComponent message = null;
+        TextComponent message;
 
         switch(result) {
             case NOT_LINKED:
@@ -44,6 +44,9 @@ public class ServerConnect implements Listener {
                 break;
             case LINKED_NOT_VERIFIED:
                 message = new TextComponent(ChatMessages.getMessage("server-change-linked-not-verified"));
+                break;
+            default:
+                message = new TextComponent("An error has occurred.");
         }
 
         message.setColor(ChatColor.RED);

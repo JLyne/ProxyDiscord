@@ -10,14 +10,12 @@ import me.prouser123.bungee.discord.listeners.JoinLeave;
 import me.prouser123.bungee.discord.Main;
 
 public class MainCommand implements MessageCreateListener, BaseCommand {
-	
-	//public static EmbedBuilder CommandEmbed = null;
-	public static ArrayList<String> array;
+	static ArrayList<String> array;
 	public static ArrayList<String> subArray;
 	
 	public MainCommand() {
-		array = new ArrayList<String>();
-		subArray = new ArrayList<String>();
+		array = new ArrayList<>();
+		subArray = new ArrayList<>();
 		
 		// Debug information
 		Main.inst().getDebugLogger().info("[MainCommand@Init] Loaded MainCommand and Array");
@@ -48,11 +46,11 @@ public class MainCommand implements MessageCreateListener, BaseCommand {
         	}
         	
         	event.getChannel().sendMessage(embed2);
-            return;
         }
     }
     
-    private EmbedBuilder createMainCommandEmbed(MessageCreateEvent event) {
+    @SuppressWarnings("unused")
+	private EmbedBuilder createMainCommandEmbed(MessageCreateEvent event) {
     	EmbedBuilder embed = new EmbedBuilder().setTitle("Commands");
     	
     	for (String command: array) {
@@ -77,7 +75,8 @@ public class MainCommand implements MessageCreateListener, BaseCommand {
     	return embed;
     }
     
-    private EmbedBuilder createSubCommandEmbed(MessageCreateEvent event) {
+    @SuppressWarnings("unused")
+	private EmbedBuilder createSubCommandEmbed(MessageCreateEvent event) {
     	EmbedBuilder embed = new EmbedBuilder().setTitle("Sub-Commands");
     	
     	for (String command: subArray) {
@@ -92,5 +91,4 @@ public class MainCommand implements MessageCreateListener, BaseCommand {
     	// return the embed
     	return embed;
     }
-
 }

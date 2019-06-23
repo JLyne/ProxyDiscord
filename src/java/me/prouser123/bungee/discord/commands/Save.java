@@ -3,10 +3,8 @@ package me.prouser123.bungee.discord.commands;
 import me.prouser123.bungee.discord.ChatMessages;
 import me.prouser123.bungee.discord.LinkingManager;
 import me.prouser123.bungee.discord.Main;
-import me.prouser123.bungee.discord.VerificationManager;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.chat.TextComponent;
-import net.md_5.bungee.api.connection.ProxiedPlayer;
 
 public class Save extends BaseCommand {
     private static LinkingManager linker = null;

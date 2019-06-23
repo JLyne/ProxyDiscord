@@ -1,7 +1,6 @@
 package me.prouser123.bungee.discord.listeners;
 
 import me.prouser123.bungee.discord.LinkingManager;
-import me.prouser123.bungee.discord.Discord;
 import me.prouser123.bungee.discord.Main;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.event.ChatEvent;

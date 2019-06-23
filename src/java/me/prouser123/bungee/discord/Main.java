@@ -1,5 +1,8 @@
 package me.prouser123.bungee.discord;
 
+import me.prouser123.bungee.discord.bot.commands.listeners.Reconnect;
+import me.prouser123.bungee.discord.bot.commands.listeners.UserRoleAdd;
+import me.prouser123.bungee.discord.bot.commands.listeners.UserRoleRemove;
 import me.prouser123.bungee.discord.commands.Link;
 import me.prouser123.bungee.discord.commands.Save;
 import me.prouser123.bungee.discord.commands.Unlink;
@@ -17,30 +20,35 @@ import java.util.Optional;
 import com.google.common.io.ByteStreams;
 
 import org.javacord.api.entity.channel.TextChannel;
-import org.javacord.api.entity.permission.Role;
 
 public class Main extends Plugin {
 	private static Main instance;
-	private static Configuration configuration;
-	private static Configuration messagesConfiguration;
-	private static Configuration botCommandConfiguration;
-	private static DebugLogger debugLogger;
 
-	private static LinkingManager linkingManager;
-	private static VerificationManager verificationManager;
-	private static KickManager kickManager;
+	private Configuration configuration;
+	private Configuration messagesConfiguration;
+	private Configuration botCommandConfiguration;
+	private DebugLogger debugLogger;
+	private Discord discord;
+
+	private LinkingManager linkingManager;
+	private VerificationManager verificationManager;
+	private KickManager kickManager;
 
     public static Main inst() {
     	  return instance;
     }
 
-    public static Configuration getConfig() {
+    Configuration getConfig() {
     	return configuration;
     }
 
     public DebugLogger getDebugLogger() {
     	return debugLogger;
     }
+
+	public Discord getDiscord() {
+		return discord;
+	}
 
 	public LinkingManager getLinkingManager() {
 		return linkingManager;
@@ -84,60 +92,52 @@ public class Main extends Plugin {
 			getLogger().severe("Error loading bot-command-options.yml");
 		}
 
-		new ChatMessages(messagesConfiguration);
-		
 		// Setup Debug Logging
 		debugLogger = new DebugLogger();
 
+		initLinking();
+		discord = new Discord(getConfig().getString("token"),  botCommandConfiguration);
 		kickManager = new KickManager(getConfig().getInt("unverified-kick-time"));
 
-		String linkingUrl = getConfig().getString("linking-url");
-		linkingManager = new LinkingManager(linkingUrl);
+		new ChatMessages(messagesConfiguration);
 
-		new Discord(getConfig().getString("token"),  botCommandConfiguration);
-
-		Main.registerListeners.verification();
-		Main.registerListeners.activityLogging();
+		initVerification();
+		initActivityLogging();
 
 		getProxy().getPluginManager().registerCommand(this, new Link());
 		getProxy().getPluginManager().registerCommand(this, new Unlink());
 		getProxy().getPluginManager().registerCommand(this, new Save());
 	}
 
-	private static class registerListeners {
-    	private static void verification() {
-			String verifiedRoleId = getConfig().getString("verify-role-id");
-			String verifiedPermission = getConfig().getString("verified-permission");
-			String bypassPermission = getConfig().getString("bypass-permission");
-			String unverifiedServerName = getConfig().getString("unverified-server");
-
-			Optional<Role> verifiedRole = Discord.api.getRoleById(verifiedRoleId);
-			net.md_5.bungee.api.config.ServerInfo unverifiedServer = Main.inst().getProxy().getServerInfo(unverifiedServerName);
-
-			if(!verifiedRole.isPresent()) {
-				Main.inst().getLogger().info("Role checking disabled. Did you put a valid role ID in the config?");
-			} else {
-				verificationManager = new VerificationManager(verifiedRole.get(), verifiedPermission, bypassPermission, unverifiedServer);
-				Main.inst().getProxy().getPluginManager().registerListener(Main.inst(), new ServerConnect(unverifiedServer));
-			}
-		}
-		
-		private static void activityLogging() {
-			String logChannelId = getConfig().getString("log-channel-id");
-			Optional<TextChannel> logChannel = Discord.api.getTextChannelById(logChannelId);
-
-			if(!logChannel.isPresent()) {
-				Main.inst().getLogger().info("Activity logging disabled. Did you put a valid channel ID in the config?");
-				return;
-			}
-
-			Main.inst().getProxy().getPluginManager().registerListener(Main.inst(), new PlayerChat(logChannel.get()));
-			Main.inst().getProxy().getPluginManager().registerListener(Main.inst(), new JoinLeave(logChannel.get()));
-			Main.inst().getLogger().info("Activity logging enabled for channel: #" + logChannel.toString().replaceAll(".*\\[|\\].*", "") + " (id: " + logChannelId + ")");
-		}
+	private void initLinking() {
+		String linkingUrl = getConfig().getString("linking-url");
+		linkingManager = new LinkingManager(linkingUrl);
 	}
 
-	public static File loadResource(Plugin plugin, String resource) {
+	private void initVerification() {
+		verificationManager = new VerificationManager(getConfig());
+		getProxy().getPluginManager().registerListener(this, new ServerConnect());
+
+		discord.getApi().addUserRoleAddListener(new UserRoleAdd());
+		discord.getApi().addUserRoleRemoveListener(new UserRoleRemove());
+		discord.getApi().addReconnectListener(new Reconnect());
+	}
+
+	private void initActivityLogging() {
+		String logChannelId = getConfig().getString("log-channel-id");
+		Optional<TextChannel> logChannel = discord.getApi().getTextChannelById(logChannelId);
+
+		if(!logChannel.isPresent()) {
+			Main.inst().getLogger().info("Activity logging disabled. Did you put a valid channel ID in the config?");
+			return;
+		}
+
+		getProxy().getPluginManager().registerListener(this, new PlayerChat(logChannel.get()));
+		getProxy().getPluginManager().registerListener(this, new JoinLeave(logChannel.get()));
+		getLogger().info("Activity logging enabled for channel: #" + logChannel.toString().replaceAll(".*\\[|].*", "") + " (id: " + logChannelId + ")");
+	}
+
+	private static void loadResource(Plugin plugin, String resource) {
         File folder = plugin.getDataFolder();
         if (!folder.exists())
             folder.mkdir();
@@ -153,15 +153,14 @@ public class Main extends Plugin {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return resourceFile;
-    }
+	}
 	
 	@Override
 	public void onDisable() {
     	linkingManager.saveLinks();
 
-		if (Discord.api != null) {
-			Discord.api.disconnect();
+		if (discord.getApi() != null) {
+			discord.getApi().disconnect();
 		}
 	}
 }

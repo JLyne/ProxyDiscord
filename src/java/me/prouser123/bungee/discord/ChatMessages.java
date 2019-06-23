@@ -1,6 +1,7 @@
 package me.prouser123.bungee.discord;
 
 import net.md_5.bungee.config.Configuration;
+import org.javacord.api.entity.permission.Role;
 
 public class ChatMessages {
     private static Configuration messages;
@@ -10,8 +11,13 @@ public class ChatMessages {
     }
 
     public static String getMessage(String id) {
+        Role verifiedRole = Main.inst().getVerificationManager().getVerifiedRole();
         String message = messages.getString(id);
 
-        return message.replace("[role]", VerificationManager.verifiedRole.getName());
+        if(verifiedRole != null) {
+            message = message.replace("[role]", verifiedRole.getName());
+        }
+
+        return message;
     }
 }

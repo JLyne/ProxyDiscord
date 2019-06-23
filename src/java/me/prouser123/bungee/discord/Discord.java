@@ -9,37 +9,36 @@ import me.prouser123.bungee.discord.bot.commands.sub.Debug;
 import net.md_5.bungee.config.Configuration;
 import org.javacord.api.DiscordApiBuilder;
 import org.javacord.api.entity.message.embed.EmbedBuilder;
-import org.javacord.api.event.message.MessageCreateEvent;
 
 import java.util.concurrent.CompletionException;
-import java.util.concurrent.ExecutionException;
 
 import org.javacord.api.DiscordApi;
 
 public class Discord {
-	
-	public static String token = null; // Bot token
-	
 	/**
 	 * Discord API Instance
 	 */
-	public static DiscordApi api = null; // Api Instance
+	private DiscordApi api; // Api Instance
 
-	private Configuration commandConfiguration;
+	private final Configuration commandConfiguration;
+
+	private boolean connected = false;
 
 	/**
 	 * Class
 	 * @param token bot token
 	 */
 	public Discord(String token, Configuration commandConfiguration) {
-		Discord.token = token;
+		// Bot token
 		this.commandConfiguration = commandConfiguration;
 
 		// Create an Instance of the DiscordApi
 		try {
 			api = new DiscordApiBuilder().setToken(token).login().join();
+			connected = true;
 		} catch (CompletionException IllegalStateException) {
 			Main.inst().getLogger().info("Connection Error. Did you put a valid token in the config?");
+			return;
 		}
 		
         // Print the invite url of the bot
@@ -50,21 +49,24 @@ public class Discord {
 
 		// Set Activity
         api.updateActivity(Constants.activity);
-        
-        // Create server join Listeners
-        api.addServerJoinListener(event -> Main.inst().getLogger().info("Joined Server: " + event.getServer().getName()));
-        api.addServerLeaveListener(event -> Main.inst().getLogger().info("Left Server: " + event.getServer().getName()));
+
+        api.addLostConnectionListener(event -> {
+			connected = false;
+			Main.inst().getLogger().info(("Lost connection to Discord."));
+		});
         
         // Add Reconnect Listener to re-add status
         api.addReconnectListener(event -> {
-        	Main.inst().getLogger().info(("Reconnected to Discord."));
-        	api.updateActivity(Constants.activity);
+			connected = true;
+			Main.inst().getLogger().info(("Reconnected to Discord."));
+			api.updateActivity(Constants.activity);
         });
-        
-        api.addResumeListener(event -> {
-        	Main.inst().getLogger().info(("Resumed connection to Discord."));
-        	api.updateActivity(Constants.activity);
-        });
+
+		api.addResumeListener(event -> {
+			connected = true;
+			Main.inst().getLogger().info(("Resumed connection to Discord."));
+			api.updateActivity(Constants.activity);
+		});
 
         registerCommands();
         registerSubCommands();
@@ -101,24 +103,17 @@ public class Discord {
 		api.addMessageCreateListener(new BotInfo(0, "!bd botinfo", "Show bot information."));
 		api.addMessageCreateListener(new Debug(1, "!bd debug", "Show debug information."));
 	}
-	
-	public static String getBotOwner(MessageCreateEvent event) {
-    	String bot_owner = "<@";
-    	try {
-			bot_owner += Long.toString(event.getApi().getApplicationInfo().get().getOwnerId());
-			bot_owner += ">";
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (ExecutionException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-    	return bot_owner;
-	}
-	
+
 	// Sets the footer, done here to keep it standardised.
 	public static void setFooter(EmbedBuilder embed) {
-		embed.setFooter("Bungee Discord " + Main.inst().getDescription().getVersion().toString() + " | !bd", Constants.footerIconURL);
+		embed.setFooter("Bungee Discord " + Main.inst().getDescription().getVersion() + " | !bd", Constants.footerIconURL);
+	}
+
+	public DiscordApi getApi() {
+		return api;
+	}
+
+	public Boolean isConnected() {
+		return connected;
 	}
 }

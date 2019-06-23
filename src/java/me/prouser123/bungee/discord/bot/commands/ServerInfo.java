@@ -14,10 +14,10 @@ import me.prouser123.bungee.discord.Main;
 
 public class ServerInfo implements MessageCreateListener, BaseCommand {
 	
-	private base base;
+	private final base base;
 	
-	public ServerInfo(int piority, String command, String helpText) {
-		base = this.easyBaseSetup(piority, command, helpText);
+	public ServerInfo(int priority, String command, String helpText) {
+		base = this.easyBaseSetup(priority, command, helpText);
 	}
 	
     @Override
@@ -28,8 +28,8 @@ public class ServerInfo implements MessageCreateListener, BaseCommand {
         	String uptime = formatter.format(ManagementFactory.getRuntimeMXBean().getUptime());
         	String[] uptime_split = uptime.split(":");
         	
-        	String uptime_days = Integer.toString(new Integer(Integer.parseInt(uptime_split[0])) - 1);
-        	String uptime_hours = Integer.toString(new Integer(Integer.parseInt(uptime_split[1])) - 1);
+        	String uptime_days = Integer.toString(Integer.parseInt(uptime_split[0]) - 1);
+        	String uptime_hours = Integer.toString(Integer.parseInt(uptime_split[1]) - 1);
         	String uptime_minutes = uptime_split[2];
         	String uptime_seconds_2 = uptime_split[3];
         	String uptime_seconds = uptime_seconds_2.substring(0, uptime_seconds_2.indexOf("."));
@@ -59,21 +59,18 @@ public class ServerInfo implements MessageCreateListener, BaseCommand {
         	try {
 				bot_owner += Long.toString(event.getApi().getApplicationInfo().get().getOwnerId());
 				bot_owner += ">";
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (ExecutionException e) {
+			} catch (InterruptedException | ExecutionException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-        	
-        	EmbedBuilder embed = new EmbedBuilder()
+
+			EmbedBuilder embed = new EmbedBuilder()
         		.setAuthor("BungeeCord Server Information", Constants.url, Constants.authorIconURL)
-            	.addInlineField("Players", Integer.toString(Main.inst().getProxy().getPlayers().size()) + "/" + Integer.toString(Main.inst().getProxy().getConfig().getPlayerLimit()))
+            	.addInlineField("Players", Main.inst().getProxy().getPlayers().size() + "/" + Main.inst().getProxy().getConfig().getPlayerLimit())
             	.addInlineField("Uptime", uptime_output)
-            	.addInlineField("Memory", Long.toString(Runtime.getRuntime().freeMemory() / 1024 / 1024 ) + "/" + Long.toString(Runtime.getRuntime().totalMemory() / 1024 / 1024) + " MB free")
+            	.addInlineField("Memory", Runtime.getRuntime().freeMemory() / 1024 / 1024 + "/" + Runtime.getRuntime().totalMemory() / 1024 / 1024 + " MB free")
             	.addInlineField("Servers", Integer.toString(Main.inst().getProxy().getServers().size()))
-            	.addInlineField("Server Versions", Main.inst().getProxy().getGameVersion().toString())
+            	.addInlineField("Server Versions", Main.inst().getProxy().getGameVersion())
             	.addInlineField("Bot Owner", bot_owner)
             	.addInlineField("Server Version", System.getProperty("os.name") + ", " + Main.inst().getProxy().getVersion());
         	
@@ -82,8 +79,6 @@ public class ServerInfo implements MessageCreateListener, BaseCommand {
             
         	// Send the embed
             event.getChannel().sendMessage(embed);
-            return;
         }
     }
-
 }

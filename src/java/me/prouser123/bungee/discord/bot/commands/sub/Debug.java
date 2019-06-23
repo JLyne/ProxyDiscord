@@ -1,5 +1,6 @@
 package me.prouser123.bungee.discord.bot.commands.sub;
 
+import me.prouser123.bungee.discord.Main;
 import org.javacord.api.Javacord;
 import org.javacord.api.entity.message.embed.EmbedBuilder;
 import org.javacord.api.event.message.MessageCreateEvent;
@@ -10,10 +11,10 @@ import me.prouser123.bungee.discord.Discord;
 
 public class Debug implements MessageCreateListener, BaseSubCommand {
 	
-	private base base;
+	private final base base;
 
-	public Debug(int piority, String command, String helpText) {
-		base = this.easyBaseSetup(piority, command, helpText);
+	public Debug(int priority, String command, String helpText) {
+		base = this.easyBaseSetup(priority, command, helpText);
 	}
 
 	@Override
@@ -28,15 +29,14 @@ public class Debug implements MessageCreateListener, BaseSubCommand {
             		.addInlineField("JavaCord User Agent", Javacord.USER_AGENT)
             		.addInlineField("JavaCord Commit ID", Javacord.COMMIT_ID)
             		.addInlineField("JavaCord Build Timestamp", Javacord.BUILD_TIMESTAMP.toString())
-            		.addInlineField("Registered Listeners", Integer.toString(Discord.api.getListeners().size()));
+            		.addInlineField("Registered Listeners", Integer.toString(Main.inst().getDiscord().getApi().getListeners().size()));
                 
             // Set footer
             Discord.setFooter(embed);
                 
             // Send the embed
             event.getChannel().sendMessage(embed);
-            return;
-        }
+		}
             
     }
 	

@@ -3,7 +3,6 @@ package me.prouser123.bungee.discord.listeners;
 import me.prouser123.bungee.discord.*;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.ComponentBuilder;
-import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import org.javacord.api.entity.channel.TextChannel;
 
@@ -31,27 +30,37 @@ public class JoinLeave implements Listener {
 			logChannel.sendMessage("`" + player.getName() + "` has joined the network.");
 		}
 
-		if(verificationManager != null) {
-			String text;
-			VerificationResult result = verificationManager.checkVerificationStatus(player);
+		String text;
+		VerificationResult result = verificationManager.checkVerificationStatus(player);
 
-			switch(result) {
-				case NOT_LINKED:
-					text = ChatMessages.getMessage("join-welcome");
-					player.sendMessage(new ComponentBuilder(text).color(ChatColor.GREEN).create());
+		switch(result) {
+			case NOT_LINKED:
+				Main.inst().getLogger().info("Unlinked player " + player.getName() + " joined");
 
-					text = ChatMessages.getMessage("join-not-linked");
-					player.sendMessage(new ComponentBuilder(text).color(ChatColor.YELLOW).create());
+				text = ChatMessages.getMessage("join-welcome");
+				player.sendMessage(new ComponentBuilder(text).color(ChatColor.GREEN).create());
 
-					kickManager.addPlayer(player);
-					return;
+				text = ChatMessages.getMessage("join-not-linked");
+				player.sendMessage(new ComponentBuilder(text).color(ChatColor.YELLOW).create());
 
-				case LINKED_NOT_VERIFIED:
-					text = ChatMessages.getMessage("join-linked-not-verified");
-					player.sendMessage(new ComponentBuilder(text).color(ChatColor.YELLOW).create());
+				kickManager.addPlayer(player);
+				return;
 
-					kickManager.addPlayer(player);
-			}
+			case LINKED_NOT_VERIFIED:
+				Main.inst().getLogger().info("Linked and unverified player " + player.getName() + " joined");
+
+				text = ChatMessages.getMessage("join-linked-not-verified");
+				player.sendMessage(new ComponentBuilder(text).color(ChatColor.YELLOW).create());
+
+				kickManager.addPlayer(player);
+
+			case VERIFIED:
+				Main.inst().getLogger().info("Verified player " + player.getName() + " joined");
+				return;
+		}
+
+		if(!Main.inst().getDiscord().isConnected()) {
+			player.sendMessage(new ComponentBuilder(ChatMessages.getMessage("discord-issues")).color(ChatColor.RED).create());
 		}
 	}
 	

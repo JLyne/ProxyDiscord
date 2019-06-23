@@ -1,35 +1,33 @@
 package me.prouser123.bungee.discord.bot.commands;
 
 import me.prouser123.bungee.discord.Main;
-import me.prouser123.bungee.discord.bot.commands.MainCommand;
 
 public interface BaseCommand {
-	
-	final String arraySeperator = ":";
+	String arraySeperator = ":";
 	
 	default base createBase() {
 		return new base();
 	}
 	
 	// setup and return base with only one command
-	default base easyBaseSetup(int piority, String command, String helpText) {
+	default base easyBaseSetup(int priority, String command, String helpText) {
 		base b = this.createBase();
 		
-		b.add(piority, command, helpText);
-		debugInit(piority, command, helpText, b);
+		b.add(priority, command, helpText);
+		debugInit(priority, command, helpText, b);
 		addCommandToHelp(b);
 		
 		return b;
 	}
 		
-	public class base {
+	class base {
 		public String command = "";
 		public String helpText = "";
 		public int helpPriority = 0;
 		
 		// Method to add variables from class init to base
-		public void add(int piority, String command, String helpText) {
-			this.helpPriority = piority;
+		void add(int priority, String command, String helpText) {
+			this.helpPriority = priority;
 			this.command = command;
 			this.helpText = helpText;
 		}
@@ -42,8 +40,8 @@ public interface BaseCommand {
 	}
 	
 	// Command to dump information about help array
-	default void debugInit(int piority, String command, String helpText, base base) {
-		Main.inst().getDebugLogger().info("[BaseCommand@debugInit] Init info: " + piority + " | " + command + " | " + helpText);
+	default void debugInit(int priority, String command, String helpText, base base) {
+		Main.inst().getDebugLogger().info("[BaseCommand@debugInit] Init info: " + priority + " | " + command + " | " + helpText);
 		Main.inst().getDebugLogger().info("[BaseCommand@debugInit] BASE() info: | " + base.helpPriority + " | " + base.command + " | " + base.helpText);
 	}
 }

@@ -12,15 +12,14 @@ public class DebugLogger {
 		}
 	}
 	
-	public DebugLogger() {
+	DebugLogger() {
 		try {
 			if (Main.inst().getConfig().getBoolean("debug-enabled")) {
 				debugEnabled = true;
 				Main.inst().getLogger().info("Enabled debug logging.");
 			}
-		} catch (NullPointerException npex) {
+		} catch (NullPointerException e) {
 			// Coudn't find the boolean, just return for now.
-			return;
 		}
 	}
 }

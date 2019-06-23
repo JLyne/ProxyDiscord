@@ -1,8 +1,6 @@
 package me.prouser123.bungee.discord;
 
-import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
-import com.google.gson.Gson;
 import me.prouser123.bungee.discord.exceptions.AlreadyLinkedException;
 import me.prouser123.bungee.discord.exceptions.InvalidTokenException;
 import net.md_5.bungee.api.ChatColor;
@@ -22,32 +20,15 @@ import java.util.UUID;
 public class LinkingManager {
     private HashBiMap<String, Long> links;
     private HashBiMap<String, String> pendingLinks;
-    private String linkingUrl;
+    private final String linkingUrl;
 
-    public LinkingManager(String linkingUrl) {
+    LinkingManager(String linkingUrl) {
         this.linkingUrl = linkingUrl;
-
         this.loadLinks();
-    }
-
-    public boolean isLinked(String uuid) {
-        return this.links.containsKey(uuid);
     }
 
     public boolean isLinked(ProxiedPlayer player) {
         return this.links.containsKey(player.getUniqueId().toString());
-    }
-
-    public boolean isLinked(Long discordId) {
-        return this.links.containsValue(discordId);
-    }
-
-    public boolean isLinked(User user) {
-        return this.links.containsValue(user.getId());
-    }
-
-    public Long getLinked(String uuid) {
-        return this.links.get(uuid);
     }
 
     public String getLinked(Long discordId) {
@@ -62,7 +43,7 @@ public class LinkingManager {
         return this.links.get(player.getUniqueId().toString());
     }
 
-    public String startLink(ProxiedPlayer player) {
+    public void startLink(ProxiedPlayer player) {
         String uuid = player.getUniqueId().toString();
 
         if(this.links.containsKey(uuid)) {
@@ -71,7 +52,7 @@ public class LinkingManager {
 
             player.sendMessage(message);
 
-            return null;
+            return;
         }
 
         String token = getLinkingToken(uuid);
@@ -83,8 +64,6 @@ public class LinkingManager {
         message.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Discord account linking instructions").create()));
 
         player.sendMessage(message);
-
-        return token;
     }
 
     private String getLinkingToken(String uuid) {
@@ -137,10 +116,6 @@ public class LinkingManager {
         }
     }
 
-    public void unlink(String uuid) {
-        this.links.remove(uuid);
-    }
-
     public void unlink(ProxiedPlayer player) {
         this.links.remove(player.getUniqueId().toString());
     }
@@ -164,7 +139,7 @@ public class LinkingManager {
         }
     }
 
-    public void loadLinks() {
+    private void loadLinks() {
         try {
             File folder = new File(Main.inst().getProxy().getPluginsFolder(), "BungeeDiscord");
             File saveFile = new File(folder, "links.sav");

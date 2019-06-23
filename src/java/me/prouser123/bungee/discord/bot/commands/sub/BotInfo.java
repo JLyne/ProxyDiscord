@@ -1,5 +1,6 @@
 package me.prouser123.bungee.discord.bot.commands.sub;
 
+import org.javacord.api.DiscordApi;
 import org.javacord.api.entity.message.embed.EmbedBuilder;
 import org.javacord.api.event.message.MessageCreateEvent;
 import org.javacord.api.listener.message.MessageCreateListener;
@@ -13,19 +14,21 @@ import me.prouser123.bungee.discord.Constants;
 
 public class BotInfo implements MessageCreateListener, BaseSubCommand {
 	
-	private base base;
+	private final base base;
 	
-	public BotInfo(int piority, String command, String helpText) {
-		base = this.easyBaseSetup(piority, command, helpText);
+	public BotInfo(int priority, String command, String helpText) {
+		base = this.easyBaseSetup(priority, command, helpText);
 	}
 	
     @Override
     public void onMessageCreate(MessageCreateEvent event) {
         if (event.getMessage().getContent().equalsIgnoreCase(base.command)) {
+			DiscordApi api = Main.inst().getDiscord().getApi();
         	
-        	Object[] currentserverroles = Discord.api.getYourself().getRoles(event.getServer().get()).toArray();
-        	String roles = "";
-        	for (Object roleObject : currentserverroles) {
+        	Object[] currentRoles = api.getYourself().getRoles(event.getServer().get()).toArray();
+
+        	StringBuilder roles = new StringBuilder();
+        	for (Object roleObject : currentRoles) {
         		String role = roleObject.toString().split(", name: ")[1].split(", server:")[0];
         		
         		// Remove the initial @ from the role name to avoid role spam
@@ -35,25 +38,23 @@ public class BotInfo implements MessageCreateListener, BaseSubCommand {
         		}
         		
         		// Adds to the list of roles
-        		roles += role + " ";
+        		roles.append(role).append(" ");
         		Main.inst().getDebugLogger().info("Has role: " + role);
         	}
         	
         	EmbedBuilder embed = new EmbedBuilder()
         		.setAuthor("BungeeDiscord Bot Information", Constants.url, Constants.authorIconURL)
-        		.addInlineField("BungeeDiscord Version", Main.inst().getDescription().getVersion().toString())
+        		.addInlineField("BungeeDiscord Version", Main.inst().getDescription().getVersion())
             	.addInlineField("JavaCord Version", Javacord.VERSION + " (API v" + Javacord.DISCORD_API_VERSION + ")")
-            	.addInlineField("Bot Servers", Long.toString(Discord.api.getServers().size()))
-            	.addInlineField("User Type", Discord.api.getAccountType().toString())
-            	.addInlineField("Roles (Current Server)", roles);
+            	.addInlineField("Bot Servers", Long.toString(api.getServers().size()))
+            	.addInlineField("User Type", api.getAccountType().toString())
+            	.addInlineField("Roles (Current Server)", roles.toString());
             
         	// Set footer
         	Discord.setFooter(embed);
             
         	// Send the embed
             event.getChannel().sendMessage(embed);
-            return;
         }
     }
-
 }

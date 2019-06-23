@@ -6,14 +6,13 @@ import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 
-import java.awt.*;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 public class KickManager {
-    private HashBiMap<Long, ProxiedPlayer> kickablePlayers;
-    private int kickTime;
+    private final HashBiMap<Long, ProxiedPlayer> kickablePlayers;
+    private final int kickTime;
 
     KickManager(int kickTime) {
         kickablePlayers = HashBiMap.create(64);
@@ -28,14 +27,14 @@ public class KickManager {
         }
 
         if (!kickablePlayers.containsValue(player)) {
-            Main.inst().getLogger().info("Adding player " + player.getName() + " to kickable list");
+            Main.inst().getDebugLogger().info("Adding player " + player.getName() + " to kickable list");
 
             kickablePlayers.put(System.currentTimeMillis(), player);
         }
     }
 
     public void removePlayer(ProxiedPlayer player) {
-        Main.inst().getLogger().info("Removing player " + player.getName() + " from kickable list");
+        Main.inst().getDebugLogger().info("Removing player " + player.getName() + " from kickable list");
         kickablePlayers.inverse().remove(player);
     }
 

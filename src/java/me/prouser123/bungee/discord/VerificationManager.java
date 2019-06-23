@@ -4,8 +4,6 @@ import me.lucko.luckperms.LuckPerms;
 import me.lucko.luckperms.api.LuckPermsApi;
 import me.lucko.luckperms.api.Node;
 import me.prouser123.bungee.discord.bot.commands.RemovalReason;
-import me.prouser123.bungee.discord.bot.commands.listeners.UserRoleAdd;
-import me.prouser123.bungee.discord.bot.commands.listeners.UserRoleRemove;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.chat.TextComponent;
@@ -13,44 +11,54 @@ import net.md_5.bungee.api.config.ServerInfo;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.connection.Server;
 import net.md_5.bungee.api.event.ServerConnectEvent;
+import net.md_5.bungee.config.Configuration;
 import org.javacord.api.entity.permission.Role;
 import org.javacord.api.entity.user.User;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Optional;
 import java.util.UUID;
 
 public class VerificationManager {
-    private static LinkingManager linkingManager = null;
-    private static KickManager kickManager = null;
+    private final LinkingManager linkingManager;
+    private final KickManager kickManager;
 
-    private static String verifiedPermission = null;
-    private static String bypassPermission = null;
-    private static ServerInfo unverifiedServer = null;
-    public static Role verifiedRole = null;
+    private final String verifiedPermission;
+    private final String bypassPermission;
+    private final String verifiedRoleId;
+    private final ServerInfo unverifiedServer;
 
-    private ArrayList<Long> verifiedRoleUsers;
-    private static LuckPermsApi luckPermsApi = null;
+    private final ArrayList<Long> verifiedRoleUsers;
+    private final LuckPermsApi luckPermsApi;
 
-    VerificationManager(Role verifiedRole, String verifiedPermission, String bypassPermission, ServerInfo unverifiedServer) {
+    VerificationManager(Configuration config) {
+        luckPermsApi = LuckPerms.getApi();
+
         verifiedRoleUsers = new ArrayList<>();
         linkingManager = Main.inst().getLinkingManager();
         kickManager = Main.inst().getKickManager();
 
-        VerificationManager.verifiedPermission = verifiedPermission;
-        VerificationManager.bypassPermission = bypassPermission;
-        VerificationManager.unverifiedServer = unverifiedServer;
-        VerificationManager.luckPermsApi = LuckPerms.getApi();
-        VerificationManager.verifiedRole = verifiedRole;
+        verifiedRoleId = config.getString("verify-role-id");
+        verifiedPermission = config.getString("verified-permission");
+        bypassPermission = config.getString("bypass-permission");
 
-        Discord.api.addUserRoleAddListener(new UserRoleAdd(verifiedRole));
-        Discord.api.addUserRoleRemoveListener(new UserRoleRemove(verifiedRole));
+        String unverifiedServerName = config.getString("unverified-server");
+        unverifiedServer = Main.inst().getProxy().getServerInfo(unverifiedServerName);
 
-        Collection<User> users = verifiedRole.getUsers();
-
-        for(User user: users) {
-            verifiedRoleUsers.add(user.getId());
+        if(unverifiedServer == null && unverifiedServerName != null && !unverifiedServerName.isEmpty()) {
+            Main.inst().getLogger().warning("Unverified server (" + unverifiedServerName + ") does not exist!");
         }
+
+        if(verifiedRoleId != null) {
+            populateUsers();
+        }
+
+        Main.inst().getDiscord().getApi().addReconnectListener(event -> {
+            if(verifiedRoleId != null) {
+                populateUsers();
+            }
+        });
     }
 
     public void addUser(User user) {
@@ -87,11 +95,16 @@ public class VerificationManager {
         }
     }
 
-    public boolean hasVerifiedRole(Long id) {
+    private boolean hasVerifiedRole(Long id) {
         return verifiedRoleUsers.contains(id);
     }
 
     public VerificationResult checkVerificationStatus(ProxiedPlayer player) {
+        if(verifiedRoleId == null) {
+            Main.inst().getDebugLogger().info("No verified role defined. Considering " + player.getName() + " verified.");
+            return VerificationResult.VERIFIED;
+        }
+
         if(player.hasPermission(bypassPermission)) {
             Main.inst().getDebugLogger().info("Player " + player.getName() + " has bypass permission. Epic.");
             addVerifiedPermission(player);
@@ -121,7 +134,12 @@ public class VerificationManager {
         return VerificationResult.NOT_LINKED;
     }
 
-    public VerificationResult checkVerificationStatus(Long discordId) {
+    VerificationResult checkVerificationStatus(Long discordId) {
+        if(verifiedRoleId == null) {
+            Main.inst().getDebugLogger().info("No verified role defined. Considering " + discordId.toString() + " verified.");
+            return VerificationResult.VERIFIED;
+        }
+
         String linked = linkingManager.getLinked(discordId);
 
         if(linked == null) {
@@ -239,11 +257,37 @@ public class VerificationManager {
         kickManager.addPlayer(player);
     }
 
-    public boolean canJoinServer(ServerInfo server, ProxiedPlayer player) {
-        if(server.equals(unverifiedServer)) {
-            return true;
+    public void populateUsers() {
+        Optional<Role> verifiedRole = Main.inst().getDiscord().getApi().getRoleById(verifiedRoleId);
+
+        if(!verifiedRole.isPresent()) {
+            if(verifiedRoleId != null && !verifiedRoleId.isEmpty()) {
+                Main.inst().getLogger().warning("Failed to load verified role (" + verifiedRoleId + "). Is the ID correct or is discord down?)");
+            }
+
+            return;
         }
 
-        return checkVerificationStatus(player) == VerificationResult.VERIFIED;
+        Main.inst().getLogger().info("Role verification enabled for role " + verifiedRole.get().getName());
+
+        Collection<User> users = verifiedRole.get().getUsers();
+
+        for(User user: users) {
+            verifiedRoleUsers.add(user.getId());
+        }
+    }
+
+    public String getVerifiedRoleId() {
+        return verifiedRoleId;
+    }
+
+    Role getVerifiedRole() {
+        Optional<Role> role = Main.inst().getDiscord().getApi().getRoleById(verifiedRoleId);
+
+        return role.orElse(null);
+    }
+
+    public ServerInfo getUnverifiedServer() {
+        return unverifiedServer;
     }
 }
