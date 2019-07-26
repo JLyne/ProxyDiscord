@@ -27,9 +27,9 @@ public class PlayerChat implements Listener {
         Long discordId = linkingManager.getLinked(sender);
 
         if(discordId != null) {
-            logChannel.sendMessage(sender.getName() + " (<@!" + discordId.toString() + ">): " + e.getMessage());
+            logChannel.sendMessage("```md\n[" + sender.getName() + "](<@!" + discordId.toString() + ">): " + e.getMessage() + "\n```");
         } else {
-            logChannel.sendMessage(sender.getName() + ": " + e.getMessage());
+            logChannel.sendMessage("```md\n[" + sender.getName() + "](Unlinked): " + e.getMessage() + "\n```");
         }
     }
 }

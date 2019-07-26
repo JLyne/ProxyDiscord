@@ -27,7 +27,7 @@ public class JoinLeave implements Listener {
 		ProxiedPlayer player = event.getPlayer();
 
 		if(logChannel != null) {
-			logChannel.sendMessage("`" + player.getName() + "` has joined the network.");
+			logChannel.sendMessage("```" + player.getName() + " has joined the network.```");
 		}
 
 		String text;
@@ -67,6 +67,6 @@ public class JoinLeave implements Listener {
 	@EventHandler
 	public void onPlayerLeave(PlayerDisconnectEvent event) {
 		kickManager.removePlayer(event.getPlayer());
-		logChannel.sendMessage("`" + event.getPlayer().getName() + "` has left the network.");
+		logChannel.sendMessage("```" + event.getPlayer().getName() + " has left the network.```");
 	}
 }
