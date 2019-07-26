@@ -5,17 +5,17 @@ import me.prouser123.bungee.discord.exceptions.AlreadyLinkedException;
 import me.prouser123.bungee.discord.exceptions.InvalidTokenException;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.ProxyServer;
-import net.md_5.bungee.api.chat.ClickEvent;
-import net.md_5.bungee.api.chat.ComponentBuilder;
-import net.md_5.bungee.api.chat.HoverEvent;
-import net.md_5.bungee.api.chat.TextComponent;
+import net.md_5.bungee.api.chat.*;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import org.javacord.api.entity.user.User;
 
 import java.io.*;
 import java.security.SecureRandom;
 import java.util.Base64;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 public class LinkingManager {
     private HashBiMap<String, Long> links;
@@ -25,6 +25,11 @@ public class LinkingManager {
     LinkingManager(String linkingUrl) {
         this.linkingUrl = linkingUrl;
         this.loadLinks();
+
+        Main.inst().getProxy().getScheduler().schedule(Main.inst(), () -> {
+            Main.inst().getDebugLogger().info("Saving linked accounts");
+            saveLinks();
+        }, 300, 300, TimeUnit.SECONDS);
     }
 
     public boolean isLinked(ProxiedPlayer player) {
