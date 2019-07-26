@@ -1,6 +1,7 @@
 package me.prouser123.bungee.discord;
 
 import me.prouser123.bungee.discord.bot.commands.listeners.Reconnect;
+import me.prouser123.bungee.discord.bot.commands.listeners.ServerMemberBan;
 import me.prouser123.bungee.discord.bot.commands.listeners.UserRoleAdd;
 import me.prouser123.bungee.discord.bot.commands.listeners.UserRoleRemove;
 import me.prouser123.bungee.discord.commands.Link;
@@ -120,6 +121,7 @@ public class Main extends Plugin {
 
 		discord.getApi().addUserRoleAddListener(new UserRoleAdd());
 		discord.getApi().addUserRoleRemoveListener(new UserRoleRemove());
+		discord.getApi().addServerMemberBanListener(new ServerMemberBan());
 		discord.getApi().addReconnectListener(new Reconnect());
 	}
 
