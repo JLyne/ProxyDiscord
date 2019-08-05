@@ -95,7 +95,7 @@ public class VerificationManager {
         }
     }
 
-    private boolean hasVerifiedRole(Long id) {
+    public boolean hasVerifiedRole(Long id) {
         return verifiedRoleUsers.contains(id);
     }
 

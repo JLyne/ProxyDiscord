@@ -3,6 +3,7 @@ package me.prouser123.bungee.discord.bot.commands;
 import me.prouser123.bungee.discord.ChatMessages;
 import me.prouser123.bungee.discord.LinkingManager;
 import me.prouser123.bungee.discord.Main;
+import me.prouser123.bungee.discord.VerificationManager;
 import me.prouser123.bungee.discord.exceptions.AlreadyLinkedException;
 import me.prouser123.bungee.discord.exceptions.InvalidTokenException;
 import org.javacord.api.entity.message.MessageAuthor;
@@ -12,9 +13,11 @@ import org.javacord.api.listener.message.MessageCreateListener;
 public class Link implements MessageCreateListener, BaseCommand {
     private static LinkingManager linkingManager;
 	private final base base;
+    private final VerificationManager verificationManager;
 
-	public Link(int priority, String command, String helpText) {
+    public Link(int priority, String command, String helpText) {
         linkingManager = Main.inst().getLinkingManager();
+        verificationManager = Main.inst().getVerificationManager();
 
 	    base = easyBaseSetup(priority, command, helpText);
 	}
@@ -29,7 +32,12 @@ public class Link implements MessageCreateListener, BaseCommand {
 
             try {
                 linkingManager.completeLink(token, id);
-                message = ChatMessages.getMessage("discord-link-success");
+
+                if(verificationManager.hasVerifiedRole(id)) {
+                    message = ChatMessages.getMessage("discord-link-success");
+                } else {
+                    message = ChatMessages.getMessage("discord-link-success-not-verified");
+                }
             } catch (AlreadyLinkedException e) {
                 message = ChatMessages.getMessage("discord-link-already-linked");
                 message = message.replace("[account]", linkingManager.getLinked(author.getId()));

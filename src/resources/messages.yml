@@ -66,19 +66,27 @@ kicked-not-linked: |-
 # When a player is kicked for not gaining the required role on their linked discord account in time
 kicked-linked-not-verified: |-
   Your Discord account didn't gain the [role] role in time!
-  Please double check your Twitch subscription and Discord connections, or wait for Discord to grant you the role.
+  Please double check your Twitch subscription and Discord connections, or wait for discord to update your roles.
 
 # Discord bot response for successful link
 discord-link-success: 'Hey [user], your accounts have been linked successfully.'
 
+discord-link-success-not-verified: |-
+  Hey [user], your accounts have been linked successfully, however you do not appear to have the __[role]__ role.
+  Please double check your Twitch subscription and Discord connections, or wait for discord to update your roles.
+  If you still need help, ask a `@Minecraft Server Mod`.
+
 # Discord bot response for link attempt with invalid token
 discord-link-invalid-token: |-
   Sorry [user], that token isn't valid, please double check it.
+  If you don't know your token (it's __not__ your username!), please connect to the server and type `/link`.
+  If you still need help, ask a `@Minecraft Server Mod`.
 
 # Discord bot response for link attempt with another account already linked
 discord-link-already-linked: |-
-  Sorry [user], your account is already linked to [account]. Please unlink it in-game first.
+  Sorry [user], your account is already linked. Please unlink it with `/unlink` in-game first.
 
 # Discord bot response for link attempt with another account already linked
 discord-link-error: |-
-    Sorry [user], an error occured while linking your accounts. Please try again later.
+  Sorry [user], an error occured while linking your accounts. Please try again later.
+
