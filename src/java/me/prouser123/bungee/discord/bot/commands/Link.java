@@ -13,12 +13,9 @@ import org.javacord.api.listener.message.MessageCreateListener;
 public class Link implements MessageCreateListener, BaseCommand {
     private static LinkingManager linkingManager;
 	private final base base;
-    private final VerificationManager verificationManager;
 
     public Link(int priority, String command, String helpText) {
         linkingManager = Main.inst().getLinkingManager();
-        verificationManager = Main.inst().getVerificationManager();
-
 	    base = easyBaseSetup(priority, command, helpText);
 	}
 	
@@ -33,7 +30,7 @@ public class Link implements MessageCreateListener, BaseCommand {
             try {
                 linkingManager.completeLink(token, id);
 
-                if(verificationManager.hasVerifiedRole(id)) {
+                if(Main.inst().getVerificationManager().hasVerifiedRole(id)) {
                     message = ChatMessages.getMessage("discord-link-success");
                 } else {
                     message = ChatMessages.getMessage("discord-link-success-not-verified");
