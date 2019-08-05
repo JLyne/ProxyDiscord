@@ -20,10 +20,6 @@
 server-info:
   command: '!serverinfo'
   description: 'Show server information.'
-# Bot Info
-bot-info:
-  command: '!botinfo'
-  description: 'Show bot information.'
 # Players
 players:
   command: '!players'

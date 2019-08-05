@@ -28,12 +28,16 @@ public class Link implements MessageCreateListener, BaseCommand {
             String message = null;
 
             try {
-                linkingManager.completeLink(token, id);
-
-                if(Main.inst().getVerificationManager().hasVerifiedRole(id)) {
-                    message = ChatMessages.getMessage("discord-link-success");
+                if(token.isEmpty()) {
+                    message = ChatMessages.getMessage("discord-link-no-token");
                 } else {
-                    message = ChatMessages.getMessage("discord-link-success-not-verified");
+                    linkingManager.completeLink(token, id);
+
+                    if(Main.inst().getVerificationManager().hasVerifiedRole(id)) {
+                        message = ChatMessages.getMessage("discord-link-success");
+                    } else {
+                        message = ChatMessages.getMessage("discord-link-success-not-verified");
+                    }
                 }
             } catch (AlreadyLinkedException e) {
                 message = ChatMessages.getMessage("discord-link-already-linked");

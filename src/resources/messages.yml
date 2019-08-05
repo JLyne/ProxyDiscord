@@ -71,15 +71,22 @@ kicked-linked-not-verified: |-
 # Discord bot response for successful link
 discord-link-success: 'Hey [user], your accounts have been linked successfully.'
 
+# Discord bot response for successful link, but the linked account doesn't have the verified role
 discord-link-success-not-verified: |-
   Hey [user], your accounts have been linked successfully, however you do not appear to have the __[role]__ role.
   Please double check your Twitch subscription and Discord connections, or wait for discord to update your roles.
   If you still need help, ask a `@Minecraft Server Mod`.
 
+# Discord bot response for link attempt with no token
+discord-link-no-token: |-
+  Sorry [user], you need to provide a token.
+  If you don't know your token (it's __not__ your username!), please use the `/link` command in-game.
+  If you still need help, ask a `@Minecraft Server Mod`.
+
 # Discord bot response for link attempt with invalid token
 discord-link-invalid-token: |-
   Sorry [user], that token isn't valid, please double check it.
-  If you don't know your token (it's __not__ your username!), please connect to the server and type `/link`.
+  If you don't know your token (it's __not__ your username!), please use the `/link` command in-game.
   If you still need help, ask a `@Minecraft Server Mod`.
 
 # Discord bot response for link attempt with another account already linked
