@@ -7,6 +7,7 @@ import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.chat.*;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
+import org.javacord.api.entity.channel.TextChannel;
 import org.javacord.api.entity.user.User;
 
 import java.io.*;
@@ -21,15 +22,25 @@ public class LinkingManager {
     private HashBiMap<String, Long> links;
     private HashBiMap<String, String> pendingLinks;
     private final String linkingUrl;
+    private final TextChannel linkingChannel;
 
-    LinkingManager(String linkingUrl) {
+    LinkingManager(String linkingUrl, TextChannel linkingChannel) {
         this.linkingUrl = linkingUrl;
+        this.linkingChannel = linkingChannel;
         this.loadLinks();
 
         Main.inst().getProxy().getScheduler().schedule(Main.inst(), () -> {
             Main.inst().getDebugLogger().info("Saving linked accounts");
             saveLinks();
         }, 300, 300, TimeUnit.SECONDS);
+    }
+
+    public boolean isLinkingChannel(TextChannel channel) {
+        if(linkingChannel == null) {
+            return true;
+        }
+
+        return channel.getIdAsString().equals(linkingChannel.getIdAsString());
     }
 
     public boolean isLinked(ProxiedPlayer player) {

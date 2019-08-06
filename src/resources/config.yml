@@ -6,11 +6,11 @@ token: bot-token-here
 
 linking-url: 'https://minecraft.rtgame.co.uk/linking?token=[token]'
 
+# Channel to accept !link requests from
+linking-channel-id: '123456789'
+
 # Role id the user needs to have to be allowed in
 verify-role-id: '123456789'
-
-# Channel to accept verify requests from
-verify-channel-id: '123456789'
 
 # Permission to grant users who have verified
 verified-permission: 'group.verified'

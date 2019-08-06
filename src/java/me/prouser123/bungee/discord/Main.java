@@ -96,12 +96,12 @@ public class Main extends Plugin {
 		// Setup Debug Logging
 		debugLogger = new DebugLogger();
 
-		initLinking();
 		discord = new Discord(getConfig().getString("token"),  botCommandConfiguration);
 		kickManager = new KickManager(getConfig().getInt("unverified-kick-time"));
 
 		new ChatMessages(messagesConfiguration);
 
+		initLinking();
 		initVerification();
 		initActivityLogging();
 
@@ -112,7 +112,16 @@ public class Main extends Plugin {
 
 	private void initLinking() {
 		String linkingUrl = getConfig().getString("linking-url");
-		linkingManager = new LinkingManager(linkingUrl);
+
+		String linkingChannelId = getConfig().getString("linking-channel-id");
+		Optional<TextChannel> linkingChannel = discord.getApi().getTextChannelById(linkingChannelId);
+
+		if(!linkingChannel.isPresent()) {
+			Main.inst().getLogger().info("Unable to find linking channel. Did you put a valid channel ID in the config?");
+			linkingManager = new LinkingManager(linkingUrl, null);
+		} else {
+			linkingManager = new LinkingManager(linkingUrl, linkingChannel.get());
+		}
 	}
 
 	private void initVerification() {
