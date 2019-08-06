@@ -50,7 +50,7 @@ verification-gained-role: |-
 # When a player loses their access due to their discord account losing the required role
 verification-lost-role: |-
   Your Discord account appears to have lost the [role] role.
-  Please check your Twitch subscription and Discord connections, or wait for discord to update your roles.
+  Please check your Twitch subscription and Discord connections, or wait for Discord to update your roles.
 
 # When a player loses their access due unlinking their discord account
 verification-lost-unlinked: 'Your Discord account has been unlinked, use /link to re-link it.'
@@ -66,7 +66,7 @@ kicked-not-linked: |-
 # When a player is kicked for not gaining the required role on their linked discord account in time
 kicked-linked-not-verified: |-
   Your Discord account didn't gain the [role] role in time!
-  Please double check your Twitch subscription and Discord connections, or wait for discord to update your roles.
+  Please double check your Twitch subscription and Discord connections, or wait for Discord to update your roles.
 
 # Discord bot response for successful link
 discord-link-success: 'Hey [user], your accounts have been linked successfully.'
@@ -74,19 +74,20 @@ discord-link-success: 'Hey [user], your accounts have been linked successfully.'
 # Discord bot response for successful link, but the linked account doesn't have the verified role
 discord-link-success-not-verified: |-
   Hey [user], your accounts have been linked successfully, however you do not appear to have the __[role]__ role.
-  Please double check your Twitch subscription and Discord connections, or wait for discord to update your roles.
+  Please double check your Twitch subscription and Discord connections, or wait for Discord to update your roles.
+  This can take up to one hour if you've just linked.
   If you still need help, ask a `@Minecraft Server Mod`.
 
 # Discord bot response for link attempt with no token
 discord-link-no-token: |-
   Sorry [user], you need to provide a token.
-  If you don't know your token (it's __not__ your username!), please use the `/link` command in-game.
+  If you don't know your token (**it's __not__ your username!**), please use the `/link` command **in-game**.
   If you still need help, ask a `@Minecraft Server Mod`.
 
 # Discord bot response for link attempt with invalid token
 discord-link-invalid-token: |-
   Sorry [user], that token isn't valid, please double check it.
-  If you don't know your token (it's __not__ your username!), please use the `/link` command in-game.
+  If you don't know your token (**it's __not__ your username!**), please use the `/link` command **in-game**.
   If you still need help, ask a `@Minecraft Server Mod`.
 
 # Discord bot response for link attempt with another account already linked
@@ -97,3 +98,47 @@ discord-link-already-linked: |-
 discord-link-error: |-
   Sorry [user], an error occured while linking your accounts. Please try again later.
 
+embed-link-success:
+  title: 'Accounts linked successfully'
+  description: |-
+    Your accounts have been linked, and you may now play on the server.
+    Have fun, and be sure to check out <#598947870246305839> for rules and FAQs.
+  thumbnail: 'https://cdn.discordapp.com/attachments/457984159458000908/608397929081864233/success_3.png'
+  colour: '#22d518'
+
+embed-link-no-token:
+  title: 'No token provided'
+  description: |-
+    aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+  thumbnail: 'https://cdn.discordapp.com/attachments/457984159458000908/608397931678007317/error_3.png'
+  colour: '#d52a18'
+
+embed-link-invalid-token:
+  title: 'Invalid token'
+  description: |-
+    bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  thumbnail: 'https://cdn.discordapp.com/attachments/457984159458000908/608397931678007317/error_3.png'
+  colour: '#d52a18'
+
+embed-link-already-linked:
+  title: 'Account already linked'
+  description: |-
+    Your Minecraft account is already linked to another discord account.
+    Please type `/unlink` **in-game** to unlink the other account first.
+  thumbnail: 'https://cdn.discordapp.com/attachments/457984159458000908/608397931678007317/error_3.png'
+  colour: '#d52a18'
+
+embed-link-success-not-verified:
+  title: 'Half way there'
+  description: |-
+    Your accounts have been linked, but you are missing the [role] role
+  thumbnail: 'https://cdn.discordapp.com/attachments/457984159458000908/608397930151542785/alert_3.png'
+  colour: '#ffac22'
+
+embed-link-error:
+  title: 'An error occurred'
+  description: |-
+    An unexpected error occured while trying to link your accounts.
+    Please try again later. If problems persist, ask a <#352082397744988162> for help.
+  thumbnail: 'https://cdn.discordapp.com/attachments/457984159458000908/608397934773665852/misc_3.png'
+  colour: '#335bc6'
