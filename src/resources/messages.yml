@@ -109,14 +109,38 @@ embed-link-success:
 embed-link-no-token:
   title: 'No token provided'
   description: |-
-    aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+    You didn't provide a token in your message.
+  fields:
+    - |-
+      What's my token?
+    - |-
+      You can get your token by connecting to the server, typing `/link` in the **in-game** chat, and following the instructions.
+    - 'Will my Minecraft username work instead?'
+    - |-
+      No. Only tokens generated via the above method will work.
+      This is to help prevent typos, and prove that you have access to the account you are trying to link.
+    - 'Still Stuck?'
+    - |-
+      If you still need help, ask a <@&352082397744988162>.
   thumbnail: 'https://cdn.discordapp.com/attachments/457984159458000908/608397931678007317/error_3.png'
   colour: '#d52a18'
 
 embed-link-invalid-token:
   title: 'Invalid token'
   description: |-
-    bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+    The token you provided is invalid, please double check it.
+  fields:
+    - |-
+      What's my token?
+    - |-
+      You can get your token by connecting to the server, typing `/link` in the **in-game** chat, and following the instructions.
+    - 'Will my Minecraft username work instead?'
+    - |-
+      No. Only tokens generated via the above method will work.
+      This is to help prevent typos, and prove that you have access to the account you are trying to link.
+    - 'Still Stuck?'
+    - |-
+      If you still need help, ask a <@&352082397744988162>.
   thumbnail: 'https://cdn.discordapp.com/attachments/457984159458000908/608397931678007317/error_3.png'
   colour: '#d52a18'
 
@@ -131,14 +155,26 @@ embed-link-already-linked:
 embed-link-success-not-verified:
   title: 'Half way there'
   description: |-
-    Your accounts have been linked, but you are missing the [role] role
+    Your accounts have been linked, but you are missing the [role] role, which is required to play on the server.
+  fields:
+    - 'Things to try'
+    - |-
+      **1)** Check you are [subscribed to RTGameCrowd](https://www.twitch.tv/subs/rtgamecrowd) on Twitch. Any tier will do, including prime.
+      **2)** Check you have connected your Twitch account to Discord. You'll find this in **User Settings > Connections**.
+    - 'If you have done both of the above'
+    - |-
+      You may have to wait for Discord to update your roles.
+      This is an automatic process that may take up to **an hour**.
+    - 'Still Stuck?'
+    - |-
+      If you've tried the above and still need help, ask a <@&352082397744988162>.
   thumbnail: 'https://cdn.discordapp.com/attachments/457984159458000908/608397930151542785/alert_3.png'
   colour: '#ffac22'
 
 embed-link-error:
-  title: 'An error occurred'
+  title: 'An error occured'
   description: |-
     An unexpected error occured while trying to link your accounts.
-    Please try again later. If problems persist, ask a <#352082397744988162> for help.
+    Please try again later. If problems persist, ask a <@&352082397744988162> for help.
   thumbnail: 'https://cdn.discordapp.com/attachments/457984159458000908/608397934773665852/misc_3.png'
   colour: '#335bc6'
