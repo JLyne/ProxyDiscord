@@ -1,8 +1,6 @@
 package me.prouser123.bungee.discord;
 
 import com.google.common.collect.HashBiMap;
-import me.prouser123.bungee.discord.exceptions.AlreadyLinkedException;
-import me.prouser123.bungee.discord.exceptions.InvalidTokenException;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.chat.*;
@@ -12,10 +10,7 @@ import org.javacord.api.entity.user.User;
 
 import java.io.*;
 import java.security.SecureRandom;
-import java.util.Base64;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 public class LinkingManager {
@@ -47,7 +42,7 @@ public class LinkingManager {
         return this.links.containsKey(player.getUniqueId().toString());
     }
 
-    public String getLinked(Long discordId) {
+    String getLinked(Long discordId) {
         return this.links.inverse().get(discordId);
     }
 
@@ -101,35 +96,53 @@ public class LinkingManager {
         return token;
     }
 
-    public void completeLink(String token, Long discordId) throws AlreadyLinkedException, InvalidTokenException {
+    public LinkResult completeLink(String token, Long discordId) {
+        //Account already linked
         if(this.links.containsValue(discordId)) {
-            throw new AlreadyLinkedException("Discord account is already linked to a Minecraft player");
+            //Said account doesn't have verified role
+            if(!Main.inst().getVerificationManager().hasVerifiedRole(discordId)) {
+                return LinkResult.ALREADY_LINKED_NOT_VERIFIED;
+            }
+
+            return LinkResult.ALREADY_LINKED;
         }
 
+        if(token.isEmpty()) {
+            return LinkResult.NO_TOKEN;
+        }
+
+        //Token doesn't exist
         if(!this.pendingLinks.containsKey(token)) {
-            throw new InvalidTokenException("Token not found");
+            return LinkResult.INVALID_TOKEN;
         }
 
         String player = this.pendingLinks.get(token);
 
         if(player == null) {
-            throw new InvalidTokenException("No player found for token");
+            return LinkResult.INVALID_TOKEN;
         }
 
         this.links.put(player, discordId);
         this.pendingLinks.remove(token);
 
+        VerificationResult result =  Main.inst().getVerificationManager().checkVerificationStatus(discordId);
+
         ProxiedPlayer onlinePlayer = ProxyServer.getInstance().getPlayer(UUID.fromString(player));
 
         if(onlinePlayer != null) {
-            if(Main.inst().getVerificationManager().checkVerificationStatus(discordId) == VerificationResult.VERIFIED) {
+            if(result == VerificationResult.VERIFIED) {
                 onlinePlayer.sendMessage(new ComponentBuilder(ChatMessages.getMessage("link-success"))
                         .color(ChatColor.GREEN).create());
+                return LinkResult.NOT_VERIFIED;
             } else {
                 onlinePlayer.sendMessage(new ComponentBuilder(ChatMessages.getMessage("link-not-verified"))
                         .color(ChatColor.YELLOW).create());
             }
+
+            return LinkResult.SUCCESS;
         }
+
+        return result == VerificationResult.VERIFIED ? LinkResult.SUCCESS : LinkResult.NOT_VERIFIED;
     }
 
     public void unlink(ProxiedPlayer player) {

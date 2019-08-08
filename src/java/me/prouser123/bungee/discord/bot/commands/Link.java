@@ -1,11 +1,7 @@
 package me.prouser123.bungee.discord.bot.commands;
 
 import me.prouser123.bungee.discord.*;
-import me.prouser123.bungee.discord.exceptions.AlreadyLinkedException;
-import me.prouser123.bungee.discord.exceptions.InvalidTokenException;
-import org.javacord.api.entity.channel.TextChannel;
 import org.javacord.api.entity.message.MessageAuthor;
-import org.javacord.api.entity.message.MessageBuilder;
 import org.javacord.api.entity.message.embed.EmbedBuilder;
 import org.javacord.api.event.message.MessageCreateEvent;
 import org.javacord.api.listener.message.MessageCreateListener;
@@ -46,22 +42,8 @@ public class Link implements MessageCreateListener, BaseCommand {
         LinkResult result = LinkResult.UNKNOWN_ERROR;
 
         try {
-            if(token.isEmpty()) {
-                result = LinkResult.NO_TOKEN;
-            } else {
-                linkingManager.completeLink(token, id);
-
-                if(Main.inst().getVerificationManager().hasVerifiedRole(id)) {
-                    result = LinkResult.SUCCESS;
-                } else {
-                    result = LinkResult.NOT_VERIFIED;
-                }
-            }
-        } catch (AlreadyLinkedException e) {
-            result = LinkResult.ALREADY_LINKED;
-        } catch (InvalidTokenException e) {
-            result = LinkResult.INVALID_TOKEN;
-        } catch(Exception e) {
+            result = linkingManager.completeLink(token, id);
+        } catch (Exception e) {
             e.printStackTrace();
         } finally {
             if(true) {
@@ -93,6 +75,7 @@ public class Link implements MessageCreateListener, BaseCommand {
                 break;
 
             case NOT_VERIFIED:
+            case ALREADY_LINKED_NOT_VERIFIED:
                 embed = ChatMessages.getEmbed("embed-link-success-not-verified");
                 break;
 
@@ -140,16 +123,5 @@ public class Link implements MessageCreateListener, BaseCommand {
             Main.inst().getDebugLogger().info(message);
             event.getChannel().sendMessage(message.replace("[user]", "<@!" + event.getMessageAuthor().getId() + ">"));
         }
-    }
-
-    private void sendEmbed(TextChannel channel, String userId) {
-        EmbedBuilder embed = new EmbedBuilder()
-                .setTitle("This is an embed")
-                .setDescription("This is the embed description")
-                .setThumbnail("https://cdn.discordapp.com/attachments/457984159458000908/608374556004057130/misc.png")
-                .addField("Field 1", "Field 1 content")
-                .setFooter("Bungee Discord " + Main.inst().getDescription().getVersion() + " | !bd"/*.split("-")[0]*/, "https://cdn.discordapp.com/avatars/215119410103451648/575d90fdda8663b633e36f8b8c06c719.png");
-
-        channel.sendMessage("<@!" + userId + ">", embed);
     }
 }
