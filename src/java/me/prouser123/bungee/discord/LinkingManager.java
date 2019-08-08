@@ -17,25 +17,35 @@ public class LinkingManager {
     private HashBiMap<String, Long> links;
     private HashBiMap<String, String> pendingLinks;
     private final String linkingUrl;
-    private final TextChannel linkingChannel;
+    private final String linkingChannelId;
 
-    LinkingManager(String linkingUrl, TextChannel linkingChannel) {
+    LinkingManager(String linkingUrl, String linkingChannelId) {
         this.linkingUrl = linkingUrl;
-        this.linkingChannel = linkingChannel;
+        this.linkingChannelId = linkingChannelId;
         this.loadLinks();
 
         Main.inst().getProxy().getScheduler().schedule(Main.inst(), () -> {
             Main.inst().getDebugLogger().info("Saving linked accounts");
             saveLinks();
         }, 300, 300, TimeUnit.SECONDS);
+
+        if(linkingChannelId != null) {
+            findChannel();
+        }
+
+        Main.inst().getDiscord().getApi().addReconnectListener(event -> {
+            if(linkingChannelId != null) {
+                findChannel();
+            }
+        });
     }
 
     public boolean isLinkingChannel(TextChannel channel) {
-        if(linkingChannel == null) {
+        if(linkingChannelId == null) {
             return true;
         }
 
-        return channel.getIdAsString().equals(linkingChannel.getIdAsString());
+        return channel.getIdAsString().equals(linkingChannelId);
     }
 
     public boolean isLinked(ProxiedPlayer player) {
@@ -189,6 +199,14 @@ public class LinkingManager {
             this.links = HashBiMap.create(1024);
             this.pendingLinks = HashBiMap.create(1024);
             Main.inst().getLogger().warning("Could not load linked accounts from disk");
+        }
+    }
+
+    private void findChannel() {
+        Optional <TextChannel> linkingChannel = Main.inst().getDiscord().getApi().getTextChannelById(linkingChannelId);
+
+        if(!linkingChannel.isPresent()) {
+            Main.inst().getLogger().info("Unable to find linking channel. Did you put a valid channel ID in the config?");
         }
     }
 }

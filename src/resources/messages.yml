@@ -96,7 +96,10 @@ discord-link-already-linked: |-
 
 # Discord bot response for link attempt with another account already linked
 discord-link-error: |-
-  Sorry [user], an error occured while linking your accounts. Please try again later.
+  Sorry [user], an error occurred while linking your accounts. Please try again later.
+
+save-success: |-
+  Linked accounts have been saved.
 
 embed-link-success:
   title: 'Accounts linked successfully'
@@ -172,9 +175,9 @@ embed-link-success-not-verified:
   colour: '#ffac22'
 
 embed-link-error:
-  title: 'An error occured'
+  title: 'An error occurred'
   description: |-
-    An unexpected error occured while trying to link your accounts.
+    An unexpected error occurred while trying to link your accounts.
     Please try again later. If problems persist, ask a <@&352082397744988162> for help.
   thumbnail: 'https://cdn.discordapp.com/attachments/457984159458000908/608397934773665852/misc_3.png'
   colour: '#335bc6'

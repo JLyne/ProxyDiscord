@@ -34,14 +34,25 @@ public class Discord {
 
 		// Create an Instance of the DiscordApi
 		try {
+			Main.inst().getLogger().info("Connecting to Discord...");
 			api = new DiscordApiBuilder().setToken(token).login().join();
+
+			/*
+			 *  FIXME: Seems to be a race condition here, which causes the various config channel/role ids to not be found
+			 *  Which naturally breaks everything
+			 *  Adding a sleep for now
+			 */
+			Main.inst().getLogger().info("Waiting a sec...");
+			Thread.sleep(4000);
+
 			connected = true;
 		} catch (CompletionException IllegalStateException) {
-			Main.inst().getLogger().info("Connection Error. Did you put a valid token in the config?");
+			Main.inst().getLogger().warning("Connection Error. Did you put a valid token in the config?");
 			return;
+		} catch(InterruptedException ignored) {
 		}
-		
-        // Print the invite url of the bot
+
+		// Print the invite url of the bot
         Main.inst().getLogger().info("Bot Invite Link: " + api.createBotInvite());
 
 		// Cache a maximum of 10 messages per channel for and remove messages older than 1 hour
