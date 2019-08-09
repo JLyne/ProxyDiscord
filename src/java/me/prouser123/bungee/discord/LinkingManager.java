@@ -139,18 +139,19 @@ public class LinkingManager {
 
         ProxiedPlayer onlinePlayer = ProxyServer.getInstance().getPlayer(UUID.fromString(player));
 
-        if(onlinePlayer != null) {
-            if(result == VerificationResult.VERIFIED) {
-                onlinePlayer.sendMessage(new ComponentBuilder(ChatMessages.getMessage("link-success"))
-                        .color(ChatColor.GREEN).create());
-                return LinkResult.NOT_VERIFIED;
-            } else {
-                onlinePlayer.sendMessage(new ComponentBuilder(ChatMessages.getMessage("link-not-verified"))
-                        .color(ChatColor.YELLOW).create());
-            }
+		if(onlinePlayer != null) {
+			if(result == VerificationResult.VERIFIED) {
+				onlinePlayer.sendMessage(new ComponentBuilder(ChatMessages.getMessage("link-success"))
+						.color(ChatColor.GREEN).create());
 
-            return LinkResult.SUCCESS;
-        }
+				return LinkResult.NOT_VERIFIED;
+			} else {
+				onlinePlayer.sendMessage(new ComponentBuilder(ChatMessages.getMessage("link-not-verified"))
+						.color(ChatColor.YELLOW).create());
+
+				return LinkResult.SUCCESS;
+			}
+		}
 
         return result == VerificationResult.VERIFIED ? LinkResult.SUCCESS : LinkResult.NOT_VERIFIED;
     }
