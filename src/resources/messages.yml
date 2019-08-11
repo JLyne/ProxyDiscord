@@ -181,3 +181,12 @@ embed-link-error:
     Please try again later. If problems persist, ask a <@&352082397744988162> for help.
   thumbnail: 'https://cdn.discordapp.com/attachments/457984159458000908/608397934773665852/misc_3.png'
   colour: '#335bc6'
+
+announcement-new: |-
+  New announcement in [channel]:
+
+announcement-latest: |-
+  Latest announcement in [channel]:
+
+announcement-read-more: |-
+  Read the full message in Discord

@@ -34,6 +34,7 @@ public class Main extends Plugin {
 	private LinkingManager linkingManager;
 	private VerificationManager verificationManager;
 	private KickManager kickManager;
+	private AnnouncementManager announcementManager;
 
     public static Main inst() {
     	  return instance;
@@ -61,6 +62,10 @@ public class Main extends Plugin {
 
 	public KickManager getKickManager() {
 		return kickManager;
+	}
+
+	public AnnouncementManager getAnnouncementManager() {
+		return announcementManager;
 	}
 
 	@Override
@@ -141,6 +146,12 @@ public class Main extends Plugin {
 		getLogger().info("Activity logging enabled for channel: #" + logChannel.toString().replaceAll(".*\\[|].*", "") + " (id: " + logChannelId + ")");
 	}
 
+	private void initAnnouncements() {
+		String announcementChannelId = getConfig().getString("announcement-channel-id");
+
+		announcementManager = new AnnouncementManager(announcementChannelId);
+	}
+	
 	private static void loadResource(Plugin plugin, String resource) {
         File folder = plugin.getDataFolder();
         if (!folder.exists())

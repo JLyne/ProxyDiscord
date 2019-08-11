@@ -33,12 +33,12 @@ public class JoinLeave implements Listener {
 		String text;
 		VerificationResult result = verificationManager.checkVerificationStatus(player);
 
+		player.sendMessage(new ComponentBuilder(ChatMessages.getMessage("join-welcome"))
+				.color(ChatColor.GREEN).create());
+
 		switch(result) {
 			case NOT_LINKED:
 				Main.inst().getLogger().info("Unlinked player " + player.getName() + " joined");
-
-				text = ChatMessages.getMessage("join-welcome");
-				player.sendMessage(new ComponentBuilder(text).color(ChatColor.GREEN).create());
 
 				text = ChatMessages.getMessage("join-not-linked");
 				player.sendMessage(new ComponentBuilder(text).color(ChatColor.YELLOW).create());
@@ -56,6 +56,8 @@ public class JoinLeave implements Listener {
 
 			case VERIFIED:
 				Main.inst().getLogger().info("Verified player " + player.getName() + " joined");
+				Main.inst().getAnnouncementManager().sendLatestAnnouncement(player);
+
 				return;
 		}
 
