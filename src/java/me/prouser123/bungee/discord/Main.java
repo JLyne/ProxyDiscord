@@ -8,7 +8,6 @@ import me.prouser123.bungee.discord.commands.Link;
 import me.prouser123.bungee.discord.commands.Save;
 import me.prouser123.bungee.discord.commands.Unlink;
 import me.prouser123.bungee.discord.listeners.JoinLeave;
-import me.prouser123.bungee.discord.listeners.PlayerChat;
 import me.prouser123.bungee.discord.listeners.ServerConnect;
 import net.md_5.bungee.api.plugin.Plugin;
 import net.md_5.bungee.config.Configuration;
@@ -16,11 +15,8 @@ import net.md_5.bungee.config.ConfigurationProvider;
 import net.md_5.bungee.config.YamlConfiguration;
 
 import java.io.*;
-import java.util.Optional;
 
 import com.google.common.io.ByteStreams;
-
-import org.javacord.api.entity.channel.TextChannel;
 
 public class Main extends Plugin {
 	private static Main instance;
@@ -31,10 +27,11 @@ public class Main extends Plugin {
 	private DebugLogger debugLogger;
 	private Discord discord;
 
-	private LinkingManager linkingManager;
-	private VerificationManager verificationManager;
-	private KickManager kickManager;
-	private AnnouncementManager announcementManager;
+	private static LinkingManager linkingManager;
+	private static VerificationManager verificationManager;
+	private static KickManager kickManager;
+	private static AnnouncementManager announcementManager;
+	private static LoggingManager loggingManager;
 
     public static Main inst() {
     	  return instance;
@@ -68,10 +65,14 @@ public class Main extends Plugin {
 		return announcementManager;
 	}
 
+	public LoggingManager getLoggingManager() {
+		return loggingManager;
+	}
+
 	@Override
 	public void onEnable() {
 		instance = this;
-		
+
 		getLogger().info("Welcome!");
 
 		// Setup config
@@ -106,9 +107,12 @@ public class Main extends Plugin {
 
 		new ChatMessages(messagesConfiguration);
 
+		initActivityLogging();
 		initLinking();
 		initVerification();
-		initActivityLogging();
+		initAnnouncements();
+
+		getProxy().getPluginManager().registerListener(this, new JoinLeave());
 
 		getProxy().getPluginManager().registerCommand(this, new Link());
 		getProxy().getPluginManager().registerCommand(this, new Unlink());
@@ -133,17 +137,9 @@ public class Main extends Plugin {
 	}
 
 	private void initActivityLogging() {
-		String logChannelId = getConfig().getString("log-channel-id");
-		Optional<TextChannel> logChannel = discord.getApi().getTextChannelById(logChannelId);
+    	String loggingChannelId = getConfig().getString("logging-channel-id");
 
-		if(!logChannel.isPresent()) {
-			Main.inst().getLogger().info("Activity logging disabled. Did you put a valid channel ID in the config?");
-			return;
-		}
-
-		getProxy().getPluginManager().registerListener(this, new PlayerChat(logChannel.get()));
-		getProxy().getPluginManager().registerListener(this, new JoinLeave(logChannel.get()));
-		getLogger().info("Activity logging enabled for channel: #" + logChannel.toString().replaceAll(".*\\[|].*", "") + " (id: " + logChannelId + ")");
+		loggingManager = new LoggingManager(loggingChannelId);
 	}
 
 	private void initAnnouncements() {
@@ -151,7 +147,7 @@ public class Main extends Plugin {
 
 		announcementManager = new AnnouncementManager(announcementChannelId);
 	}
-	
+
 	private static void loadResource(Plugin plugin, String resource) {
         File folder = plugin.getDataFolder();
         if (!folder.exists())
