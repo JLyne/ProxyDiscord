@@ -12,6 +12,8 @@ import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.event.EventHandler;
 import net.md_5.bungee.event.EventPriority;
 import net.md_5.bungee.api.chat.TextComponent;
+import net.md_5.bungee.protocol.Protocol;
+import net.md_5.bungee.protocol.ProtocolConstants;
 
 public class ServerConnect implements Listener {
     private static VerificationManager verificationManager = null;
@@ -23,6 +25,13 @@ public class ServerConnect implements Listener {
     @EventHandler(priority = EventPriority.LOW)
     public void onServerConnect(ServerConnectEvent e) {
         if (e.isCancelled()) return;
+
+        //Disable linking for bedrock users
+        if(e.getPlayer().getXUID() != null) {
+            Main.inst().getLogger().info("Bedrock player " + e.getPlayer().getName() + " switching servers. Not checking link status.");
+
+            return;
+        }
 
         ServerInfo unverifiedServer = verificationManager.getUnverifiedServer();
 

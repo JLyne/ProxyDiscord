@@ -26,6 +26,16 @@ public class JoinLeave implements Listener {
 	public void onPlayerJoin(PostLoginEvent event) {
 		ProxiedPlayer player = event.getPlayer();
 
+		if(player.getXUID() != null) {
+			if(logChannel != null) {
+				logChannel.sendMessage("```" + player.getName() + " has joined the network using bedrock.```");
+			}
+
+			Main.inst().getLogger().info("Bedrock player " + player.getName() + " joined. Not checking link status.");
+
+			return;
+		}
+
 		if(logChannel != null) {
 			logChannel.sendMessage("```" + player.getName() + " has joined the network.```");
 		}

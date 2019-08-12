@@ -144,12 +144,12 @@ public class LinkingManager {
 				onlinePlayer.sendMessage(new ComponentBuilder(ChatMessages.getMessage("link-success"))
 						.color(ChatColor.GREEN).create());
 
-				return LinkResult.NOT_VERIFIED;
+				return LinkResult.SUCCESS;
 			} else {
 				onlinePlayer.sendMessage(new ComponentBuilder(ChatMessages.getMessage("link-not-verified"))
 						.color(ChatColor.YELLOW).create());
 
-				return LinkResult.SUCCESS;
+				return LinkResult.NOT_VERIFIED;
 			}
 		}
 

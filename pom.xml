@@ -19,6 +19,10 @@
       <id>Prouser123-mcdev</id>
       <url>https://packagecloud.io/Prouser123/mcdev/maven2/</url>
     </repository>
+    <repository>
+      <id>codemc-repo</id>
+      <url>https://repo.codemc.org/repository/maven-public</url>
+    </repository>
   </repositories>
   
   <build>
@@ -75,20 +79,6 @@
   </build>
   
   <dependencies>
-    <dependency>
-      <groupId>net.md-5</groupId>
-      <artifactId>bungeecord-api</artifactId>
-      <version>1.12-SNAPSHOT</version>
-      <type>jar</type>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>net.md-5</groupId>
-      <artifactId>bungeecord-api</artifactId>
-      <version>1.12-SNAPSHOT</version>
-      <type>javadoc</type>
-      <scope>provided</scope>
-    </dependency>
     <!-- JavaCord (Discord Library) -->
     <dependency>
       <groupId>org.javacord</groupId>
@@ -115,10 +105,12 @@
       <version>4.4</version>
       <scope>provided</scope>
     </dependency>
+
     <dependency>
-      <groupId>net.md-5</groupId>
-      <artifactId>bungeecord-api</artifactId>
-      <version>1.12-SNAPSHOT</version>
+      <groupId>network.ycc.waterdog</groupId>
+      <artifactId>waterdog-api</artifactId>
+      <version>1.14-SNAPSHOT</version>
+      <scope>provided</scope>
     </dependency>
   </dependencies>
   <properties>
