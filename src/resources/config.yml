@@ -24,6 +24,9 @@ unverified-server: 'waiting'
 # Channel to log joins/leaves/chats etc in
 log-channel-id: '123456789'
 
+# Channel for annoucements, messages sent here will be shown in chat
+announcement-channel-id: '610046112996261908'
+
 # Enable debug logging? Only useful if you are developing this plugin.
 debug-enabled: false
 

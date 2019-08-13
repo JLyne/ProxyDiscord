@@ -36,16 +36,16 @@ public class MainCommand implements MessageCreateListener, BaseCommand {
         	event.getChannel().sendMessage(this.createSubCommandEmbed(event));
         	
         	
-        	EmbedBuilder embed2 = new EmbedBuilder();
-        	
-        	if (JoinLeave.logChannel != null) {
-            	embed2.setTitle("Enabled Features");
-            	embed2.addField("Join / Leave Messages", "Message to a channel when a player joins the network.");
-        	} else {
-        		embed2.addField("Disabled Features", "Join / Leave Messages");
-        	}
-        	
-        	event.getChannel().sendMessage(embed2);
+//        	EmbedBuilder embed2 = new EmbedBuilder();
+//
+//        	if (JoinLeave.logChannel != null) {
+//            	embed2.setTitle("Enabled Features");
+//            	embed2.addField("Join / Leave Messages", "Message to a channel when a player joins the network.");
+//        	} else {
+//        		embed2.addField("Disabled Features", "Join / Leave Messages");
+//        	}
+//
+        	//event.getChannel().sendMessage(embed2);
         }
     }
     

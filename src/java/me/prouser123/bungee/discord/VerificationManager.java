@@ -3,7 +3,6 @@ package me.prouser123.bungee.discord;
 import me.lucko.luckperms.LuckPerms;
 import me.lucko.luckperms.api.LuckPermsApi;
 import me.lucko.luckperms.api.Node;
-import me.prouser123.bungee.discord.bot.commands.RemovalReason;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.chat.TextComponent;

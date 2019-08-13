@@ -4,51 +4,62 @@ import me.prouser123.bungee.discord.*;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
-import org.javacord.api.entity.channel.TextChannel;
+import net.md_5.bungee.api.event.PostLoginEvent;
+import net.md_5.bungee.api.event.ServerConnectedEvent;
 
 import net.md_5.bungee.api.event.PlayerDisconnectEvent;
-import net.md_5.bungee.api.event.PostLoginEvent;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.event.EventHandler;
 
+import java.util.HashMap;
+import java.util.UUID;
+
 public class JoinLeave implements Listener {
-	public static TextChannel logChannel = null;
 	private static VerificationManager verificationManager = null;
 	private static KickManager kickManager = null;
+	private static LoggingManager loggingManager = null;
 
-	public JoinLeave(TextChannel logChannel) {
-		JoinLeave.logChannel = logChannel;
+	private HashMap<UUID, Boolean> firstJoin;
+
+	public JoinLeave() {
 		verificationManager = Main.inst().getVerificationManager();
 		kickManager = Main.inst().getKickManager();
+		loggingManager = Main.inst().getLoggingManager();
+
+		firstJoin = new HashMap<>();
 	}
-	
+
 	@EventHandler
-	public void onPlayerJoin(PostLoginEvent event) {
+	public void onPostLogin(PostLoginEvent event) {
+		firstJoin.put(event.getPlayer().getUniqueId(), true);
+	}
+
+	@EventHandler
+	public void onServerConnected(ServerConnectedEvent event) {
 		ProxiedPlayer player = event.getPlayer();
 
-		if(player.getXUID() != null) {
-			if(logChannel != null) {
-				logChannel.sendMessage("```" + player.getName() + " has joined the network using bedrock.```");
-			}
+		if(!firstJoin.get(player.getUniqueId())) {
+			return;
+		}
 
+		if(player.getXUID() != null) {
 			Main.inst().getLogger().info("Bedrock player " + player.getName() + " joined. Not checking link status.");
 
 			return;
 		}
 
-		if(logChannel != null) {
-			logChannel.sendMessage("```" + player.getName() + " has joined the network.```");
-		}
+		firstJoin.put(player.getUniqueId(), false);
+		loggingManager.logJoin(player);
 
 		String text;
 		VerificationResult result = verificationManager.checkVerificationStatus(player);
 
+		player.sendMessage(new ComponentBuilder(ChatMessages.getMessage("join-welcome"))
+				.color(ChatColor.GREEN).create());
+
 		switch(result) {
 			case NOT_LINKED:
 				Main.inst().getLogger().info("Unlinked player " + player.getName() + " joined");
-
-				text = ChatMessages.getMessage("join-welcome");
-				player.sendMessage(new ComponentBuilder(text).color(ChatColor.GREEN).create());
 
 				text = ChatMessages.getMessage("join-not-linked");
 				player.sendMessage(new ComponentBuilder(text).color(ChatColor.YELLOW).create());
@@ -66,6 +77,8 @@ public class JoinLeave implements Listener {
 
 			case VERIFIED:
 				Main.inst().getLogger().info("Verified player " + player.getName() + " joined");
+				Main.inst().getAnnouncementManager().sendLatestAnnouncement(player);
+
 				return;
 		}
 
@@ -75,8 +88,14 @@ public class JoinLeave implements Listener {
 	}
 	
 	@EventHandler
-	public void onPlayerLeave(PlayerDisconnectEvent event) {
-		kickManager.removePlayer(event.getPlayer());
-		logChannel.sendMessage("```" + event.getPlayer().getName() + " has left the network.```");
+	public void onDisconnect(PlayerDisconnectEvent event) {
+		ProxiedPlayer player = event.getPlayer();
+
+		if(!firstJoin.get(player.getUniqueId())) {
+			loggingManager.logLeave(player);
+		}
+
+		firstJoin.remove(player.getUniqueId());
+		kickManager.removePlayer(player);
 	}
 }

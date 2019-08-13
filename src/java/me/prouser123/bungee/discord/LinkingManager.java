@@ -139,19 +139,19 @@ public class LinkingManager {
 
         ProxiedPlayer onlinePlayer = ProxyServer.getInstance().getPlayer(UUID.fromString(player));
 
-		if(onlinePlayer != null) {
-			if(result == VerificationResult.VERIFIED) {
-				onlinePlayer.sendMessage(new ComponentBuilder(ChatMessages.getMessage("link-success"))
-						.color(ChatColor.GREEN).create());
+        if(onlinePlayer != null) {
+            if(result == VerificationResult.VERIFIED) {
+                onlinePlayer.sendMessage(new ComponentBuilder(ChatMessages.getMessage("link-success"))
+                        .color(ChatColor.GREEN).create());
 
-				return LinkResult.SUCCESS;
-			} else {
-				onlinePlayer.sendMessage(new ComponentBuilder(ChatMessages.getMessage("link-not-verified"))
-						.color(ChatColor.YELLOW).create());
+                return LinkResult.SUCCESS;
+            } else {
+                onlinePlayer.sendMessage(new ComponentBuilder(ChatMessages.getMessage("link-not-verified"))
+                        .color(ChatColor.YELLOW).create());
 
-				return LinkResult.NOT_VERIFIED;
-			}
-		}
+                return LinkResult.NOT_VERIFIED;
+            }
+        }
 
         return result == VerificationResult.VERIFIED ? LinkResult.SUCCESS : LinkResult.NOT_VERIFIED;
     }
@@ -207,7 +207,7 @@ public class LinkingManager {
         Optional <TextChannel> linkingChannel = Main.inst().getDiscord().getApi().getTextChannelById(linkingChannelId);
 
         if(!linkingChannel.isPresent()) {
-            Main.inst().getLogger().info("Unable to find linking channel. Did you put a valid channel ID in the config?");
+            Main.inst().getLogger().warning("Unable to find linking channel. Did you put a valid channel ID in the config?");
         }
     }
 }
