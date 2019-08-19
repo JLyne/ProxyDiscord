@@ -1,0 +1,63 @@
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath 'com.github.jengelman.gradle.plugins:shadow:2.0.1'
+    }
+}
+
+apply plugin: 'java'
+apply plugin: 'com.github.johnrengelman.shadow'
+apply plugin: 'maven'
+
+group = 'me.prouser123.bungee'
+version = 'RTGAME'
+
+description = """discord"""
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+configurations {
+    shade
+    compile.extendsFrom shade
+}
+
+sourceSets {
+    main {
+        java {
+            srcDirs= ["./src/java"]
+        }
+        resources {
+            srcDirs= ["./src/resources"]
+        }
+    }
+}
+
+repositories {
+     maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
+     maven { url "https://packagecloud.io/Prouser123/mcdev/maven2/" }
+     maven { url "https://repo.codemc.org/repository/maven-public" }
+     maven { url "http://repo.maven.apache.org/maven2" }
+}
+
+dependencies {
+    compile group: 'org.javacord', name: 'javacord', version:'3.0.1'
+    compile group: 'me.prouser123', name: 'bstatsplus', version:'1.4.0.1'
+    compile group: 'com.google.guava', name: 'guava', version:'28.0-jre'
+    compileOnly group: 'me.lucko.luckperms', name: 'luckperms-api', version:'4.4'
+    compileOnly group: 'network.ycc.waterdog', name: 'waterdog-api', version:'1.14-SNAPSHOT'
+    shade 'org.javacord:javacord'
+    shade 'org.javacord:javacord-api'
+    shade 'org.javacord:javacord-core'
+    shade 'com.squareup.okhttp3:okhttp'
+    shade 'com.squareup.okio:okio'
+    shade 'com.squareup.okhttp3:logging-interceptor'
+    shade 'com.fasterxml.jackson.core:jackson-databind'
+    shade 'com.fasterxml.jackson.core:jackson-annotations'
+    shade 'com.fasterxml.jackson.core:jackson-core'
+    shade 'com.neovisionaries:nv-websocket-client'
+    shade 'org.apache.logging.log4j:log4j-api'
+    shade 'com.google.guava:guava'
+}
