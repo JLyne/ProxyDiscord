@@ -21,7 +21,7 @@ public class LoggingManager implements Listener {
 
     private AtomicInteger logsPerMessage = new AtomicInteger(1); //Number of logs to combine together into one message, to avoid rate limits and falling behind
     private AtomicInteger unsentLogs = new AtomicInteger(0); //Number of unsent logs in current message
-    private AtomicInteger sentSinceLastCheck = new AtomicInteger(0); //Number of messages sent since last check
+    private AtomicInteger queuedToSend = new AtomicInteger(0); //Number of messages waiting to be sent by javacord
 
     private MessageBuilder currentMessage; //Current unsent message
 
@@ -41,20 +41,12 @@ public class LoggingManager implements Listener {
             }
         });
 
-        //Check messages that were sent every 5 seconds, and adjust logsPerMessage accordingly
-        //Ideally it will strike a balance between the log falling behind due to rate limits, and the chat not updating often enough due to lots of logs in one message
+        //Decrease logs per message if a low number of messages are unsent
         Main.inst().getProxy().getScheduler().schedule(Main.inst(), () -> {
-            if(sentSinceLastCheck.get() >= 5 && logsPerMessage.get() < 16) {
-                Main.inst().getLogger().info("Increasing logsPerMessage due to high activity (" + sentSinceLastCheck.get() + " logs)");
-                logsPerMessage.set(Math.min(logsPerMessage.get() * 2, 16));
-            }
-
-            if(sentSinceLastCheck.get() <= 2 && logsPerMessage.get() > 1) {
-                Main.inst().getLogger().info("Decreasing logsPerMessage due to low activity (" + sentSinceLastCheck.get() + " logs)");
+            if(queuedToSend.get() <= 2 && logsPerMessage.get() > 1) {
+                Main.inst().getLogger().info("Decreasing logsPerMessage due to low activity (" + queuedToSend.get() + " queued messages)");
                 logsPerMessage.set(Math.max(logsPerMessage.get() / 2, 1));
             }
-
-            sentSinceLastCheck.set(0);
         }, 5, 5, TimeUnit.SECONDS);
     }
 
@@ -112,7 +104,7 @@ public class LoggingManager implements Listener {
             return;
         }
 
-        String dateFormat = "<dd-MM-yy HH:mm:ss>";
+        String dateFormat = "<dd-MM-yy HH:mm:ss> ";
         SimpleDateFormat format = new SimpleDateFormat(dateFormat);
         String date = format.format(new Date());
         Optional <TextChannel> loggingChannel = Main.inst().getDiscord().getApi().getTextChannelById(loggingChannelId);
@@ -121,24 +113,33 @@ public class LoggingManager implements Listener {
 
         synchronized (lockDummy) {
             if(currentMessage.getStringBuilder().length() + message.length() > 1950) {
-                loggingChannel.ifPresent(textChannel ->  currentMessage.send(textChannel));
-                currentMessage = new MessageBuilder();
+                queuedToSend.incrementAndGet();
+                loggingChannel.ifPresent(textChannel ->  currentMessage.send(textChannel).thenAcceptAsync(result -> {
+                     queuedToSend.decrementAndGet();
+                }));
 
+                currentMessage = new MessageBuilder();
                 unsentLogs.set(0);
-                sentSinceLastCheck.incrementAndGet();
             }
 
             currentMessage.append(MessageDecoration.CODE_LONG.getPrefix())
                     .append("md").append("\n").append(message).append(MessageDecoration.CODE_LONG.getSuffix());
 
             if(unsentLogs.incrementAndGet() >= logsPerMessage.get()) {
-                loggingChannel.ifPresent(textChannel ->  currentMessage.send(textChannel));
-                currentMessage = new MessageBuilder();
+                queuedToSend.incrementAndGet();
+                loggingChannel.ifPresent(textChannel ->  currentMessage.send(textChannel).thenAcceptAsync(result -> {
+                     queuedToSend.decrementAndGet();
+                }));
 
+                currentMessage = new MessageBuilder();
                 unsentLogs.set(0);
-                sentSinceLastCheck.incrementAndGet();
+            }
+
+            //Increase logsPerMessage if many messages are queued, to help stop the log falling behind
+            if(queuedToSend.get() >= 5 && logsPerMessage.get() < 16) {
+                Main.inst().getLogger().info("Increasing logsPerMessage due to high activity (" + queuedToSend.get() + " queued messages)");
+                logsPerMessage.set(Math.min(logsPerMessage.get() * 2, 16));
             }
         }
-
     }
 }
