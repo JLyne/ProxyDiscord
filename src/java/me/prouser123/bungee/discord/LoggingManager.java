@@ -1,5 +1,14 @@
 package me.prouser123.bungee.discord;
 
+import me.lucko.luckperms.LuckPerms;
+import me.lucko.luckperms.api.Contexts;
+import me.lucko.luckperms.api.LuckPermsApi;
+import me.lucko.luckperms.api.User;
+import me.lucko.luckperms.api.caching.MetaData;
+import me.lucko.luckperms.api.manager.UserManager;
+import net.md_5.bungee.api.ChatColor;
+import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.event.ChatEvent;
 import net.md_5.bungee.api.plugin.Listener;
@@ -12,6 +21,7 @@ import org.javacord.api.entity.message.MessageDecoration;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -24,10 +34,13 @@ public class LoggingManager implements Listener {
     private AtomicInteger queuedToSend = new AtomicInteger(0); //Number of messages waiting to be sent by javacord
 
     private MessageBuilder currentMessage; //Current unsent message
+    private LuckPermsApi luckPermsApi;
 
     LoggingManager(String loggingChannelId) {
         this.loggingChannelId = loggingChannelId;
         currentMessage = new MessageBuilder();
+
+        luckPermsApi = LuckPerms.getApi();
 
         if(loggingChannelId != null) {
             findChannel();
@@ -86,6 +99,24 @@ public class LoggingManager implements Listener {
             return;
         }
 
+        loggingChannel.get().addMessageCreateListener(event -> {
+            if(event.getMessageAuthor().isYourself()) {
+                return;
+            }
+
+            Main.inst().getProxy().getScheduler().runAsync(Main.inst(), () -> {
+                String message = event.getReadableMessageContent();
+                Long discordId = event.getMessage().getAuthor().getId();
+                String linked = Main.inst().getLinkingManager().getLinked(discordId);
+
+                event.deleteMessage();
+
+                if(linked != null) {
+                    sendDiscordMessage(UUID.fromString(linked), message);
+                }
+            });
+        });
+
         Main.inst().getLogger().info("Activity logging enabled for channel: #" + loggingChannel.toString().replaceAll(".*\\[|].*", "") + " (id: " + loggingChannelId + ")");
     }
 
@@ -97,6 +128,40 @@ public class LoggingManager implements Listener {
         } else {
             return "[" + player.getName() + "](Unlinked)";
         }
+    }
+
+    private String getPlayerLogName(User user) {
+         Long discordId = Main.inst().getLinkingManager().getLinked(user.getUuid());
+
+        if(discordId != null) {
+            return "[" + user.getName() + "](<@!" + discordId.toString() + ">)";
+        } else {
+            return "[" + user.getName() + "](Unlinked)";
+        }
+    }
+
+    private void sendDiscordMessage(UUID uuid, String message) {
+        UserManager userManager = luckPermsApi.getUserManager();
+        User user = userManager.loadUser(uuid).join();
+
+        if(user == null) {
+            return;
+        }
+
+        if(message.isEmpty()) {
+            return;
+        }
+
+        MetaData metaData = user.getCachedData().getMetaData(Contexts.allowAll());
+        String prefix = ( metaData.getPrefix() != null) ?  metaData.getPrefix() : "";
+        String suffix = ( metaData.getSuffix() != null) ?  metaData.getSuffix() : "";
+
+        String text = "&l&bDISCORD>&r " + prefix + user.getName() + suffix + "&r: " + message;
+        text = ChatColor.translateAlternateColorCodes('&', text);
+
+        BaseComponent[] components = TextComponent.fromLegacyText(text);
+        Main.inst().getProxy().broadcast(components);
+        sendLogMessage("DISCORD> " + getPlayerLogName(user) + ": " + message);
     }
 
     private void sendLogMessage(String message) {

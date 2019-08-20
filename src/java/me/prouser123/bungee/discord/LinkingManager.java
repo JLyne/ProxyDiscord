@@ -60,8 +60,12 @@ public class LinkingManager {
         return this.links.inverse().get(user.getId());
     }
 
-    public Long getLinked(ProxiedPlayer player) {
+    Long getLinked(ProxiedPlayer player) {
         return this.links.get(player.getUniqueId().toString());
+    }
+
+    Long getLinked(UUID uuid) {
+        return this.links.get(uuid.toString());
     }
 
     public void startLink(ProxiedPlayer player) {
