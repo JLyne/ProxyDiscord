@@ -6,10 +6,12 @@ import me.lucko.luckperms.api.LuckPermsApi;
 import me.lucko.luckperms.api.User;
 import me.lucko.luckperms.api.caching.MetaData;
 import me.lucko.luckperms.api.manager.UserManager;
+import me.prouser123.bungee.discord.bot.commands.ServerInfo;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
+import net.md_5.bungee.api.connection.Server;
 import net.md_5.bungee.api.event.ChatEvent;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.event.EventHandler;
@@ -17,6 +19,8 @@ import net.md_5.bungee.event.EventPriority;
 import org.javacord.api.entity.channel.TextChannel;
 import org.javacord.api.entity.message.MessageBuilder;
 import org.javacord.api.entity.message.MessageDecoration;
+import org.javacord.api.listener.message.MessageCreateListener;
+import org.javacord.api.util.event.ListenerManager;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -35,6 +39,7 @@ public class LoggingManager implements Listener {
 
     private MessageBuilder currentMessage; //Current unsent message
     private LuckPermsApi luckPermsApi;
+    private ListenerManager<MessageCreateListener> logListener = null;
 
     LoggingManager(String loggingChannelId) {
         this.loggingChannelId = loggingChannelId;
@@ -84,7 +89,7 @@ public class LoggingManager implements Listener {
         ProxiedPlayer sender = (ProxiedPlayer) e.getSender();
         String message = e.getMessage().replace("```", "");
 
-        sendLogMessage(getPlayerLogName(sender) + ": " + message);
+        sendLogMessage(getPlayerLogName(sender) + "\n" + message);
     }
 
     private void findChannel() {
@@ -99,7 +104,11 @@ public class LoggingManager implements Listener {
             return;
         }
 
-        loggingChannel.get().addMessageCreateListener(event -> {
+        if(logListener != null) {
+            logListener.remove();
+        }
+
+        logListener = loggingChannel.get().addMessageCreateListener(event -> {
             if(event.getMessageAuthor().isYourself()) {
                 return;
             }
@@ -121,12 +130,14 @@ public class LoggingManager implements Listener {
     }
 
     private String getPlayerLogName(ProxiedPlayer player) {
-         Long discordId = Main.inst().getLinkingManager().getLinked(player);
+        Long discordId = Main.inst().getLinkingManager().getLinked(player);
+        Server server = player.getServer();
+        String serverName = server != null ? server.getInfo().getName() : "none";
 
         if(discordId != null) {
-            return "[" + player.getName() + "](<@!" + discordId.toString() + ">)";
+            return "[" + serverName + "][" + player.getName() + "](<@!" + discordId.toString() + ">)";
         } else {
-            return "[" + player.getName() + "](Unlinked)";
+            return "[" + serverName + "][" + player.getName() + "](Unlinked)";
         }
     }
 
@@ -161,7 +172,7 @@ public class LoggingManager implements Listener {
 
         BaseComponent[] components = TextComponent.fromLegacyText(text);
         Main.inst().getProxy().broadcast(components);
-        sendLogMessage("DISCORD> " + getPlayerLogName(user) + ": " + message);
+        sendLogMessage("[DISCORD]" + getPlayerLogName(user) + "\n" + message);
     }
 
     private void sendLogMessage(String message) {
@@ -178,10 +189,17 @@ public class LoggingManager implements Listener {
 
         synchronized (lockDummy) {
             if(currentMessage.getStringBuilder().length() + message.length() > 1950) {
-                queuedToSend.incrementAndGet();
-                loggingChannel.ifPresent(textChannel ->  currentMessage.send(textChannel).thenAcceptAsync(result -> {
-                     queuedToSend.decrementAndGet();
-                }));
+
+                if(loggingChannel.isPresent()) {
+                    queuedToSend.incrementAndGet();
+                    currentMessage.send(loggingChannel.get()).thenAcceptAsync(result -> {
+                        queuedToSend.decrementAndGet();
+                    }).exceptionally(error -> {
+                        Main.inst().getLogger().warning("Failed to send log message");
+                        queuedToSend.decrementAndGet();
+                        return null;
+                    });
+                }
 
                 currentMessage = new MessageBuilder();
                 unsentLogs.set(0);
@@ -191,10 +209,17 @@ public class LoggingManager implements Listener {
                     .append("md").append("\n").append(message).append(MessageDecoration.CODE_LONG.getSuffix());
 
             if(unsentLogs.incrementAndGet() >= logsPerMessage.get()) {
-                queuedToSend.incrementAndGet();
-                loggingChannel.ifPresent(textChannel ->  currentMessage.send(textChannel).thenAcceptAsync(result -> {
-                     queuedToSend.decrementAndGet();
-                }));
+
+                if(loggingChannel.isPresent()) {
+                    queuedToSend.incrementAndGet();
+                    currentMessage.send(loggingChannel.get()).thenAcceptAsync(result -> {
+                        queuedToSend.decrementAndGet();
+                    }).exceptionally(error -> {
+                        Main.inst().getLogger().warning("Failed to send log message");
+                        queuedToSend.decrementAndGet();
+                        return null;
+                    });
+                }
 
                 currentMessage = new MessageBuilder();
                 unsentLogs.set(0);

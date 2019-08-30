@@ -65,7 +65,7 @@ public class JoinLeave implements Listener {
 				player.sendMessage(new ComponentBuilder(text).color(ChatColor.YELLOW).create());
 
 				kickManager.addPlayer(player);
-				return;
+				break;
 
 			case LINKED_NOT_VERIFIED:
 				Main.inst().getLogger().info("Linked and unverified player " + player.getName() + " joined");
@@ -74,12 +74,13 @@ public class JoinLeave implements Listener {
 				player.sendMessage(new ComponentBuilder(text).color(ChatColor.YELLOW).create());
 
 				kickManager.addPlayer(player);
+				break;
 
 			case VERIFIED:
 				Main.inst().getLogger().info("Verified player " + player.getName() + " joined");
 				Main.inst().getAnnouncementManager().sendLatestAnnouncement(player);
 
-				return;
+				break;
 		}
 
 		if(!Main.inst().getDiscord().isConnected()) {
