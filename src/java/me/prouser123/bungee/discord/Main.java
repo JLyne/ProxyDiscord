@@ -7,6 +7,7 @@ import me.prouser123.bungee.discord.bot.commands.listeners.UserRoleRemove;
 import me.prouser123.bungee.discord.commands.Link;
 import me.prouser123.bungee.discord.commands.Save;
 import me.prouser123.bungee.discord.commands.Unlink;
+import me.prouser123.bungee.discord.listeners.DeluxeQueues;
 import me.prouser123.bungee.discord.listeners.JoinLeave;
 import me.prouser123.bungee.discord.listeners.ServerConnect;
 import net.md_5.bungee.api.plugin.Plugin;
@@ -113,6 +114,7 @@ public class Main extends Plugin {
 		initAnnouncements();
 
 		getProxy().getPluginManager().registerListener(this, new JoinLeave());
+		getProxy().getPluginManager().registerListener(this, new DeluxeQueues());
 
 		getProxy().getPluginManager().registerCommand(this, new Link());
 		getProxy().getPluginManager().registerCommand(this, new Unlink());

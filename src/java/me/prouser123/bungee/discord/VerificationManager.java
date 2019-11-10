@@ -1,5 +1,6 @@
 package me.prouser123.bungee.discord;
 
+import me.glaremasters.deluxequeues.DeluxeQueues;
 import me.lucko.luckperms.LuckPerms;
 import me.lucko.luckperms.api.LuckPermsApi;
 import me.lucko.luckperms.api.Node;
@@ -228,6 +229,13 @@ public class VerificationManager {
             player.disconnect(message);
 
             return;
+        }
+
+        //Remove player from any queues
+        DeluxeQueues deluxeQueues = (DeluxeQueues) Main.inst().getProxy().getPluginManager().getPlugin("DeluxeQueues");
+
+        if(deluxeQueues != null) {
+            deluxeQueues.getQueueHandler().clearPlayer(player);
         }
 
         Server currentServer = player.getServer();
