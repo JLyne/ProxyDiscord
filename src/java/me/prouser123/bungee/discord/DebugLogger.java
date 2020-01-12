@@ -7,14 +7,14 @@ public class DebugLogger {
 	private boolean debugEnabled = false;
 	
 	public void info(String message) {
-		if (debugEnabled) {
-			Main.inst().getProxy().getLogger().log(Level.INFO, "[" + Main.inst().getDescription().getName() + ".DEBUG] " + message);
+		if(debugEnabled) {
+			Main.inst().getLogger().info("[ProxyDiscord.DEBUG] " + message);
 		}
 	}
 	
 	DebugLogger() {
 		try {
-			if (Main.inst().getConfig().getBoolean("debug-enabled")) {
+			if(Main.inst().getConfig().getNode("debug-enabled").getBoolean(false)) {
 				debugEnabled = true;
 				Main.inst().getLogger().info("Enabled debug logging.");
 			}

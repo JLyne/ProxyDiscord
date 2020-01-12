@@ -19,7 +19,7 @@ public class Link implements MessageCreateListener, BaseCommand {
 
         //Fail fast if linking manager isn't ready yet
         if(linkingManager == null) {
-            Main.inst().getLogger().warning("Ignoring link attempt before linking manager is ready.");
+            Main.inst().getLogger().warn("Ignoring link attempt before linking manager is ready.");
             String message = ChatMessages.getMessage("discord-link-error");
             event.getChannel().sendMessage(message.replace("[user]", "<@!" + event.getMessageAuthor().getId() + ">"));
 

@@ -1,27 +1,25 @@
 package me.prouser123.bungee.discord;
 
-import me.lucko.luckperms.LuckPerms;
-import me.lucko.luckperms.api.Contexts;
-import me.lucko.luckperms.api.LuckPermsApi;
-import me.lucko.luckperms.api.User;
-import me.lucko.luckperms.api.caching.MetaData;
-import me.lucko.luckperms.api.manager.UserManager;
-import me.prouser123.bungee.discord.bot.commands.ServerInfo;
-import net.md_5.bungee.api.ChatColor;
-import net.md_5.bungee.api.chat.BaseComponent;
-import net.md_5.bungee.api.chat.TextComponent;
-import net.md_5.bungee.api.connection.ProxiedPlayer;
-import net.md_5.bungee.api.connection.Server;
-import net.md_5.bungee.api.event.ChatEvent;
-import net.md_5.bungee.api.plugin.Listener;
-import net.md_5.bungee.event.EventHandler;
-import net.md_5.bungee.event.EventPriority;
+import com.velocitypowered.api.event.Subscribe;
+import com.velocitypowered.api.event.player.PlayerChatEvent;
+import com.velocitypowered.api.proxy.Player;
+import com.velocitypowered.api.proxy.ProxyServer;
+import com.velocitypowered.api.proxy.ServerConnection;
+import net.kyori.text.serializer.legacy.LegacyComponentSerializer;
+import net.luckperms.api.LuckPerms;
+import net.luckperms.api.LuckPermsProvider;
+import net.luckperms.api.cacheddata.CachedMetaData;
+import net.luckperms.api.model.user.User;
+import net.luckperms.api.model.user.UserManager;
+import net.luckperms.api.query.QueryOptions;
 import org.javacord.api.entity.channel.TextChannel;
 import org.javacord.api.entity.message.MessageBuilder;
 import org.javacord.api.entity.message.MessageDecoration;
 import org.javacord.api.listener.message.MessageCreateListener;
 import org.javacord.api.util.event.ListenerManager;
+import org.slf4j.Logger;
 
+import javax.inject.Inject;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Optional;
@@ -29,7 +27,7 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class LoggingManager implements Listener {
+public class LoggingManager {
     private final String loggingChannelId;
     private final Integer lockDummy = 0;
 
@@ -38,20 +36,24 @@ public class LoggingManager implements Listener {
     private AtomicInteger queuedToSend = new AtomicInteger(0); //Number of messages waiting to be sent by javacord
 
     private MessageBuilder currentMessage; //Current unsent message
-    private LuckPermsApi luckPermsApi;
     private ListenerManager<MessageCreateListener> logListener = null;
 
-    LoggingManager(String loggingChannelId) {
+    private final ProxyServer proxy;
+    private final Logger logger;
+
+    @Inject
+    public LoggingManager(String loggingChannelId) {
+        this.proxy = Main.inst().getProxy();
+        this.logger = Main.inst().getLogger();
+
         this.loggingChannelId = loggingChannelId;
         currentMessage = new MessageBuilder();
-
-        luckPermsApi = LuckPerms.getApi();
 
         if(loggingChannelId != null) {
             findChannel();
         }
 
-        Main.inst().getProxy().getPluginManager().registerListener(Main.inst(), this);
+        //proxy.getPluginManager().registerListener(Main.inst(), this);
 
         Main.inst().getDiscord().getApi().addReconnectListener(event -> {
             if(loggingChannelId != null) {
@@ -60,33 +62,25 @@ public class LoggingManager implements Listener {
         });
 
         //Decrease logs per message if a low number of messages are unsent
-        Main.inst().getProxy().getScheduler().schedule(Main.inst(), () -> {
+        proxy.getScheduler().buildTask(Main.inst(), () -> {
             if(queuedToSend.get() <= 2 && logsPerMessage.get() > 1) {
-                Main.inst().getLogger().info("Decreasing logsPerMessage due to low activity (" + queuedToSend.get() + " queued messages)");
+                logger.info("Decreasing logsPerMessage due to low activity (" + queuedToSend.get() + " queued messages)");
                 logsPerMessage.set(Math.max(logsPerMessage.get() / 2, 1));
             }
-        }, 5, 5, TimeUnit.SECONDS);
+        }).repeat( 5, TimeUnit.SECONDS).delay( 5, TimeUnit.SECONDS).schedule();
     }
 
-    public void logJoin(ProxiedPlayer player) {
+    public void logJoin(Player player) {
         sendLogMessage(getPlayerLogName(player) + " has joined the network.");
     }
 
-    public void logLeave(ProxiedPlayer player) {
+    public void logLeave(Player player) {
         sendLogMessage(getPlayerLogName(player) + " has left the network.");
     }
 
-    @EventHandler(priority = EventPriority.LOWEST)
-    public void onPlayerChat(ChatEvent e) {
-        if(e.isCancelled()) {
-            return;
-        }
-
-        if(!(e.getSender() instanceof ProxiedPlayer)) {
-            return;
-        }
-
-        ProxiedPlayer sender = (ProxiedPlayer) e.getSender();
+    @Subscribe
+    public void onPlayerChat(PlayerChatEvent e) {
+        Player sender = e.getPlayer();
         String message = e.getMessage().replace("```", "");
 
         sendLogMessage(getPlayerLogName(sender) + "\n" + message);
@@ -100,7 +94,7 @@ public class LoggingManager implements Listener {
         Optional <TextChannel> loggingChannel = Main.inst().getDiscord().getApi().getTextChannelById(loggingChannelId);
 
         if(!loggingChannel.isPresent()) {
-            Main.inst().getLogger().warning("Unable to find logging channel. Did you put a valid channel ID in the config?");
+            logger.warn("Unable to find logging channel. Did you put a valid channel ID in the config?");
             return;
         }
 
@@ -113,7 +107,7 @@ public class LoggingManager implements Listener {
                 return;
             }
 
-            Main.inst().getProxy().getScheduler().runAsync(Main.inst(), () -> {
+            proxy.getScheduler().buildTask(Main.inst(), () -> {
                 String message = event.getReadableMessageContent();
                 Long discordId = event.getMessage().getAuthor().getId();
                 String linked = Main.inst().getLinkingManager().getLinked(discordId);
@@ -123,56 +117,60 @@ public class LoggingManager implements Listener {
                 if(linked != null) {
                     sendDiscordMessage(UUID.fromString(linked), message);
                 }
-            });
+            }).schedule();
         });
 
-        Main.inst().getLogger().info("Activity logging enabled for channel: #" + loggingChannel.toString().replaceAll(".*\\[|].*", "") + " (id: " + loggingChannelId + ")");
+        logger.info("Activity logging enabled for channel: #" + loggingChannel.toString().replaceAll(".*\\[|].*", "") + " (id: " + loggingChannelId + ")");
     }
 
-    private String getPlayerLogName(ProxiedPlayer player) {
+    private String getPlayerLogName(Player player) {
         Long discordId = Main.inst().getLinkingManager().getLinked(player);
-        Server server = player.getServer();
-        String serverName = server != null ? server.getInfo().getName() : "none";
+        Optional<ServerConnection> server = player.getCurrentServer();
+        String serverName = server.isPresent() ? server.get().getServerInfo().getName() : "none";
 
         if(discordId != null) {
-            return "[" + serverName + "][" + player.getName() + "](<@!" + discordId.toString() + ">)";
+            return "[" + serverName + "][" + player.getUsername() + "](<@!" + discordId.toString() + ">)";
         } else {
-            return "[" + serverName + "][" + player.getName() + "](Unlinked)";
+            return "[" + serverName + "][" + player.getUsername() + "](Unlinked)";
         }
     }
 
     private String getPlayerLogName(User user) {
-         Long discordId = Main.inst().getLinkingManager().getLinked(user.getUuid());
+         Long discordId = Main.inst().getLinkingManager().getLinked(user.getUniqueId());
 
         if(discordId != null) {
-            return "[" + user.getName() + "](<@!" + discordId.toString() + ">)";
+            return "[" + user.getFriendlyName() + "](<@!" + discordId.toString() + ">)";
         } else {
-            return "[" + user.getName() + "](Unlinked)";
+            return "[" + user.getFriendlyName() + "](Unlinked)";
         }
     }
 
     private void sendDiscordMessage(UUID uuid, String message) {
-        UserManager userManager = luckPermsApi.getUserManager();
-        User user = userManager.loadUser(uuid).join();
+        try {
+            LuckPerms luckPermsApi = LuckPermsProvider.get();
 
-        if(user == null) {
-            return;
+            UserManager userManager = luckPermsApi.getUserManager();
+            User user = userManager.loadUser(uuid).join();
+
+            if(user == null) {
+                return;
+            }
+
+            if(message.isEmpty()) {
+                return;
+            }
+
+            CachedMetaData metaData = user.getCachedData().getMetaData(QueryOptions.nonContextual());
+            String prefix = ( metaData.getPrefix() != null) ?  metaData.getPrefix() : "";
+            String suffix = ( metaData.getSuffix() != null) ?  metaData.getSuffix() : "";
+
+            String text = "&l&bDISCORD>&r " + prefix + user.getFriendlyName() + suffix + "&r: " + message;
+
+            proxy.broadcast(LegacyComponentSerializer.legacy().deserialize(text, '&'));
+            sendLogMessage("[DISCORD]" + getPlayerLogName(user) + "\n" + message);
+        } catch (IllegalStateException e) {
+            logger.warn("Failed to send Discord message: " + e.getMessage());
         }
-
-        if(message.isEmpty()) {
-            return;
-        }
-
-        MetaData metaData = user.getCachedData().getMetaData(Contexts.allowAll());
-        String prefix = ( metaData.getPrefix() != null) ?  metaData.getPrefix() : "";
-        String suffix = ( metaData.getSuffix() != null) ?  metaData.getSuffix() : "";
-
-        String text = "&l&bDISCORD>&r " + prefix + user.getName() + suffix + "&r: " + message;
-        text = ChatColor.translateAlternateColorCodes('&', text);
-
-        BaseComponent[] components = TextComponent.fromLegacyText(text);
-        Main.inst().getProxy().broadcast(components);
-        sendLogMessage("[DISCORD]" + getPlayerLogName(user) + "\n" + message);
     }
 
     private void sendLogMessage(String message) {
@@ -195,7 +193,7 @@ public class LoggingManager implements Listener {
                     currentMessage.send(loggingChannel.get()).thenAcceptAsync(result -> {
                         queuedToSend.decrementAndGet();
                     }).exceptionally(error -> {
-                        Main.inst().getLogger().warning("Failed to send log message");
+                        logger.warn("Failed to send log message");
                         queuedToSend.decrementAndGet();
                         return null;
                     });
@@ -215,7 +213,7 @@ public class LoggingManager implements Listener {
                     currentMessage.send(loggingChannel.get()).thenAcceptAsync(result -> {
                         queuedToSend.decrementAndGet();
                     }).exceptionally(error -> {
-                        Main.inst().getLogger().warning("Failed to send log message");
+                        logger.warn("Failed to send log message");
                         queuedToSend.decrementAndGet();
                         return null;
                     });
@@ -227,7 +225,7 @@ public class LoggingManager implements Listener {
 
             //Increase logsPerMessage if many messages are queued, to help stop the log falling behind
             if(queuedToSend.get() >= 5 && logsPerMessage.get() < 16) {
-                Main.inst().getLogger().info("Increasing logsPerMessage due to high activity (" + queuedToSend.get() + " queued messages)");
+                logger.info("Increasing logsPerMessage due to high activity (" + queuedToSend.get() + " queued messages)");
                 logsPerMessage.set(Math.min(logsPerMessage.get() * 2, 16));
             }
         }

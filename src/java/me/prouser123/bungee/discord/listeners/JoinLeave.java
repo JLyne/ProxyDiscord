@@ -1,50 +1,52 @@
 package me.prouser123.bungee.discord.listeners;
 
+import com.velocitypowered.api.event.Subscribe;
+import com.velocitypowered.api.event.connection.DisconnectEvent;
+import com.velocitypowered.api.event.connection.PostLoginEvent;
+import com.velocitypowered.api.event.player.ServerPreConnectEvent;
+import com.velocitypowered.api.proxy.Player;
+import com.velocitypowered.api.proxy.ProxyServer;
 import me.prouser123.bungee.discord.*;
-import net.md_5.bungee.api.ChatColor;
-import net.md_5.bungee.api.chat.ComponentBuilder;
-import net.md_5.bungee.api.connection.ProxiedPlayer;
-import net.md_5.bungee.api.event.PostLoginEvent;
-import net.md_5.bungee.api.event.ServerConnectedEvent;
+import net.kyori.text.TextComponent;
+import net.kyori.text.format.TextColor;
+import org.slf4j.Logger;
 
-import net.md_5.bungee.api.event.PlayerDisconnectEvent;
-import net.md_5.bungee.api.plugin.Listener;
-import net.md_5.bungee.event.EventHandler;
-
+import javax.inject.Inject;
 import java.util.HashMap;
 import java.util.UUID;
 
-public class JoinLeave implements Listener {
+public class JoinLeave {
 	private static VerificationManager verificationManager = null;
 	private static KickManager kickManager = null;
 	private static LoggingManager loggingManager = null;
 
 	private HashMap<UUID, Boolean> firstJoin;
 
-	public JoinLeave() {
-		verificationManager = Main.inst().getVerificationManager();
+	private final ProxyServer proxy;
+    private final Logger logger;
+
+    @Inject
+    public JoinLeave() {
+        this.proxy = Main.inst().getProxy();
+        this.logger = Main.inst().getLogger();
+
+        verificationManager = Main.inst().getVerificationManager();
 		kickManager = Main.inst().getKickManager();
 		loggingManager = Main.inst().getLoggingManager();
-
 		firstJoin = new HashMap<>();
-	}
+        logger.info("Hello there, it's a test plugin I made!");
+    }
 
-	@EventHandler
+	@Subscribe
 	public void onPostLogin(PostLoginEvent event) {
 		firstJoin.put(event.getPlayer().getUniqueId(), true);
 	}
 
-	@EventHandler
-	public void onServerConnected(ServerConnectedEvent event) {
-		ProxiedPlayer player = event.getPlayer();
+	@Subscribe
+	public void onServerConnected(ServerPreConnectEvent event) {
+		Player player = event.getPlayer();
 
 		if(!firstJoin.get(player.getUniqueId())) {
-			return;
-		}
-
-		if(player.getXUID() != null) {
-			Main.inst().getLogger().info("Bedrock player " + player.getName() + " joined. Not checking link status.");
-
 			return;
 		}
 
@@ -54,43 +56,43 @@ public class JoinLeave implements Listener {
 		String text;
 		VerificationResult result = verificationManager.checkVerificationStatus(player);
 
-		player.sendMessage(new ComponentBuilder(ChatMessages.getMessage("join-welcome"))
-				.color(ChatColor.GREEN).create());
+		player.sendMessage(TextComponent.of(ChatMessages.getMessage("join-welcome"))
+				.color(TextColor.GREEN));
 
 		switch(result) {
 			case NOT_LINKED:
-				Main.inst().getLogger().info("Unlinked player " + player.getName() + " joined");
+				logger.info("Unlinked player " + player.getUsername() + " joined");
 
 				text = ChatMessages.getMessage("join-not-linked");
-				player.sendMessage(new ComponentBuilder(text).color(ChatColor.YELLOW).create());
+				player.sendMessage(TextComponent.of(text).color(TextColor.YELLOW));
 
 				kickManager.addPlayer(player);
 				break;
 
 			case LINKED_NOT_VERIFIED:
-				Main.inst().getLogger().info("Linked and unverified player " + player.getName() + " joined");
+				logger.info("Linked and unverified player " + player.getUsername() + " joined");
 
 				text = ChatMessages.getMessage("join-linked-not-verified");
-				player.sendMessage(new ComponentBuilder(text).color(ChatColor.YELLOW).create());
+				player.sendMessage(TextComponent.of(text).color(TextColor.YELLOW));
 
 				kickManager.addPlayer(player);
 				break;
 
 			case VERIFIED:
-				Main.inst().getLogger().info("Verified player " + player.getName() + " joined");
+				logger.info("Verified player " + player.getUsername() + " joined");
 				Main.inst().getAnnouncementManager().sendLatestAnnouncement(player);
 
 				break;
 		}
 
 		if(!Main.inst().getDiscord().isConnected()) {
-			player.sendMessage(new ComponentBuilder(ChatMessages.getMessage("discord-issues")).color(ChatColor.RED).create());
+			player.sendMessage(TextComponent.of(ChatMessages.getMessage("discord-issues")).color(TextColor.RED));
 		}
 	}
 	
-	@EventHandler
-	public void onDisconnect(PlayerDisconnectEvent event) {
-		ProxiedPlayer player = event.getPlayer();
+	@Subscribe
+	public void onDisconnect(DisconnectEvent event) {
+		Player player = event.getPlayer();
 
 		if(!firstJoin.get(player.getUniqueId())) {
 			loggingManager.logLeave(player);

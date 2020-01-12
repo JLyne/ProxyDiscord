@@ -1,13 +1,17 @@
 package me.prouser123.bungee.discord;
 
 import com.google.common.collect.HashBiMap;
-import net.md_5.bungee.api.ChatColor;
-import net.md_5.bungee.api.ProxyServer;
-import net.md_5.bungee.api.chat.*;
-import net.md_5.bungee.api.connection.ProxiedPlayer;
+import com.velocitypowered.api.proxy.ProxyServer;
+import net.kyori.text.TextComponent;
+import net.kyori.text.event.ClickEvent;
+import net.kyori.text.event.HoverEvent;
+import net.kyori.text.format.TextColor;
+import com.velocitypowered.api.proxy.Player;
 import org.javacord.api.entity.channel.TextChannel;
 import org.javacord.api.entity.user.User;
+import org.slf4j.Logger;
 
+import javax.inject.Inject;
 import java.io.*;
 import java.security.SecureRandom;
 import java.util.*;
@@ -19,15 +23,22 @@ public class LinkingManager {
     private final String linkingUrl;
     private final String linkingChannelId;
 
-    LinkingManager(String linkingUrl, String linkingChannelId) {
+    private final ProxyServer proxy;
+    private final Logger logger;
+
+    @Inject
+    public LinkingManager(String linkingUrl, String linkingChannelId) {
+        this.proxy = Main.inst().getProxy();
+        this.logger = Main.inst().getLogger();
+
         this.linkingUrl = linkingUrl;
         this.linkingChannelId = linkingChannelId;
         this.loadLinks();
 
-        Main.inst().getProxy().getScheduler().schedule(Main.inst(), () -> {
+        proxy.getScheduler().buildTask(Main.inst(), () -> {
             Main.inst().getDebugLogger().info("Saving linked accounts");
             saveLinks();
-        }, 300, 300, TimeUnit.SECONDS);
+        }).repeat(300, TimeUnit.SECONDS).delay(300, TimeUnit.SECONDS).schedule();
 
         if(linkingChannelId != null) {
             findChannel();
@@ -48,7 +59,7 @@ public class LinkingManager {
         return channel.getIdAsString().equals(linkingChannelId);
     }
 
-    public boolean isLinked(ProxiedPlayer player) {
+    public boolean isLinked(Player player) {
         return this.links.containsKey(player.getUniqueId().toString());
     }
 
@@ -60,7 +71,7 @@ public class LinkingManager {
         return this.links.inverse().get(user.getId());
     }
 
-    Long getLinked(ProxiedPlayer player) {
+    Long getLinked(Player player) {
         return this.links.get(player.getUniqueId().toString());
     }
 
@@ -68,12 +79,12 @@ public class LinkingManager {
         return this.links.get(uuid.toString());
     }
 
-    public void startLink(ProxiedPlayer player) {
+    public void startLink(Player player) {
         String uuid = player.getUniqueId().toString();
 
         if(this.links.containsKey(uuid)) {
-            TextComponent message = new TextComponent(ChatMessages.getMessage("link-already-linked"));
-            message.setColor(ChatColor.RED);
+            TextComponent message = TextComponent.of(ChatMessages.getMessage("link-already-linked"));
+            message.color(TextColor.RED);
 
             player.sendMessage(message);
 
@@ -83,10 +94,10 @@ public class LinkingManager {
         String token = getLinkingToken(uuid);
         String url = linkingUrl.replace("[token]", token);
 
-        TextComponent message = new TextComponent(ChatMessages.getMessage("link"));
-        message.setColor(ChatColor.LIGHT_PURPLE);
-        message.setClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, url));
-        message.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Discord account linking instructions").create()));
+        TextComponent message = TextComponent.of(ChatMessages.getMessage("link"));
+        message.color(TextColor.LIGHT_PURPLE);
+        message.clickEvent(ClickEvent.openUrl(url));
+        message.hoverEvent(HoverEvent.showText(TextComponent.of("Discord account linking instructions")));
 
         player.sendMessage(message);
     }
@@ -141,17 +152,17 @@ public class LinkingManager {
 
         VerificationResult result =  Main.inst().getVerificationManager().checkVerificationStatus(discordId);
 
-        ProxiedPlayer onlinePlayer = ProxyServer.getInstance().getPlayer(UUID.fromString(player));
+        Optional<Player> onlinePlayer = proxy.getPlayer(UUID.fromString(player));
 
-        if(onlinePlayer != null) {
+        if(onlinePlayer.isPresent()) {
             if(result == VerificationResult.VERIFIED) {
-                onlinePlayer.sendMessage(new ComponentBuilder(ChatMessages.getMessage("link-success"))
-                        .color(ChatColor.GREEN).create());
+                onlinePlayer.get().sendMessage(TextComponent.of(ChatMessages.getMessage("link-success"))
+                        .color(TextColor.GREEN));
 
                 return LinkResult.SUCCESS;
             } else {
-                onlinePlayer.sendMessage(new ComponentBuilder(ChatMessages.getMessage("link-not-verified"))
-                        .color(ChatColor.YELLOW).create());
+                onlinePlayer.get().sendMessage(TextComponent.of(ChatMessages.getMessage("link-not-verified"))
+                        .color(TextColor.YELLOW));
 
                 return LinkResult.NOT_VERIFIED;
             }
@@ -160,13 +171,13 @@ public class LinkingManager {
         return result == VerificationResult.VERIFIED ? LinkResult.SUCCESS : LinkResult.NOT_VERIFIED;
     }
 
-    public void unlink(ProxiedPlayer player) {
+    public void unlink(Player player) {
         this.links.remove(player.getUniqueId().toString());
     }
 
     public void saveLinks() {
         try {
-            File folder = new File(Main.inst().getProxy().getPluginsFolder(), "BungeeDiscord");
+            File folder = new File(proxy.getPluginsFolder(), "BungeeDiscord");
             File saveFile = new File(folder, "links.sav");
 
             if (!saveFile.exists() && !saveFile.createNewFile()) {
@@ -179,13 +190,13 @@ public class LinkingManager {
             save.writeObject(this.links);
             save.writeObject(this.pendingLinks);
         } catch (IOException e) {
-            Main.inst().getLogger().warning("Could not save linked accounts to disk");
+            logger.warn("Could not save linked accounts to disk");
         }
     }
 
     private void loadLinks() {
         try {
-            File folder = new File(Main.inst().getProxy().getPluginsFolder(), "BungeeDiscord");
+            File folder = new File(proxy.getPluginsFolder(), "BungeeDiscord");
             File saveFile = new File(folder, "links.sav");
 
             if (!saveFile.exists()) {
@@ -203,7 +214,7 @@ public class LinkingManager {
         } catch (IOException | ClassNotFoundException | ClassCastException e) {
             this.links = HashBiMap.create(1024);
             this.pendingLinks = HashBiMap.create(1024);
-            Main.inst().getLogger().warning("Could not load linked accounts from disk");
+            logger.warn("Could not load linked accounts from disk");
         }
     }
 
@@ -211,7 +222,7 @@ public class LinkingManager {
         Optional <TextChannel> linkingChannel = Main.inst().getDiscord().getApi().getTextChannelById(linkingChannelId);
 
         if(!linkingChannel.isPresent()) {
-            Main.inst().getLogger().warning("Unable to find linking channel. Did you put a valid channel ID in the config?");
+            logger.warn("Unable to find linking channel. Did you put a valid channel ID in the config?");
         }
     }
 }

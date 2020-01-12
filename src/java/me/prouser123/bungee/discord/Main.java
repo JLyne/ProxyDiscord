@@ -1,5 +1,10 @@
 package me.prouser123.bungee.discord;
 
+import com.google.common.eventbus.Subscribe;
+import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
+import com.velocitypowered.api.plugin.Plugin;
+import com.velocitypowered.api.plugin.annotation.DataDirectory;
+import com.velocitypowered.api.proxy.ProxyServer;
 import me.prouser123.bungee.discord.bot.commands.listeners.Reconnect;
 import me.prouser123.bungee.discord.bot.commands.listeners.ServerMemberBan;
 import me.prouser123.bungee.discord.bot.commands.listeners.UserRoleAdd;
@@ -10,21 +15,25 @@ import me.prouser123.bungee.discord.commands.Unlink;
 import me.prouser123.bungee.discord.listeners.DeluxeQueues;
 import me.prouser123.bungee.discord.listeners.JoinLeave;
 import me.prouser123.bungee.discord.listeners.ServerConnect;
-import net.md_5.bungee.api.plugin.Plugin;
-import net.md_5.bungee.config.Configuration;
-import net.md_5.bungee.config.ConfigurationProvider;
-import net.md_5.bungee.config.YamlConfiguration;
 
 import java.io.*;
+import java.nio.file.Path;
 
 import com.google.common.io.ByteStreams;
+import ninja.leaping.configurate.ConfigurationNode;
+import org.slf4j.Logger;
 
-public class Main extends Plugin {
+import javax.inject.Inject;
+import ninja.leaping.configurate.yaml.YAMLConfigurationLoader;
+
+@Plugin(id = "proxydiscord", name = "ProxyDiscord", version = "0.1-SNAPSHOT",
+        description = "", authors = {"Jim (NotKatuen)"})
+public class Main {
 	private static Main instance;
 
-	private Configuration configuration;
-	private Configuration messagesConfiguration;
-	private Configuration botCommandConfiguration;
+	private ConfigurationNode configuration;
+	private ConfigurationNode messagesConfiguration;
+	private ConfigurationNode botCommandConfiguration;
 	private DebugLogger debugLogger;
 	private Discord discord;
 
@@ -34,11 +43,15 @@ public class Main extends Plugin {
 	private static AnnouncementManager announcementManager;
 	private static LoggingManager loggingManager;
 
+	@Inject
+    @DataDirectory
+    private Path dataDirectory;
+
     public static Main inst() {
     	  return instance;
     }
 
-    Configuration getConfig() {
+    ConfigurationNode getConfig() {
     	return configuration;
     }
 
@@ -70,41 +83,51 @@ public class Main extends Plugin {
 		return loggingManager;
 	}
 
-	@Override
-	public void onEnable() {
+	private final ProxyServer proxy;
+    private final Logger logger;
+
+    @Inject
+    public Main(ProxyServer proxy, Logger logger) {
+    	this.proxy = proxy;
+    	this.logger = logger;
+
 		instance = this;
+	}
 
-		getLogger().info("Welcome!");
-
-		// Setup config
+	@Subscribe
+	public void onProxyInitialization(ProxyInitializeEvent event) {
+    	// Setup config
 		loadResource(this, "config.yml");
 		try {
-			configuration = ConfigurationProvider.getProvider(YamlConfiguration.class).load(new File(getDataFolder(), "config.yml"));
+			configuration = YAMLConfigurationLoader.builder().setFile(
+					new File(dataDirectory.toAbsolutePath().toString(), "config.yml")).build().load();
 		} catch (IOException e) {
-			getLogger().severe("Error loading config.yml");
+			logger.error("Error loading config.yml");
 		}
 
 		//Message config
 		loadResource(this, "messages.yml");
 		try {
-			messagesConfiguration = ConfigurationProvider.getProvider(YamlConfiguration.class).load(new File(getDataFolder(), "messages.yml"));
+			messagesConfiguration = YAMLConfigurationLoader.builder().setFile(
+					new File(dataDirectory.toAbsolutePath().toString(), "messages.yml")).build().load();
 		} catch (IOException e) {
-			getLogger().severe("Error loading messages.yml");
+			logger.error("Error loading messages.yml");
 		}
 
 		// Setup bot config
 		loadResource(this, "bot-command-options.yml");
 		try {
-			botCommandConfiguration = ConfigurationProvider.getProvider(YamlConfiguration.class).load(new File(getDataFolder(), "bot-command-options.yml"));
+			botCommandConfiguration = YAMLConfigurationLoader.builder().setFile(
+					new File(dataDirectory.toAbsolutePath().toString(), "bot-command-options.yml")).build().load();
 		} catch (IOException e) {
-			getLogger().severe("Error loading bot-command-options.yml");
+			logger.error("Error loading bot-command-options.yml");
 		}
 
 		// Setup Debug Logging
 		debugLogger = new DebugLogger();
 
-		discord = new Discord(getConfig().getString("token"),  botCommandConfiguration);
-		kickManager = new KickManager(getConfig().getInt("unverified-kick-time"));
+		discord = new Discord(getConfig().getNode("token").getString(),  botCommandConfiguration);
+		kickManager = new KickManager(getConfig().getNode("unverified-kick-time").getInt(120));
 
 		new ChatMessages(messagesConfiguration);
 
@@ -113,12 +136,12 @@ public class Main extends Plugin {
 		initVerification();
 		initAnnouncements();
 
-		getProxy().getPluginManager().registerListener(this, new JoinLeave());
-		getProxy().getPluginManager().registerListener(this, new DeluxeQueues());
+		proxy.getEventManager().register(this, new JoinLeave());
+		proxy.getEventManager().register(this, new DeluxeQueues());
 
-		getProxy().getPluginManager().registerCommand(this, new Link());
-		getProxy().getPluginManager().registerCommand(this, new Unlink());
-		getProxy().getPluginManager().registerCommand(this, new Save());
+		proxy.getPluginManager().registerCommand(this, new Link());
+		proxy.getPluginManager().registerCommand(this, new Unlink());
+		proxy.getPluginManager().registerCommand(this, new Save());
 	}
 
 	private void initLinking() {
@@ -130,7 +153,7 @@ public class Main extends Plugin {
 
 	private void initVerification() {
 		verificationManager = new VerificationManager(getConfig());
-		getProxy().getPluginManager().registerListener(this, new ServerConnect());
+		proxy.getEventManager().register(this, new ServerConnect());
 
 		discord.getApi().addUserRoleAddListener(new UserRoleAdd());
 		discord.getApi().addUserRoleRemoveListener(new UserRoleRemove());
@@ -150,7 +173,8 @@ public class Main extends Plugin {
 		announcementManager = new AnnouncementManager(announcementChannelId);
 	}
 
-	private static void loadResource(Plugin plugin, String resource) {
+	private static void loadResource(Main plugin, String resource) {
+    	dataDirectory.resolve()
         File folder = plugin.getDataFolder();
         if (!folder.exists())
             folder.mkdir();
@@ -175,5 +199,13 @@ public class Main extends Plugin {
 		if (discord.getApi() != null) {
 			discord.getApi().disconnect();
 		}
+	}
+
+	public Logger getLogger() {
+    	return logger;
+	}
+
+	public ProxyServer getProxy() {
+    	return proxy;
 	}
 }

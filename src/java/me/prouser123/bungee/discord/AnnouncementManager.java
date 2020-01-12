@@ -1,32 +1,30 @@
 package me.prouser123.bungee.discord;
 
-import com.google.common.collect.HashBiMap;
-import net.md_5.bungee.api.ChatColor;
-import net.md_5.bungee.api.CommandSender;
-import net.md_5.bungee.api.ProxyServer;
-import net.md_5.bungee.api.chat.ClickEvent;
-import net.md_5.bungee.api.chat.ComponentBuilder;
-import net.md_5.bungee.api.chat.HoverEvent;
-import net.md_5.bungee.api.chat.TextComponent;
-import net.md_5.bungee.api.connection.ProxiedPlayer;
-import net.md_5.bungee.protocol.packet.Chat;
+import com.velocitypowered.api.proxy.Player;
+import com.velocitypowered.api.proxy.ProxyServer;
+import net.kyori.text.TextComponent;
+import net.kyori.text.format.TextColor;
+import net.kyori.text.format.TextDecoration;
 import org.javacord.api.entity.channel.TextChannel;
 import org.javacord.api.entity.message.Message;
-import org.javacord.api.entity.user.User;
+import org.slf4j.Logger;
 
-import java.io.*;
-import java.security.SecureRandom;
-import java.util.Base64;
+import javax.inject.Inject;
 import java.util.Optional;
-import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 
 public class AnnouncementManager {
     private String announcementChannelId;
     private String announcementChannelName = null;
     private Message lastMessage = null;
 
-    AnnouncementManager(String announcementChannelId) {
+    private final ProxyServer proxy;
+    private final Logger logger;
+
+    @Inject
+    public AnnouncementManager(String announcementChannelId) {
+        this.proxy = Main.inst().getProxy();
+        this.logger = Main.inst().getLogger();
+
         this.announcementChannelId = announcementChannelId;
 
         if(announcementChannelId != null) {
@@ -40,7 +38,7 @@ public class AnnouncementManager {
         });
     }
 
-    public void sendLatestAnnouncement(CommandSender player) {
+    public void sendLatestAnnouncement(Player player) {
         sendAnnouncement(lastMessage, false, player);
     }
 
@@ -48,7 +46,7 @@ public class AnnouncementManager {
         sendAnnouncement(message, true, null);
     }
 
-    private void sendAnnouncement(Message message, boolean isNew, CommandSender player) {
+    private void sendAnnouncement(Message message, boolean isNew, Player player) {
         if(message == null) {
             return;
         }
@@ -59,33 +57,31 @@ public class AnnouncementManager {
 
         if(isNew) {
             String heading = ChatMessages.getMessage("announcement-new").replace("[channel]", announcementChannelName);
-            announcement = new TextComponent(heading);
+            announcement = TextComponent.of(heading);
         } else {
             String heading = ChatMessages.getMessage("announcement-latest").replace("[channel]", announcementChannelName);
-            announcement = new TextComponent(heading);
+            announcement = TextComponent.of(heading);
         }
 
-        announcement.setColor(ChatColor.DARK_GREEN);
-        announcement.setBold(true);
+        announcement.color(TextColor.DARK_GREEN).decoration(TextDecoration.BOLD);
 
-        TextComponent text = new TextComponent(content.length() > 250 ? content.subSequence(0, 250) + "..." : content);
-        text.setColor(ChatColor.GOLD);
-        text.setBold(false);
+        TextComponent text = TextComponent.of(content.length() > 250 ? content.subSequence(0, 250) + "..." : content);
+        text.color(TextColor.GOLD);
+        text.decoration(TextDecoration.BOLD);
 
-        announcement.addExtra(text);
+        announcement.append(text);
 
         if(content.length() > 250) {
-            TextComponent readMore = new TextComponent("\n" + ChatMessages.getMessage("announcement-read-more"));
-            readMore.setColor(ChatColor.LIGHT_PURPLE);
-            readMore.setBold(false);
+            TextComponent readMore = TextComponent.of("\n" + ChatMessages.getMessage("announcement-read-more"));
+            readMore.color(TextColor.LIGHT_PURPLE);
 
-            announcement.addExtra(readMore);
+            announcement.append(readMore);
         }
 
         if(player != null) {
             player.sendMessage(announcement);
         } else {
-            ProxyServer.getInstance().broadcast(announcement);
+            proxy.broadcast(announcement);
         }
     }
 
@@ -97,12 +93,12 @@ public class AnnouncementManager {
         Optional <TextChannel> announcementChannel = Main.inst().getDiscord().getApi().getTextChannelById(announcementChannelId);
 
         if(!announcementChannel.isPresent()) {
-            Main.inst().getLogger().warning("Unable to find announcement channel. Did you put a valid channel ID in the config?");
+            logger.warn("Unable to find announcement channel. Did you put a valid channel ID in the config?");
             return;
         }
 
         announcementChannelName = "#" + announcementChannel.toString().replaceAll(".*\\[|].*", "");
-        Main.inst().getLogger().info("Announcements enabled for channel: " + announcementChannelName + " (id: " + announcementChannelId + ")");
+        logger.info("Announcements enabled for channel: " + announcementChannelName + " (id: " + announcementChannelId + ")");
 
         announcementChannel.get().addMessageCreateListener(messageCreateEvent -> {
             sendAnnouncement(messageCreateEvent.getMessage());
@@ -114,7 +110,7 @@ public class AnnouncementManager {
                 lastMessage = messages.getNewestMessage().get();
             }
         }).exceptionally(e -> {
-            Main.inst().getLogger().warning("Failed to retrieve latest announcement channel message");
+            logger.warn("Failed to retrieve latest announcement channel message");
             return null;
         });
     }

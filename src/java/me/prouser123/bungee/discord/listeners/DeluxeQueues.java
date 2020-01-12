@@ -1,21 +1,19 @@
 package me.prouser123.bungee.discord.listeners;
 
+import com.velocitypowered.api.event.Subscribe;
+import com.velocitypowered.api.proxy.server.RegisteredServer;
 import me.glaremasters.deluxequeues.events.PlayerQueueEvent;
 import me.prouser123.bungee.discord.*;
-import net.md_5.bungee.api.config.ServerInfo;
-import net.md_5.bungee.api.plugin.Listener;
-import net.md_5.bungee.event.EventHandler;
-import net.md_5.bungee.event.EventPriority;
 
-public class DeluxeQueues implements Listener {
+public class DeluxeQueues {
 	private static VerificationManager verificationManager = null;
 
 	public DeluxeQueues() {
 		verificationManager = Main.inst().getVerificationManager();
 	}
 
-	@EventHandler(priority = EventPriority.LOW)
-	public void nPlayerJoinQueue(PlayerQueueEvent event) {
+	@Subscribe
+	public void onPlayerJoinQueue(PlayerQueueEvent event) {
 		Main.inst().getLogger().info("PlayerQueueEvent");
 
 		if(event.isCancelled()) {
@@ -23,12 +21,7 @@ public class DeluxeQueues implements Listener {
 			return;
 		}
 
-        if(event.getPlayer().getXUID() != null) {
-			Main.inst().getLogger().info("Ignoring bedrock player");
-            return;
-        }
-
-        ServerInfo unverifiedServer = verificationManager.getUnverifiedServer();
+        RegisteredServer unverifiedServer = verificationManager.getUnverifiedServer();
 
         if(event.getServer().equals(unverifiedServer)) {
         	Main.inst().getLogger().info("Ignoring unverified server");

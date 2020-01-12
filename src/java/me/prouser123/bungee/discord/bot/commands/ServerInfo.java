@@ -66,11 +66,10 @@ public class ServerInfo implements MessageCreateListener, BaseCommand {
 
 			EmbedBuilder embed = new EmbedBuilder()
         		.setAuthor("BungeeCord Server Information", Constants.url, Constants.authorIconURL)
-            	.addInlineField("Players", Main.inst().getProxy().getPlayers().size() + "/" + Main.inst().getProxy().getConfig().getPlayerLimit())
+            	.addInlineField("Players", Main.inst().getProxy().getPlayerCount() + "/" + Main.inst().getProxy().getConfiguration().getShowMaxPlayers())
             	.addInlineField("Uptime", uptime_output)
             	.addInlineField("Memory", Runtime.getRuntime().freeMemory() / 1024 / 1024 + "/" + Runtime.getRuntime().totalMemory() / 1024 / 1024 + " MB free")
-            	.addInlineField("Servers", Integer.toString(Main.inst().getProxy().getServers().size()))
-            	.addInlineField("Server Versions", Main.inst().getProxy().getGameVersion())
+            	.addInlineField("Servers", Integer.toString(Main.inst().getProxy().getAllServers().size()))
             	.addInlineField("Bot Owner", bot_owner)
             	.addInlineField("Server Version", System.getProperty("os.name") + ", " + Main.inst().getProxy().getVersion());
         	
