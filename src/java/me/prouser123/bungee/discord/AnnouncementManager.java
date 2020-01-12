@@ -9,7 +9,6 @@ import org.javacord.api.entity.channel.TextChannel;
 import org.javacord.api.entity.message.Message;
 import org.slf4j.Logger;
 
-import javax.inject.Inject;
 import java.util.Optional;
 
 public class AnnouncementManager {
@@ -51,22 +50,22 @@ public class AnnouncementManager {
         }
 
         lastMessage = message;
-        TextComponent announcement;
+        TextComponent.Builder announcement;
         String content = "\n" + message.getReadableContent();
 
         if(isNew) {
             String heading = ChatMessages.getMessage("announcement-new").replace("[channel]", announcementChannelName);
-            announcement = TextComponent.of(heading);
+            announcement = TextComponent.builder().content(heading);
         } else {
             String heading = ChatMessages.getMessage("announcement-latest").replace("[channel]", announcementChannelName);
-            announcement = TextComponent.of(heading);
+            announcement = TextComponent.builder().content(heading);
         }
 
-        announcement.color(TextColor.DARK_GREEN).decoration(TextDecoration.BOLD);
+        announcement.color(TextColor.DARK_GREEN).decoration(TextDecoration.BOLD, true);
 
         TextComponent text = TextComponent.of(content.length() > 250 ? content.subSequence(0, 250) + "..." : content)
                 .color(TextColor.GOLD)
-                .decoration(TextDecoration.BOLD, true);
+                .decoration(TextDecoration.BOLD, false);
 
         announcement.append(text);
 
@@ -79,9 +78,9 @@ public class AnnouncementManager {
         }
 
         if(player != null) {
-            player.sendMessage(announcement);
+            player.sendMessage(announcement.build());
         } else {
-            proxy.broadcast(announcement);
+            proxy.broadcast(announcement.build());
         }
     }
 
