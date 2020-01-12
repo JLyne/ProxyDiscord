@@ -35,7 +35,6 @@ public class Discord {
 	 * Class
 	 * @param token bot token
 	 */
-	@Inject
 	public Discord(String token, ConfigurationNode commandConfiguration) {
 		this.proxy = Main.inst().getProxy();
         this.logger = Main.inst().getLogger();

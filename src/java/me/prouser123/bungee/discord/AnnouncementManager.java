@@ -20,7 +20,6 @@ public class AnnouncementManager {
     private final ProxyServer proxy;
     private final Logger logger;
 
-    @Inject
     public AnnouncementManager(String announcementChannelId) {
         this.proxy = Main.inst().getProxy();
         this.logger = Main.inst().getLogger();
@@ -65,15 +64,16 @@ public class AnnouncementManager {
 
         announcement.color(TextColor.DARK_GREEN).decoration(TextDecoration.BOLD);
 
-        TextComponent text = TextComponent.of(content.length() > 250 ? content.subSequence(0, 250) + "..." : content);
-        text.color(TextColor.GOLD);
-        text.decoration(TextDecoration.BOLD);
+        TextComponent text = TextComponent.of(content.length() > 250 ? content.subSequence(0, 250) + "..." : content)
+                .color(TextColor.GOLD)
+                .decoration(TextDecoration.BOLD, true);
 
         announcement.append(text);
 
         if(content.length() > 250) {
-            TextComponent readMore = TextComponent.of("\n" + ChatMessages.getMessage("announcement-read-more"));
-            readMore.color(TextColor.LIGHT_PURPLE);
+            TextComponent readMore = TextComponent.of("\n" + ChatMessages.getMessage("announcement-read-more"))
+                    .color(TextColor.LIGHT_PURPLE)
+                    .decoration(TextDecoration.BOLD, false);
 
             announcement.append(readMore);
         }
@@ -100,9 +100,7 @@ public class AnnouncementManager {
         announcementChannelName = "#" + announcementChannel.toString().replaceAll(".*\\[|].*", "");
         logger.info("Announcements enabled for channel: " + announcementChannelName + " (id: " + announcementChannelId + ")");
 
-        announcementChannel.get().addMessageCreateListener(messageCreateEvent -> {
-            sendAnnouncement(messageCreateEvent.getMessage());
-        });
+        announcementChannel.get().addMessageCreateListener(messageCreateEvent -> sendAnnouncement(messageCreateEvent.getMessage()));
 
         announcementChannel.get().getMessages(1).thenAcceptAsync(messages -> {
             if(messages.getNewestMessage().isPresent()) {

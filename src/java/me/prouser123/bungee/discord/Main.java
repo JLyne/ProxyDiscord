@@ -1,7 +1,8 @@
 package me.prouser123.bungee.discord;
 
-import com.google.common.eventbus.Subscribe;
+import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
+import com.velocitypowered.api.event.proxy.ProxyShutdownEvent;
 import com.velocitypowered.api.plugin.Plugin;
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.ProxyServer;
@@ -12,7 +13,7 @@ import me.prouser123.bungee.discord.bot.commands.listeners.UserRoleRemove;
 import me.prouser123.bungee.discord.commands.Link;
 import me.prouser123.bungee.discord.commands.Save;
 import me.prouser123.bungee.discord.commands.Unlink;
-import me.prouser123.bungee.discord.listeners.DeluxeQueues;
+//import me.prouser123.bungee.discord.listeners.DeluxeQueues;
 import me.prouser123.bungee.discord.listeners.JoinLeave;
 import me.prouser123.bungee.discord.listeners.ServerConnect;
 
@@ -97,7 +98,7 @@ public class Main {
 	@Subscribe
 	public void onProxyInitialization(ProxyInitializeEvent event) {
     	// Setup config
-		loadResource(this, "config.yml");
+		loadResource("config.yml");
 		try {
 			configuration = YAMLConfigurationLoader.builder().setFile(
 					new File(dataDirectory.toAbsolutePath().toString(), "config.yml")).build().load();
@@ -106,7 +107,7 @@ public class Main {
 		}
 
 		//Message config
-		loadResource(this, "messages.yml");
+		loadResource("messages.yml");
 		try {
 			messagesConfiguration = YAMLConfigurationLoader.builder().setFile(
 					new File(dataDirectory.toAbsolutePath().toString(), "messages.yml")).build().load();
@@ -115,7 +116,7 @@ public class Main {
 		}
 
 		// Setup bot config
-		loadResource(this, "bot-command-options.yml");
+		loadResource("bot-command-options.yml");
 		try {
 			botCommandConfiguration = YAMLConfigurationLoader.builder().setFile(
 					new File(dataDirectory.toAbsolutePath().toString(), "bot-command-options.yml")).build().load();
@@ -137,16 +138,16 @@ public class Main {
 		initAnnouncements();
 
 		proxy.getEventManager().register(this, new JoinLeave());
-		proxy.getEventManager().register(this, new DeluxeQueues());
+		//proxy.getEventManager().register(this, new DeluxeQueues());
 
-		proxy.getPluginManager().registerCommand(this, new Link());
-		proxy.getPluginManager().registerCommand(this, new Unlink());
-		proxy.getPluginManager().registerCommand(this, new Save());
+		proxy.getCommandManager().register(new Link(),"link");
+		proxy.getCommandManager().register(new Unlink(), "unlink");
+		proxy.getCommandManager().register(new Save(), "save");
 	}
 
 	private void initLinking() {
-		String linkingUrl = getConfig().getString("linking-url");
-		String linkingChannelId = getConfig().getString("linking-channel-id");
+		String linkingUrl = getConfig().getNode("linking-url").getString();
+		String linkingChannelId = getConfig().getNode("linking-channel-id").getString();
 
 		linkingManager = new LinkingManager(linkingUrl, linkingChannelId);
 	}
@@ -162,28 +163,32 @@ public class Main {
 	}
 
 	private void initActivityLogging() {
-    	String loggingChannelId = getConfig().getString("logging-channel-id");
+    	String loggingChannelId = getConfig().getNode("logging-channel-id").getString();
 
 		loggingManager = new LoggingManager(loggingChannelId);
 	}
 
 	private void initAnnouncements() {
-		String announcementChannelId = getConfig().getString("announcement-channel-id");
+		String announcementChannelId = getConfig().getNode("announcement-channel-id").getString();
 
 		announcementManager = new AnnouncementManager(announcementChannelId);
 	}
 
-	private static void loadResource(Main plugin, String resource) {
-    	dataDirectory.resolve()
-        File folder = plugin.getDataFolder();
-        if (!folder.exists())
+	private void loadResource(String resource) {
+    	File folder = dataDirectory.toFile();
+
+        if(!folder.exists()) {
             folder.mkdir();
-        File resourceFile = new File(folder, resource);
+		}
+
+        File resourceFile = new File(dataDirectory.toFile(), resource);
+
         try {
-            if (!resourceFile.exists()) {
+            if(!resourceFile.exists()) {
                 resourceFile.createNewFile();
-                try (InputStream in = plugin.getResourceAsStream(resource);
-                     OutputStream out = new FileOutputStream(resourceFile)) {
+
+                try (InputStream in = getClass().getClassLoader().getResourceAsStream(resource);
+					 OutputStream out = new FileOutputStream(resourceFile)) {
                     ByteStreams.copy(in, out);
                 }
             }
@@ -191,9 +196,9 @@ public class Main {
             e.printStackTrace();
         }
 	}
-	
-	@Override
-	public void onDisable() {
+
+	@Subscribe
+	public void onProxyShutdown(ProxyShutdownEvent event) {
     	linkingManager.saveLinks();
 
 		if (discord.getApi() != null) {
@@ -207,5 +212,9 @@ public class Main {
 
 	public ProxyServer getProxy() {
     	return proxy;
+	}
+
+	public Path getDataDirectory() {
+		return dataDirectory;
 	}
 }

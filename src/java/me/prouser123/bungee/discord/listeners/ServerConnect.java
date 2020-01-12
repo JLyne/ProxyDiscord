@@ -34,17 +34,17 @@ public class ServerConnect {
             return;
         }
 
-        TextComponent message;
+        TextComponent.Builder message;
 
         switch(result) {
             case NOT_LINKED:
-                message = TextComponent.of(ChatMessages.getMessage("server-change-not-linked"));
+                message = TextComponent.builder().content(ChatMessages.getMessage("server-change-not-linked"));
                 break;
             case LINKED_NOT_VERIFIED:
-                message = TextComponent.of(ChatMessages.getMessage("server-change-linked-not-verified"));
+                message = TextComponent.builder().content(ChatMessages.getMessage("server-change-linked-not-verified"));
                 break;
             default:
-                message = TextComponent.of("An error has occurred.");
+                message = TextComponent.builder().content("An error has occurred.");
         }
 
         message.color(TextColor.RED);
@@ -55,13 +55,13 @@ public class ServerConnect {
 
             if (currentServer.isPresent() && currentServer.get().getServer().equals(unverifiedServer)) {
                 e.setResult(ServerPreConnectEvent.ServerResult.denied());
-                e.getPlayer().sendMessage(message);
+                e.getPlayer().sendMessage(message.build());
             } else {
                 e.setResult(ServerPreConnectEvent.ServerResult.allowed(unverifiedServer));
             }
         } else {
             Main.inst().getDebugLogger().info("Disconnecting unverified player " + e.getPlayer().getUsername());
-            e.getPlayer().disconnect(message);
+            e.getPlayer().disconnect(message.build());
         }
     }
 }

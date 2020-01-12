@@ -41,7 +41,6 @@ public class LoggingManager {
     private final ProxyServer proxy;
     private final Logger logger;
 
-    @Inject
     public LoggingManager(String loggingChannelId) {
         this.proxy = Main.inst().getProxy();
         this.logger = Main.inst().getLogger();

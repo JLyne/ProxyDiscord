@@ -26,7 +26,6 @@ public class LinkingManager {
     private final ProxyServer proxy;
     private final Logger logger;
 
-    @Inject
     public LinkingManager(String linkingUrl, String linkingChannelId) {
         this.proxy = Main.inst().getProxy();
         this.logger = Main.inst().getLogger();
@@ -83,8 +82,8 @@ public class LinkingManager {
         String uuid = player.getUniqueId().toString();
 
         if(this.links.containsKey(uuid)) {
-            TextComponent message = TextComponent.of(ChatMessages.getMessage("link-already-linked"));
-            message.color(TextColor.RED);
+            TextComponent message = TextComponent.of(ChatMessages.getMessage("link-already-linked"))
+                    .color(TextColor.RED);
 
             player.sendMessage(message);
 
@@ -94,10 +93,10 @@ public class LinkingManager {
         String token = getLinkingToken(uuid);
         String url = linkingUrl.replace("[token]", token);
 
-        TextComponent message = TextComponent.of(ChatMessages.getMessage("link"));
-        message.color(TextColor.LIGHT_PURPLE);
-        message.clickEvent(ClickEvent.openUrl(url));
-        message.hoverEvent(HoverEvent.showText(TextComponent.of("Discord account linking instructions")));
+        TextComponent message = TextComponent.of(ChatMessages.getMessage("link"))
+                .color(TextColor.LIGHT_PURPLE)
+                .clickEvent(ClickEvent.openUrl(url))
+                .hoverEvent(HoverEvent.showText(TextComponent.of("Discord account linking instructions")));
 
         player.sendMessage(message);
     }
@@ -177,7 +176,7 @@ public class LinkingManager {
 
     public void saveLinks() {
         try {
-            File folder = new File(proxy.getPluginsFolder(), "BungeeDiscord");
+            File folder = Main.inst().getDataDirectory().toFile();
             File saveFile = new File(folder, "links.sav");
 
             if (!saveFile.exists() && !saveFile.createNewFile()) {
@@ -196,7 +195,7 @@ public class LinkingManager {
 
     private void loadLinks() {
         try {
-            File folder = new File(proxy.getPluginsFolder(), "BungeeDiscord");
+            File folder = Main.inst().getDataDirectory().toFile();
             File saveFile = new File(folder, "links.sav");
 
             if (!saveFile.exists()) {

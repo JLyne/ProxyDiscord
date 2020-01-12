@@ -25,7 +25,6 @@ public class JoinLeave {
 	private final ProxyServer proxy;
     private final Logger logger;
 
-    @Inject
     public JoinLeave() {
         this.proxy = Main.inst().getProxy();
         this.logger = Main.inst().getLogger();

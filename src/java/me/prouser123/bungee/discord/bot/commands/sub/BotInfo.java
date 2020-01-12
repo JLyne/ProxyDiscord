@@ -1,5 +1,6 @@
 package me.prouser123.bungee.discord.bot.commands.sub;
 
+import com.velocitypowered.api.proxy.ProxyServer;
 import org.javacord.api.DiscordApi;
 import org.javacord.api.entity.message.embed.EmbedBuilder;
 import org.javacord.api.event.message.MessageCreateEvent;
@@ -11,12 +12,18 @@ import org.javacord.api.Javacord;
 import me.prouser123.bungee.discord.Discord;
 import me.prouser123.bungee.discord.Main;
 import me.prouser123.bungee.discord.Constants;
+import org.slf4j.Logger;
 
 public class BotInfo implements MessageCreateListener, BaseSubCommand {
 	
 	private final base base;
-	
-	public BotInfo(int priority, String command, String helpText) {
+
+	private final ProxyServer proxy;
+    private final Logger logger;
+
+    public BotInfo(int priority, String command, String helpText) {
+		this.proxy = Main.inst().getProxy();
+		this.logger = Main.inst().getLogger();
 		base = this.easyBaseSetup(priority, command, helpText);
 	}
 	
@@ -44,7 +51,7 @@ public class BotInfo implements MessageCreateListener, BaseSubCommand {
         	
         	EmbedBuilder embed = new EmbedBuilder()
         		.setAuthor("BungeeDiscord Bot Information", Constants.url, Constants.authorIconURL)
-        		.addInlineField("BungeeDiscord Version", Main.inst().getDescription().getVersion())
+        		.addInlineField("BungeeDiscord Version", proxy.getPluginManager().fromInstance(Main.inst()).get().getDescription().getVersion().get())
             	.addInlineField("JavaCord Version", Javacord.VERSION + " (API v" + Javacord.DISCORD_API_VERSION + ")")
             	.addInlineField("Bot Servers", Long.toString(api.getServers().size()))
             	.addInlineField("User Type", api.getAccountType().toString())

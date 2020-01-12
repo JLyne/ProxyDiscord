@@ -17,7 +17,7 @@ public class ChatMessages {
 
     public static String getMessage(String id) {
         Role verifiedRole = Main.inst().getVerificationManager().getVerifiedRole();
-        String message = messages.getString(id);
+        String message = messages.getNode(id).getString("Message " + id + " does not exist");
 
         if(verifiedRole != null) {
             message = message.replace("[role]", verifiedRole.getName());

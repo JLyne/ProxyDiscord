@@ -1,32 +1,31 @@
 package me.prouser123.bungee.discord.commands;
 
+import com.velocitypowered.api.command.Command;
+import com.velocitypowered.api.command.CommandSource;
+import com.velocitypowered.api.proxy.Player;
 import me.prouser123.bungee.discord.LinkingManager;
 import me.prouser123.bungee.discord.Main;
 import me.prouser123.bungee.discord.ChatMessages;
 import me.prouser123.bungee.discord.VerificationManager;
-import net.md_5.bungee.api.CommandSender;
-import net.md_5.bungee.api.chat.TextComponent;
-import net.md_5.bungee.api.connection.ProxiedPlayer;
+import net.kyori.text.TextComponent;
 
-public class Unlink extends BaseCommand {
+public class Unlink implements Command {
     private static LinkingManager linker = null;
 
     public Unlink() {
-        super("unlink");
-
         Unlink.linker = Main.inst().getLinkingManager();
     }
 
     @Override
-    public void execute(CommandSender commandSender, String[] strings) {
-        if(linker.isLinked((ProxiedPlayer) commandSender)) {
+    public void execute(CommandSource commandSender, String[] strings) {
+        if(linker.isLinked((Player) commandSender)) {
             VerificationManager verificationManager = Main.inst().getVerificationManager();
 
-            linker.unlink((ProxiedPlayer) commandSender);
-            verificationManager.checkVerificationStatus((ProxiedPlayer) commandSender);
-            commandSender.sendMessage(new TextComponent(ChatMessages.getMessage("unlink-success")));
+            linker.unlink((Player) commandSender);
+            verificationManager.checkVerificationStatus((Player) commandSender);
+            commandSender.sendMessage(TextComponent.of(ChatMessages.getMessage("unlink-success")));
         } else {
-            commandSender.sendMessage(new TextComponent(ChatMessages.getMessage("unlink-unlink-not-linked")));
+            commandSender.sendMessage(TextComponent.of(ChatMessages.getMessage("unlink-not-linked")));
         }
     }
 }

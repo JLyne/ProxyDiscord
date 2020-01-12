@@ -36,7 +36,6 @@ public class VerificationManager {
     private final ProxyServer proxy;
     private final Logger logger;
 
-    @Inject
     public VerificationManager(ConfigurationNode config) {
         this.proxy = Main.inst().getProxy();
         this.logger = Main.inst().getLogger();
@@ -49,7 +48,7 @@ public class VerificationManager {
         verifiedPermission = config.getNode("verified-permission").getString();
         bypassPermission = config.getNode("bypass-permission").getString();
 
-        String unverifiedServerName = config.getString("unverified-server");
+        String unverifiedServerName = config.getNode("unverified-server").getString();
         unverifiedServer = proxy.getServer(unverifiedServerName).orElse(null);
 
         if(unverifiedServer == null && unverifiedServerName != null && !unverifiedServerName.isEmpty()) {
@@ -230,25 +229,25 @@ public class VerificationManager {
             logger.warn("Failed to update permissions: " + e.getMessage());
         }
 
-        TextComponent message;
+        TextComponent.Builder message;
 
         switch(reason) {
             case VERIFIED_ROLE_LOST:
-                message = TextComponent.of(ChatMessages.getMessage("verification-lost-role"));
+                message = TextComponent.builder().content(ChatMessages.getMessage("verification-lost-role"));
                 break;
 
             case UNLINKED:
-                message = TextComponent.of(ChatMessages.getMessage("verification-lost-unlinked"));
+                message = TextComponent.builder().content(ChatMessages.getMessage("verification-lost-unlinked"));
                 break;
             default:
-                message = TextComponent.of("Something unexpected happened.");
+                message = TextComponent.builder().content("Something unexpected happened.");
         }
 
         message.color(TextColor.RED);
 
         if(unverifiedServer == null) {
             Main.inst().getDebugLogger().info("No unverified server defined. Kicking " + player.getUsername());
-            player.disconnect(message);
+            player.disconnect(message.build());
 
             return;
         }
@@ -272,16 +271,16 @@ public class VerificationManager {
                     TextComponent extra = TextComponent.of(text.replace("[server]", unverifiedServer.getServerInfo().getName()));
                     message.append(extra);
 
-                    player.sendMessage(message);
+                    player.sendMessage(message.build());
                 } else {
                     Main.inst().getDebugLogger().info("Failed to move " + player.getUsername() + " to " + unverifiedServer.getServerInfo().getName() + ". Kicking.");
-                    player.disconnect(message);
+                    player.disconnect(message.build());
                 }
             });
 
-            player.sendMessage(message);
+            player.sendMessage(message.build());
         } else if(reason != RemovalReason.UNLINKED) {
-            player.sendMessage(message);
+            player.sendMessage(message.build());
         }
 
         kickManager.addPlayer(player);

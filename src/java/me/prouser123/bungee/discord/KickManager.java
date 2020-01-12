@@ -19,7 +19,6 @@ public class KickManager {
     private final ProxyServer proxy;
     private final Logger logger;
 
-    @Inject
     public KickManager(int kickTime) {
         this.proxy = Main.inst().getProxy();
         this.logger = Main.inst().getLogger();

@@ -1,23 +1,23 @@
 package me.prouser123.bungee.discord.commands;
 
+import com.velocitypowered.api.command.Command;
+import com.velocitypowered.api.command.CommandSource;
 import me.prouser123.bungee.discord.ChatMessages;
 import me.prouser123.bungee.discord.LinkingManager;
 import me.prouser123.bungee.discord.Main;
-import net.md_5.bungee.api.CommandSender;
-import net.md_5.bungee.api.chat.TextComponent;
+import net.kyori.text.TextComponent;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
-public class Save extends BaseCommand {
+public class Save implements Command {
     private static LinkingManager linker = null;
 
     public Save() {
-        super("save");
-
         Save.linker = Main.inst().getLinkingManager();
     }
 
     @Override
-    public void execute(CommandSender commandSender, String[] strings) {
+    public void execute(@NonNull CommandSource source, String[] args) {
         linker.saveLinks();
-        commandSender.sendMessage(new TextComponent(ChatMessages.getMessage("save-success")));
+        source.sendMessage(TextComponent.of(ChatMessages.getMessage("save-success")));
     }
 }
