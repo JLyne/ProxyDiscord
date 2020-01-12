@@ -6,8 +6,7 @@ import org.javacord.api.entity.message.embed.EmbedBuilder;
 import org.javacord.api.event.message.MessageCreateEvent;
 import org.javacord.api.listener.message.MessageCreateListener;
 
-import me.prouser123.bungee.discord.listeners.JoinLeave;
-import me.prouser123.bungee.discord.Main;
+import me.prouser123.bungee.discord.ProxyDiscord;
 
 public class MainCommand implements MessageCreateListener, BaseCommand {
 	static ArrayList<String> array;
@@ -18,8 +17,8 @@ public class MainCommand implements MessageCreateListener, BaseCommand {
 		subArray = new ArrayList<>();
 		
 		// Debug information
-		Main.inst().getDebugLogger().info("[MainCommand@Init] Loaded MainCommand and Array");
-		Main.inst().getDebugLogger().info("[MainCommand@Init] Arr: " + array);
+		ProxyDiscord.inst().getDebugLogger().info("[MainCommand@Init] Loaded MainCommand and Array");
+		ProxyDiscord.inst().getDebugLogger().info("[MainCommand@Init] Arr: " + array);
 	}
 	
 	/**
@@ -57,7 +56,7 @@ public class MainCommand implements MessageCreateListener, BaseCommand {
     		String[] split = command.split(this.arraySeperator);
     		
     		// Debug information
-    		Main.inst().getDebugLogger().info("[MainCommand@OnMessage] Command: " + split[0] + ", HelpText: " + split[1]);
+    		ProxyDiscord.inst().getDebugLogger().info("[MainCommand@OnMessage] Command: " + split[0] + ", HelpText: " + split[1]);
     		
     		// Currently not required as there are no main bot that require it.
     		// Instead we will just add the field.
@@ -83,7 +82,7 @@ public class MainCommand implements MessageCreateListener, BaseCommand {
     		String[] split = command.split(this.arraySeperator);
     		
     		// Debug information
-    		Main.inst().getDebugLogger().info("[MainCommand@OnMessage] Command: " + split[0] + ", HelpText: " + split[1]);
+    		ProxyDiscord.inst().getDebugLogger().info("[MainCommand@OnMessage] Command: " + split[0] + ", HelpText: " + split[1]);
 
     		embed.addField(split[0], split[1]);
     	}

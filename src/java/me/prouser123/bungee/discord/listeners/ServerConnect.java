@@ -1,32 +1,30 @@
 package me.prouser123.bungee.discord.listeners;
 
-import me.prouser123.bungee.discord.Main;
+import com.velocitypowered.api.event.Subscribe;
+import com.velocitypowered.api.event.player.ServerPreConnectEvent;
+import com.velocitypowered.api.proxy.ServerConnection;
+import com.velocitypowered.api.proxy.server.RegisteredServer;
+import me.prouser123.bungee.discord.ProxyDiscord;
 import me.prouser123.bungee.discord.VerificationManager;
 import me.prouser123.bungee.discord.VerificationResult;
 import me.prouser123.bungee.discord.ChatMessages;
-import net.md_5.bungee.api.ChatColor;
-import net.md_5.bungee.api.config.ServerInfo;
-import net.md_5.bungee.api.connection.Server;
-import net.md_5.bungee.api.event.ServerConnectEvent;
-import net.md_5.bungee.api.plugin.Listener;
-import net.md_5.bungee.event.EventHandler;
-import net.md_5.bungee.event.EventPriority;
-import net.md_5.bungee.api.chat.TextComponent;
+import net.kyori.text.TextComponent;
+import net.kyori.text.format.TextColor;
 
-public class ServerConnect implements Listener {
+import java.util.Optional;
+
+public class ServerConnect {
     private static VerificationManager verificationManager = null;
 
     public ServerConnect() {
-        ServerConnect.verificationManager = Main.inst().getVerificationManager();
+        ServerConnect.verificationManager = ProxyDiscord.inst().getVerificationManager();
     }
 
-    @EventHandler(priority = EventPriority.LOW)
-    public void onServerConnect(ServerConnectEvent e) {
-        if (e.isCancelled()) return;
+    @Subscribe
+    public void onServerConnect(ServerPreConnectEvent e) {
+        RegisteredServer unverifiedServer = verificationManager.getUnverifiedServer();
 
-        ServerInfo unverifiedServer = verificationManager.getUnverifiedServer();
-
-        if(e.getTarget().equals(unverifiedServer)) {
+        if(e.getOriginalServer().equals(unverifiedServer)) {
             return;
         }
 
@@ -36,35 +34,34 @@ public class ServerConnect implements Listener {
             return;
         }
 
-        TextComponent message;
+        TextComponent.Builder message;
 
         switch(result) {
             case NOT_LINKED:
-                message = new TextComponent(ChatMessages.getMessage("server-change-not-linked"));
+                message = TextComponent.builder().content(ChatMessages.getMessage("server-change-not-linked"));
                 break;
             case LINKED_NOT_VERIFIED:
-                message = new TextComponent(ChatMessages.getMessage("server-change-linked-not-verified"));
+                message = TextComponent.builder().content(ChatMessages.getMessage("server-change-linked-not-verified"));
                 break;
             default:
-                message = new TextComponent("An error has occurred.");
+                message = TextComponent.builder().content("An error has occurred.");
         }
 
-        message.setColor(ChatColor.RED);
+        message.color(TextColor.RED);
 
         if(unverifiedServer != null) {
-            Main.inst().getDebugLogger().info("Blocking unverified player " + e.getPlayer().getName() + " from joining " + e.getTarget().getName());
-            Server currentServer = e.getPlayer().getServer();
+            ProxyDiscord.inst().getDebugLogger().info("Blocking unverified player " + e.getPlayer().getUsername() + " from joining " + e.getOriginalServer().getServerInfo().getName());
+            Optional<ServerConnection> currentServer = e.getPlayer().getCurrentServer();
 
-            if (currentServer != null && currentServer.getInfo().equals(unverifiedServer)) {
-                e.setCancelled(true);
-                e.getPlayer().sendMessage(message);
+            if (currentServer.isPresent() && currentServer.get().getServer().equals(unverifiedServer)) {
+                e.setResult(ServerPreConnectEvent.ServerResult.denied());
+                e.getPlayer().sendMessage(message.build());
             } else {
-                e.setTarget(unverifiedServer);
+                e.setResult(ServerPreConnectEvent.ServerResult.allowed(unverifiedServer));
             }
         } else {
-            Main.inst().getDebugLogger().info("Disconnecting unverified player " + e.getPlayer().getName());
-            e.getPlayer().disconnect(message);
-            e.setCancelled(true);
+            ProxyDiscord.inst().getDebugLogger().info("Disconnecting unverified player " + e.getPlayer().getUsername());
+            e.getPlayer().disconnect(message.build());
         }
     }
 }

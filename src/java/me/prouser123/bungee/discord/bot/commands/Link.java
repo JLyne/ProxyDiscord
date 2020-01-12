@@ -15,11 +15,11 @@ public class Link implements MessageCreateListener, BaseCommand {
 	
     @Override
     public void onMessageCreate(MessageCreateEvent event) {
-        LinkingManager linkingManager = Main.inst().getLinkingManager();
+        LinkingManager linkingManager = ProxyDiscord.inst().getLinkingManager();
 
         //Fail fast if linking manager isn't ready yet
         if(linkingManager == null) {
-            Main.inst().getLogger().warning("Ignoring link attempt before linking manager is ready.");
+            ProxyDiscord.inst().getLogger().warn("Ignoring link attempt before linking manager is ready.");
             String message = ChatMessages.getMessage("discord-link-error");
             event.getChannel().sendMessage(message.replace("[user]", "<@!" + event.getMessageAuthor().getId() + ">"));
 
@@ -85,7 +85,7 @@ public class Link implements MessageCreateListener, BaseCommand {
         }
 
         if(embed != null) {
-            Main.inst().getDebugLogger().info(embed.toString());
+            ProxyDiscord.inst().getDebugLogger().info(embed.toString());
             event.getChannel().sendMessage("<@!" + event.getMessageAuthor().getId() + ">", embed);
         }
     }
@@ -120,7 +120,7 @@ public class Link implements MessageCreateListener, BaseCommand {
         }
 
         if(message != null) {
-            Main.inst().getDebugLogger().info(message);
+            ProxyDiscord.inst().getDebugLogger().info(message);
             event.getChannel().sendMessage(message.replace("[user]", "<@!" + event.getMessageAuthor().getId() + ">"));
         }
     }
