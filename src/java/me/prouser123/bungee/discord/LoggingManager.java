@@ -19,7 +19,6 @@ import org.javacord.api.listener.message.MessageCreateListener;
 import org.javacord.api.util.event.ListenerManager;
 import org.slf4j.Logger;
 
-import javax.inject.Inject;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Optional;
@@ -42,8 +41,8 @@ public class LoggingManager {
     private final Logger logger;
 
     public LoggingManager(String loggingChannelId) {
-        this.proxy = Main.inst().getProxy();
-        this.logger = Main.inst().getLogger();
+        this.proxy = ProxyDiscord.inst().getProxy();
+        this.logger = ProxyDiscord.inst().getLogger();
 
         this.loggingChannelId = loggingChannelId;
         currentMessage = new MessageBuilder();
@@ -54,14 +53,14 @@ public class LoggingManager {
 
         //proxy.getPluginManager().registerListener(Main.inst(), this);
 
-        Main.inst().getDiscord().getApi().addReconnectListener(event -> {
+        ProxyDiscord.inst().getDiscord().getApi().addReconnectListener(event -> {
             if(loggingChannelId != null) {
                 findChannel();
             }
         });
 
         //Decrease logs per message if a low number of messages are unsent
-        proxy.getScheduler().buildTask(Main.inst(), () -> {
+        proxy.getScheduler().buildTask(ProxyDiscord.inst(), () -> {
             if(queuedToSend.get() <= 2 && logsPerMessage.get() > 1) {
                 logger.info("Decreasing logsPerMessage due to low activity (" + queuedToSend.get() + " queued messages)");
                 logsPerMessage.set(Math.max(logsPerMessage.get() / 2, 1));
@@ -90,7 +89,7 @@ public class LoggingManager {
             return;
         }
 
-        Optional <TextChannel> loggingChannel = Main.inst().getDiscord().getApi().getTextChannelById(loggingChannelId);
+        Optional <TextChannel> loggingChannel = ProxyDiscord.inst().getDiscord().getApi().getTextChannelById(loggingChannelId);
 
         if(!loggingChannel.isPresent()) {
             logger.warn("Unable to find logging channel. Did you put a valid channel ID in the config?");
@@ -106,10 +105,10 @@ public class LoggingManager {
                 return;
             }
 
-            proxy.getScheduler().buildTask(Main.inst(), () -> {
+            proxy.getScheduler().buildTask(ProxyDiscord.inst(), () -> {
                 String message = event.getReadableMessageContent();
                 Long discordId = event.getMessage().getAuthor().getId();
-                String linked = Main.inst().getLinkingManager().getLinked(discordId);
+                String linked = ProxyDiscord.inst().getLinkingManager().getLinked(discordId);
 
                 event.deleteMessage();
 
@@ -123,7 +122,7 @@ public class LoggingManager {
     }
 
     private String getPlayerLogName(Player player) {
-        Long discordId = Main.inst().getLinkingManager().getLinked(player);
+        Long discordId = ProxyDiscord.inst().getLinkingManager().getLinked(player);
         Optional<ServerConnection> server = player.getCurrentServer();
         String serverName = server.isPresent() ? server.get().getServerInfo().getName() : "none";
 
@@ -135,7 +134,7 @@ public class LoggingManager {
     }
 
     private String getPlayerLogName(User user) {
-         Long discordId = Main.inst().getLinkingManager().getLinked(user.getUniqueId());
+         Long discordId = ProxyDiscord.inst().getLinkingManager().getLinked(user.getUniqueId());
 
         if(discordId != null) {
             return "[" + user.getFriendlyName() + "](<@!" + discordId.toString() + ">)";
@@ -180,7 +179,7 @@ public class LoggingManager {
         String dateFormat = "<dd-MM-yy HH:mm:ss> ";
         SimpleDateFormat format = new SimpleDateFormat(dateFormat);
         String date = format.format(new Date());
-        Optional <TextChannel> loggingChannel = Main.inst().getDiscord().getApi().getTextChannelById(loggingChannelId);
+        Optional <TextChannel> loggingChannel = ProxyDiscord.inst().getDiscord().getApi().getTextChannelById(loggingChannelId);
 
         message = date + message;
 

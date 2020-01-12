@@ -1,6 +1,6 @@
 package me.prouser123.bungee.discord.bot.commands.sub;
 
-import me.prouser123.bungee.discord.Main;
+import me.prouser123.bungee.discord.ProxyDiscord;
 import org.javacord.api.Javacord;
 import org.javacord.api.entity.message.embed.EmbedBuilder;
 import org.javacord.api.event.message.MessageCreateEvent;
@@ -29,7 +29,7 @@ public class Debug implements MessageCreateListener, BaseSubCommand {
             		.addInlineField("JavaCord User Agent", Javacord.USER_AGENT)
             		.addInlineField("JavaCord Commit ID", Javacord.COMMIT_ID)
             		.addInlineField("JavaCord Build Timestamp", Javacord.BUILD_TIMESTAMP.toString())
-            		.addInlineField("Registered Listeners", Integer.toString(Main.inst().getDiscord().getApi().getListeners().size()));
+            		.addInlineField("Registered Listeners", Integer.toString(ProxyDiscord.inst().getDiscord().getApi().getListeners().size()));
                 
             // Set footer
             Discord.setFooter(embed);

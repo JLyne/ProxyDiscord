@@ -10,7 +10,7 @@ import org.javacord.api.listener.message.MessageCreateListener;
 import org.javacord.api.Javacord;
 
 import me.prouser123.bungee.discord.Discord;
-import me.prouser123.bungee.discord.Main;
+import me.prouser123.bungee.discord.ProxyDiscord;
 import me.prouser123.bungee.discord.Constants;
 import org.slf4j.Logger;
 
@@ -22,15 +22,15 @@ public class BotInfo implements MessageCreateListener, BaseSubCommand {
     private final Logger logger;
 
     public BotInfo(int priority, String command, String helpText) {
-		this.proxy = Main.inst().getProxy();
-		this.logger = Main.inst().getLogger();
+		this.proxy = ProxyDiscord.inst().getProxy();
+		this.logger = ProxyDiscord.inst().getLogger();
 		base = this.easyBaseSetup(priority, command, helpText);
 	}
 	
     @Override
     public void onMessageCreate(MessageCreateEvent event) {
         if (event.getMessage().getContent().equalsIgnoreCase(base.command)) {
-			DiscordApi api = Main.inst().getDiscord().getApi();
+			DiscordApi api = ProxyDiscord.inst().getDiscord().getApi();
         	
         	Object[] currentRoles = api.getYourself().getRoles(event.getServer().get()).toArray();
 
@@ -40,18 +40,18 @@ public class BotInfo implements MessageCreateListener, BaseSubCommand {
         		
         		// Remove the initial @ from the role name to avoid role spam
         		if (role.startsWith(("@"))) {
-        			Main.inst().getDebugLogger().info("StartsWith @ - Removing...");
+        			ProxyDiscord.inst().getDebugLogger().info("StartsWith @ - Removing...");
         			role = role.replace("@", "");
         		}
         		
         		// Adds to the list of roles
         		roles.append(role).append(" ");
-        		Main.inst().getDebugLogger().info("Has role: " + role);
+        		ProxyDiscord.inst().getDebugLogger().info("Has role: " + role);
         	}
         	
         	EmbedBuilder embed = new EmbedBuilder()
         		.setAuthor("BungeeDiscord Bot Information", Constants.url, Constants.authorIconURL)
-        		.addInlineField("BungeeDiscord Version", proxy.getPluginManager().fromInstance(Main.inst()).get().getDescription().getVersion().get())
+        		.addInlineField("BungeeDiscord Version", proxy.getPluginManager().fromInstance(ProxyDiscord.inst()).get().getDescription().getVersion().get())
             	.addInlineField("JavaCord Version", Javacord.VERSION + " (API v" + Javacord.DISCORD_API_VERSION + ")")
             	.addInlineField("Bot Servers", Long.toString(api.getServers().size()))
             	.addInlineField("User Type", api.getAccountType().toString())

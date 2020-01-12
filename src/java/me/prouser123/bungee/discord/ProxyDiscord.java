@@ -1,5 +1,6 @@
 package me.prouser123.bungee.discord;
 
+import co.aikar.commands.VelocityCommandManager;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
 import com.velocitypowered.api.event.proxy.ProxyShutdownEvent;
@@ -29,8 +30,8 @@ import ninja.leaping.configurate.yaml.YAMLConfigurationLoader;
 
 @Plugin(id = "proxydiscord", name = "ProxyDiscord", version = "0.1-SNAPSHOT",
         description = "", authors = {"Jim (NotKatuen)"})
-public class Main {
-	private static Main instance;
+public class ProxyDiscord {
+	private static ProxyDiscord instance;
 
 	private ConfigurationNode configuration;
 	private ConfigurationNode messagesConfiguration;
@@ -48,7 +49,7 @@ public class Main {
     @DataDirectory
     private Path dataDirectory;
 
-    public static Main inst() {
+    public static ProxyDiscord inst() {
     	  return instance;
     }
 
@@ -88,7 +89,7 @@ public class Main {
     private final Logger logger;
 
     @Inject
-    public Main(ProxyServer proxy, Logger logger) {
+    public ProxyDiscord(ProxyServer proxy, Logger logger) {
     	this.proxy = proxy;
     	this.logger = logger;
 
@@ -140,9 +141,10 @@ public class Main {
 		proxy.getEventManager().register(this, new JoinLeave());
 		//proxy.getEventManager().register(this, new DeluxeQueues());
 
-		proxy.getCommandManager().register(new Link(),"link");
-		proxy.getCommandManager().register(new Unlink(), "unlink");
-		proxy.getCommandManager().register(new Save(), "save");
+		VelocityCommandManager commandManager = new VelocityCommandManager(proxy, this);
+		commandManager.registerCommand(new Link());
+		commandManager.registerCommand(new Unlink());
+		commandManager.registerCommand(new Save());
 	}
 
 	private void initLinking() {

@@ -16,7 +16,7 @@ public class ChatMessages {
     }
 
     public static String getMessage(String id) {
-        Role verifiedRole = Main.inst().getVerificationManager().getVerifiedRole();
+        Role verifiedRole = ProxyDiscord.inst().getVerificationManager().getVerifiedRole();
         String message = messages.getNode(id).getString("Message " + id + " does not exist");
 
         if(verifiedRole != null) {
@@ -27,7 +27,7 @@ public class ChatMessages {
     }
 
     public static EmbedBuilder getEmbed(String id) {
-        Role verifiedRole = Main.inst().getVerificationManager().getVerifiedRole();
+        Role verifiedRole = ProxyDiscord.inst().getVerificationManager().getVerifiedRole();
         String roleLink = verifiedRole != null ? "<@&" + verifiedRole.getIdAsString() + ">" : "Unknown Role";
 
         if(!id.startsWith("embed")) {

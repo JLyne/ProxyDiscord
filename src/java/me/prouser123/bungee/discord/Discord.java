@@ -16,8 +16,6 @@ import java.util.concurrent.CompletionException;
 import org.javacord.api.DiscordApi;
 import org.slf4j.Logger;
 
-import javax.inject.Inject;
-
 public class Discord {
 	/**
 	 * Discord API Instance
@@ -36,8 +34,8 @@ public class Discord {
 	 * @param token bot token
 	 */
 	public Discord(String token, ConfigurationNode commandConfiguration) {
-		this.proxy = Main.inst().getProxy();
-        this.logger = Main.inst().getLogger();
+		this.proxy = ProxyDiscord.inst().getProxy();
+        this.logger = ProxyDiscord.inst().getLogger();
 		// Bot token
 		this.commandConfiguration = commandConfiguration;
 

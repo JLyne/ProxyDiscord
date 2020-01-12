@@ -11,7 +11,6 @@ import net.kyori.text.TextComponent;
 import net.kyori.text.format.TextColor;
 import org.slf4j.Logger;
 
-import javax.inject.Inject;
 import java.util.HashMap;
 import java.util.UUID;
 
@@ -26,12 +25,12 @@ public class JoinLeave {
     private final Logger logger;
 
     public JoinLeave() {
-        this.proxy = Main.inst().getProxy();
-        this.logger = Main.inst().getLogger();
+        this.proxy = ProxyDiscord.inst().getProxy();
+        this.logger = ProxyDiscord.inst().getLogger();
 
-        verificationManager = Main.inst().getVerificationManager();
-		kickManager = Main.inst().getKickManager();
-		loggingManager = Main.inst().getLoggingManager();
+        verificationManager = ProxyDiscord.inst().getVerificationManager();
+		kickManager = ProxyDiscord.inst().getKickManager();
+		loggingManager = ProxyDiscord.inst().getLoggingManager();
 		firstJoin = new HashMap<>();
         logger.info("Hello there, it's a test plugin I made!");
     }
@@ -79,12 +78,12 @@ public class JoinLeave {
 
 			case VERIFIED:
 				logger.info("Verified player " + player.getUsername() + " joined");
-				Main.inst().getAnnouncementManager().sendLatestAnnouncement(player);
+				ProxyDiscord.inst().getAnnouncementManager().sendLatestAnnouncement(player);
 
 				break;
 		}
 
-		if(!Main.inst().getDiscord().isConnected()) {
+		if(!ProxyDiscord.inst().getDiscord().isConnected()) {
 			player.sendMessage(TextComponent.of(ChatMessages.getMessage("discord-issues")).color(TextColor.RED));
 		}
 	}

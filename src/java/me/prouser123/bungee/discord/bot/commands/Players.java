@@ -8,7 +8,7 @@ import org.javacord.api.entity.message.embed.EmbedBuilder;
 import org.javacord.api.event.message.MessageCreateEvent;
 import org.javacord.api.listener.message.MessageCreateListener;
 
-import me.prouser123.bungee.discord.Main;
+import me.prouser123.bungee.discord.ProxyDiscord;
 
 public class Players implements MessageCreateListener, BaseCommand {
 
@@ -30,7 +30,7 @@ public class Players implements MessageCreateListener, BaseCommand {
             // Create an array of players and their servers
             List<String> players = new ArrayList<>();
 
-            for (Player player : Main.inst().getProxy().getAllPlayers()) {
+            for (Player player : ProxyDiscord.inst().getProxy().getAllPlayers()) {
                 players.add(player.getUsername() + " at " + player.getCurrentServer().get().getServerInfo().getName());
             }
 

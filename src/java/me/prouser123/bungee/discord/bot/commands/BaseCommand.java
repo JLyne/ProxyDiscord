@@ -1,6 +1,6 @@
 package me.prouser123.bungee.discord.bot.commands;
 
-import me.prouser123.bungee.discord.Main;
+import me.prouser123.bungee.discord.ProxyDiscord;
 
 public interface BaseCommand {
 	String arraySeperator = ":";
@@ -34,14 +34,14 @@ public interface BaseCommand {
 	}
 	
 	default void addCommandToHelp(base b) {
-		Main.inst().getDebugLogger().info("[BaseCommand@Add2Help] Adding " + b.command);
+		ProxyDiscord.inst().getDebugLogger().info("[BaseCommand@Add2Help] Adding " + b.command);
 		MainCommand.array.add(b.helpPriority, b.command + arraySeperator + b.helpText);
-		Main.inst().getDebugLogger().info("[BaseCommand@Add2Help] " + MainCommand.array);
+		ProxyDiscord.inst().getDebugLogger().info("[BaseCommand@Add2Help] " + MainCommand.array);
 	}
 	
 	// Command to dump information about help array
 	default void debugInit(int priority, String command, String helpText, base base) {
-		Main.inst().getDebugLogger().info("[BaseCommand@debugInit] Init info: " + priority + " | " + command + " | " + helpText);
-		Main.inst().getDebugLogger().info("[BaseCommand@debugInit] BASE() info: | " + base.helpPriority + " | " + base.command + " | " + base.helpText);
+		ProxyDiscord.inst().getDebugLogger().info("[BaseCommand@debugInit] Init info: " + priority + " | " + command + " | " + helpText);
+		ProxyDiscord.inst().getDebugLogger().info("[BaseCommand@debugInit] BASE() info: | " + base.helpPriority + " | " + base.command + " | " + base.helpText);
 	}
 }

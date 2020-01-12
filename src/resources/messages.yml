@@ -37,11 +37,48 @@ link-not-verified: |-
   Your Discord account has been linked, but you don't appear to have the [role] role.
   Please double check your Twitch subscription and Discord connections, or wait for Discord to grant you the role.
 
+# When a mod uses /link player discordid, but the player is already linked to the same discord account
+link-other-already-linked-same: |-
+  [player] is already linked to this discord account.
+
+# When a mod uses /link player discordid, but the player is already linked to a different discord account
+link-other-already-linked-known: |-
+  [player] is already linked to the discord account [discord]. Use /unlink [player] to unlink it first.
+
+# When a mod uses /link player discordid, but the player is already linked to a different discord account, and getting the account's name failed
+link-other-already-linked-unknown: |-
+  [player] has already linked a discord account. Use /unlink [player] to unlink it first.
+
+# When a mod uses /link player discordid, but the provided discord account is already linked to another player
+link-other-discord-already-linked-known: |-
+  [discord] is already linked to player [player]. Use /unlink [player] to unlink it first.
+
+# When a mod uses /link player discordid, but the provided discord account is already linked to another player
+link-other-discord-already-linked-unknown: |-
+  [discord] is already linked to another player. This player will need to unlink it first.
+
+link-other-success: |-
+  [player] has been linked to [discord]
+
+link-other-not-verified: |-
+  [player] has been linked to [discord], but they do not appear to have the [role] role.
+
 # When a player uses /unlink
 unlink-success: 'Your discord account has been unlinked.'
 
 # When a player uses /unlink without a discord account linked
 unlink-not-linked: 'You have not linked a discord account.'
+
+# When a mod unlinks a player via /unlink player
+unlink-other-success: |-
+  [player]'s discord account has been unlinked
+
+# When a mod unlink via /unlink player, and the player doesn't have a discord account linked
+unlink-other-not-linked: '[player] has not linked a discord account.'
+
+# Sent to the target player when a mod unlinks their account via /unlink player
+unlink-by-other-success: |-
+  You discord account has been unlinked by [player]
 
 # When a player loses their access due to their discord account losing the required role
 verification-gained-role: |-

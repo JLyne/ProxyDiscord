@@ -7,7 +7,6 @@ import net.kyori.text.TextComponent;
 import net.kyori.text.format.TextColor;
 import org.slf4j.Logger;
 
-import javax.inject.Inject;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -20,8 +19,8 @@ public class KickManager {
     private final Logger logger;
 
     public KickManager(int kickTime) {
-        this.proxy = Main.inst().getProxy();
-        this.logger = Main.inst().getLogger();
+        this.proxy = ProxyDiscord.inst().getProxy();
+        this.logger = ProxyDiscord.inst().getLogger();
 
         kickablePlayers = HashBiMap.create(64);
         this.kickTime = kickTime;
@@ -35,23 +34,23 @@ public class KickManager {
         }
 
         if (!kickablePlayers.containsValue(player)) {
-            Main.inst().getDebugLogger().info("Adding player " + player.getUsername() + " to kickable list");
+            ProxyDiscord.inst().getDebugLogger().info("Adding player " + player.getUsername() + " to kickable list");
 
             kickablePlayers.put(System.currentTimeMillis(), player);
         }
     }
 
     public void removePlayer(Player player) {
-        Main.inst().getDebugLogger().info("Removing player " + player.getUsername() + " from kickable list");
+        ProxyDiscord.inst().getDebugLogger().info("Removing player " + player.getUsername() + " from kickable list");
         kickablePlayers.inverse().remove(player);
     }
 
     private void kickPlayers() {
-        proxy.getScheduler().buildTask(Main.inst(), () -> {
-            Main.inst().getDebugLogger().info("Running kick task");
+        proxy.getScheduler().buildTask(ProxyDiscord.inst(), () -> {
+            ProxyDiscord.inst().getDebugLogger().info("Running kick task");
 
             Long now = System.currentTimeMillis();
-            VerificationManager verificationManager = Main.inst().getVerificationManager();
+            VerificationManager verificationManager = ProxyDiscord.inst().getVerificationManager();
 
             Iterator iterator = kickablePlayers.entrySet().iterator();
 
@@ -66,14 +65,13 @@ public class KickManager {
                     continue;
                 }
 
-                Main.inst().getDebugLogger().info("Player " + player.getUsername() + " added time " + addedTime);
-                Main.inst().getDebugLogger().info("Player " + player.getUsername() + " elapsed time " + (now - addedTime) / 1000);
-                Main.inst().getDebugLogger().info("Kick time: " + kickTime);
+                ProxyDiscord.inst().getDebugLogger().info("Player " + player.getUsername() + " added time " + addedTime);
+                ProxyDiscord.inst().getDebugLogger().info("Player " + player.getUsername() + " elapsed time " + (now - addedTime) / 1000);
+                ProxyDiscord.inst().getDebugLogger().info("Kick time: " + kickTime);
 
                 if(((now - addedTime) / 1000) > kickTime) {
                     switch(verificationManager.checkVerificationStatus(player)) {
                         case VERIFIED:
-                            iterator.remove();
                             continue;
 
                         case LINKED_NOT_VERIFIED:
@@ -85,9 +83,8 @@ public class KickManager {
                             message = TextComponent.of(ChatMessages.getMessage("kicked-not-linked")).color(TextColor.RED);
                     }
 
-                    Main.inst().getDebugLogger().info("Kicking player " + player.getUsername() + " for exceeding unverified kick time");
+                    ProxyDiscord.inst().getDebugLogger().info("Kicking player " + player.getUsername() + " for exceeding unverified kick time");
                     player.disconnect(message);
-                    iterator.remove();
                 }
             }
         }).delay(10, TimeUnit.SECONDS).repeat(10, TimeUnit.SECONDS).schedule();

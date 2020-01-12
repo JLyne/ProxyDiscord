@@ -16,7 +16,6 @@ import org.javacord.api.entity.permission.Role;
 import org.javacord.api.entity.user.User;
 import org.slf4j.Logger;
 
-import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Optional;
@@ -37,12 +36,12 @@ public class VerificationManager {
     private final Logger logger;
 
     public VerificationManager(ConfigurationNode config) {
-        this.proxy = Main.inst().getProxy();
-        this.logger = Main.inst().getLogger();
+        this.proxy = ProxyDiscord.inst().getProxy();
+        this.logger = ProxyDiscord.inst().getLogger();
 
         verifiedRoleUsers = new ArrayList<>();
-        linkingManager = Main.inst().getLinkingManager();
-        kickManager = Main.inst().getKickManager();
+        linkingManager = ProxyDiscord.inst().getLinkingManager();
+        kickManager = ProxyDiscord.inst().getKickManager();
 
         verifiedRoleId = config.getNode("verify-role-id").getString();
         verifiedPermission = config.getNode("verified-permission").getString();
@@ -59,7 +58,7 @@ public class VerificationManager {
             populateUsers();
         }
 
-        Main.inst().getDiscord().getApi().addReconnectListener(event -> {
+        ProxyDiscord.inst().getDiscord().getApi().addReconnectListener(event -> {
             if(verifiedRoleId != null) {
                 populateUsers();
             }
@@ -72,13 +71,13 @@ public class VerificationManager {
         }
 
         String linked = linkingManager.getLinked(user);
-        Main.inst().getDebugLogger().info("Removing verified status of " + user.getDiscriminatedName());
+        ProxyDiscord.inst().getDebugLogger().info("Removing verified status of " + user.getDiscriminatedName());
 
         if(linked != null) {
             Optional<Player> player = proxy.getPlayer(UUID.fromString(linked));
 
             if(player.isPresent()) {
-                Main.inst().getDebugLogger().info("Linked account is currently on the server. Adding permission");
+                ProxyDiscord.inst().getDebugLogger().info("Linked account is currently on the server. Adding permission");
                 addVerifiedPermission(player.get());
             }
         }
@@ -88,13 +87,13 @@ public class VerificationManager {
         verifiedRoleUsers.remove(user.getId());
 
         String linked = linkingManager.getLinked(user);
-        Main.inst().getDebugLogger().info("Removing verified status of " + user.getDiscriminatedName());
+        ProxyDiscord.inst().getDebugLogger().info("Removing verified status of " + user.getDiscriminatedName());
 
         if(linked != null) {
             Optional<Player> player  = proxy.getPlayer(UUID.fromString(linked));
 
             if(player.isPresent()) {
-                Main.inst().getDebugLogger().info("Linked account is currently on the server. Removing permission");
+                ProxyDiscord.inst().getDebugLogger().info("Linked account is currently on the server. Removing permission");
                 removeVerifiedPermission(player.get(), RemovalReason.VERIFIED_ROLE_LOST);
             }
         }
@@ -106,12 +105,14 @@ public class VerificationManager {
 
     public VerificationResult checkVerificationStatus(Player player) {
         if(verifiedRoleId == null) {
-            Main.inst().getDebugLogger().info("No verified role defined. Considering " + player.getUsername() + " verified.");
+            ProxyDiscord.inst().getDebugLogger().info("No verified role defined. Considering " + player.getUsername() + " verified.");
+            addVerifiedPermission(player);
+
             return VerificationResult.VERIFIED;
         }
 
         if(player.hasPermission(bypassPermission)) {
-            Main.inst().getDebugLogger().info("Player " + player.getUsername() + " has bypass permission. Epic.");
+            ProxyDiscord.inst().getDebugLogger().info("Player " + player.getUsername() + " has bypass permission. Epic.");
             addVerifiedPermission(player);
 
             return VerificationResult.VERIFIED;
@@ -121,19 +122,19 @@ public class VerificationManager {
 
         if (linkedId != null) {
             if(hasVerifiedRole(linkedId)) {
-                Main.inst().getDebugLogger().info("Player " + player.getUsername() + " has linked discord and has verified role. Epic.");
+                ProxyDiscord.inst().getDebugLogger().info("Player " + player.getUsername() + " has linked discord and has verified role. Epic.");
                 addVerifiedPermission(player);
 
                 return VerificationResult.VERIFIED;
             }
 
-            Main.inst().getDebugLogger().info("Player " + player.getUsername() + " has linked discord, but doesn't have the verified role. Sad.");
+            ProxyDiscord.inst().getDebugLogger().info("Player " + player.getUsername() + " has linked discord, but doesn't have the verified role. Sad.");
             removeVerifiedPermission(player, RemovalReason.VERIFIED_ROLE_LOST);
 
             return VerificationResult.LINKED_NOT_VERIFIED;
         }
 
-        Main.inst().getDebugLogger().info("Player " + player.getUsername() + " hasn't linked discord. Very sad.");
+        ProxyDiscord.inst().getDebugLogger().info("Player " + player.getUsername() + " hasn't linked discord. Very sad.");
         removeVerifiedPermission(player, RemovalReason.UNLINKED);
 
         return VerificationResult.NOT_LINKED;
@@ -141,14 +142,14 @@ public class VerificationManager {
 
     VerificationResult checkVerificationStatus(Long discordId) {
         if(verifiedRoleId == null) {
-            Main.inst().getDebugLogger().info("No verified role defined. Considering " + discordId.toString() + " verified.");
+            ProxyDiscord.inst().getDebugLogger().info("No verified role defined. Considering " + discordId.toString() + " verified.");
             return VerificationResult.VERIFIED;
         }
 
         String linked = linkingManager.getLinked(discordId);
 
         if(linked == null) {
-            Main.inst().getDebugLogger().info("Discord id " + discordId.toString() + " has not been linked to a player. Sad.");
+            ProxyDiscord.inst().getDebugLogger().info("Discord id " + discordId.toString() + " has not been linked to a player. Sad.");
             return VerificationResult.NOT_LINKED;
         }
 
@@ -156,7 +157,7 @@ public class VerificationManager {
 
         if(player.isPresent()) {
             if(player.get().hasPermission(bypassPermission)) {
-                Main.inst().getDebugLogger().info("Player " + player.get().getUsername() + " has bypass permission. Epic.");
+                ProxyDiscord.inst().getDebugLogger().info("Player " + player.get().getUsername() + " has bypass permission. Epic.");
                 addVerifiedPermission(player.get());
 
                 return VerificationResult.VERIFIED;
@@ -164,19 +165,19 @@ public class VerificationManager {
         }
 
         if(hasVerifiedRole(discordId)) {
-            Main.inst().getDebugLogger().info("Discord id " + discordId.toString() + " is linked and has verified role. Epic.");
+            ProxyDiscord.inst().getDebugLogger().info("Discord id " + discordId.toString() + " is linked and has verified role. Epic.");
 
             if(player.isPresent()) {
-                Main.inst().getDebugLogger().info("Linked account is currently on the server. Adding permission");
+                ProxyDiscord.inst().getDebugLogger().info("Linked account is currently on the server. Adding permission");
                 addVerifiedPermission(player.get());
             }
 
             return VerificationResult.VERIFIED;
         } else {
-            Main.inst().getDebugLogger().info("Discord id " + discordId.toString() + " is linked, but doesn't have the verified role. Sad.");
+            ProxyDiscord.inst().getDebugLogger().info("Discord id " + discordId.toString() + " is linked, but doesn't have the verified role. Sad.");
 
             if(player.isPresent()) {
-                Main.inst().getDebugLogger().info("Linked account is currently on the server. Removing permission");
+                ProxyDiscord.inst().getDebugLogger().info("Linked account is currently on the server. Removing permission");
                 removeVerifiedPermission(player.get(), RemovalReason.VERIFIED_ROLE_LOST);
             }
 
@@ -191,7 +192,7 @@ public class VerificationManager {
 
         kickManager.removePlayer(player);
 
-        Main.inst().getDebugLogger().info("Adding verified permission to " + player.getUsername());
+        ProxyDiscord.inst().getDebugLogger().info("Adding verified permission to " + player.getUsername());
 
         try {
             LuckPerms luckPermsApi = LuckPermsProvider.get();
@@ -213,7 +214,7 @@ public class VerificationManager {
             return;
         }
 
-        Main.inst().getDebugLogger().info("Removing verified permission from " + player.getUsername());
+        ProxyDiscord.inst().getDebugLogger().info("Removing verified permission from " + player.getUsername());
 
         try {
             LuckPerms luckPermsApi = LuckPermsProvider.get();
@@ -246,7 +247,7 @@ public class VerificationManager {
         message.color(TextColor.RED);
 
         if(unverifiedServer == null) {
-            Main.inst().getDebugLogger().info("No unverified server defined. Kicking " + player.getUsername());
+            ProxyDiscord.inst().getDebugLogger().info("No unverified server defined. Kicking " + player.getUsername());
             player.disconnect(message.build());
 
             return;
@@ -263,7 +264,7 @@ public class VerificationManager {
         Optional<ServerConnection> currentServer = player.getCurrentServer();
 
         if(currentServer.isPresent() && !currentServer.get().getServer().equals(unverifiedServer)) {
-            Main.inst().getDebugLogger().info("Moving " + player.getUsername() + " to " + unverifiedServer.getServerInfo().getName());
+            ProxyDiscord.inst().getDebugLogger().info("Moving " + player.getUsername() + " to " + unverifiedServer.getServerInfo().getName());
 
             player.createConnectionRequest(unverifiedServer).connect().thenAccept(result -> {
                 if(!result.isSuccessful()) {
@@ -273,7 +274,7 @@ public class VerificationManager {
 
                     player.sendMessage(message.build());
                 } else {
-                    Main.inst().getDebugLogger().info("Failed to move " + player.getUsername() + " to " + unverifiedServer.getServerInfo().getName() + ". Kicking.");
+                    ProxyDiscord.inst().getDebugLogger().info("Failed to move " + player.getUsername() + " to " + unverifiedServer.getServerInfo().getName() + ". Kicking.");
                     player.disconnect(message.build());
                 }
             });
@@ -287,7 +288,7 @@ public class VerificationManager {
     }
 
     public void populateUsers() {
-        Optional<Role> verifiedRole = Main.inst().getDiscord().getApi().getRoleById(verifiedRoleId);
+        Optional<Role> verifiedRole = ProxyDiscord.inst().getDiscord().getApi().getRoleById(verifiedRoleId);
 
         if(!verifiedRole.isPresent()) {
             if(verifiedRoleId != null && !verifiedRoleId.isEmpty()) {
@@ -311,7 +312,7 @@ public class VerificationManager {
     }
 
     Role getVerifiedRole() {
-        Optional<Role> role = Main.inst().getDiscord().getApi().getRoleById(verifiedRoleId);
+        Optional<Role> role = ProxyDiscord.inst().getDiscord().getApi().getRoleById(verifiedRoleId);
 
         return role.orElse(null);
     }

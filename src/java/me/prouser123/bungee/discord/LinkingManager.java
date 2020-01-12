@@ -11,7 +11,6 @@ import org.javacord.api.entity.channel.TextChannel;
 import org.javacord.api.entity.user.User;
 import org.slf4j.Logger;
 
-import javax.inject.Inject;
 import java.io.*;
 import java.security.SecureRandom;
 import java.util.*;
@@ -27,15 +26,15 @@ public class LinkingManager {
     private final Logger logger;
 
     public LinkingManager(String linkingUrl, String linkingChannelId) {
-        this.proxy = Main.inst().getProxy();
-        this.logger = Main.inst().getLogger();
+        this.proxy = ProxyDiscord.inst().getProxy();
+        this.logger = ProxyDiscord.inst().getLogger();
 
         this.linkingUrl = linkingUrl;
         this.linkingChannelId = linkingChannelId;
         this.loadLinks();
 
-        proxy.getScheduler().buildTask(Main.inst(), () -> {
-            Main.inst().getDebugLogger().info("Saving linked accounts");
+        proxy.getScheduler().buildTask(ProxyDiscord.inst(), () -> {
+            ProxyDiscord.inst().getDebugLogger().info("Saving linked accounts");
             saveLinks();
         }).repeat(300, TimeUnit.SECONDS).delay(300, TimeUnit.SECONDS).schedule();
 
@@ -43,7 +42,7 @@ public class LinkingManager {
             findChannel();
         }
 
-        Main.inst().getDiscord().getApi().addReconnectListener(event -> {
+        ProxyDiscord.inst().getDiscord().getApi().addReconnectListener(event -> {
             if(linkingChannelId != null) {
                 findChannel();
             }
@@ -62,19 +61,19 @@ public class LinkingManager {
         return this.links.containsKey(player.getUniqueId().toString());
     }
 
-    String getLinked(Long discordId) {
+    public String getLinked(Long discordId) {
         return this.links.inverse().get(discordId);
     }
 
-    String getLinked(User user) {
+    public String getLinked(User user) {
         return this.links.inverse().get(user.getId());
     }
 
-    Long getLinked(Player player) {
+    public Long getLinked(Player player) {
         return this.links.get(player.getUniqueId().toString());
     }
 
-    Long getLinked(UUID uuid) {
+    public Long getLinked(UUID uuid) {
         return this.links.get(uuid.toString());
     }
 
@@ -124,7 +123,7 @@ public class LinkingManager {
         //Account already linked
         if(this.links.containsValue(discordId)) {
             //Said account doesn't have verified role
-            if(!Main.inst().getVerificationManager().hasVerifiedRole(discordId)) {
+            if(!ProxyDiscord.inst().getVerificationManager().hasVerifiedRole(discordId)) {
                 return LinkResult.ALREADY_LINKED_NOT_VERIFIED;
             }
 
@@ -149,9 +148,53 @@ public class LinkingManager {
         this.links.put(player, discordId);
         this.pendingLinks.remove(token);
 
-        VerificationResult result =  Main.inst().getVerificationManager().checkVerificationStatus(discordId);
+        VerificationResult result =  ProxyDiscord.inst().getVerificationManager().checkVerificationStatus(discordId);
 
         Optional<Player> onlinePlayer = proxy.getPlayer(UUID.fromString(player));
+
+        if(onlinePlayer.isPresent()) {
+            if(result == VerificationResult.VERIFIED) {
+                onlinePlayer.get().sendMessage(TextComponent.of(ChatMessages.getMessage("link-success"))
+                        .color(TextColor.GREEN));
+
+                return LinkResult.SUCCESS;
+            } else {
+                onlinePlayer.get().sendMessage(TextComponent.of(ChatMessages.getMessage("link-not-verified"))
+                        .color(TextColor.YELLOW));
+
+                return LinkResult.NOT_VERIFIED;
+            }
+        }
+
+        return result == VerificationResult.VERIFIED ? LinkResult.SUCCESS : LinkResult.NOT_VERIFIED;
+    }
+
+    public LinkResult manualLink(UUID uuid, Long discordId) {
+        //Minecraft account already linked
+        if(this.links.containsValue(discordId)) {
+            //Said account doesn't have verified role
+            if(!ProxyDiscord.inst().getVerificationManager().hasVerifiedRole(discordId)) {
+                return LinkResult.ALREADY_LINKED_NOT_VERIFIED;
+            }
+
+            return LinkResult.ALREADY_LINKED;
+        }
+
+        //Discord account already linked
+        if(this.links.containsKey(uuid.toString())) {
+            //Said account doesn't have verified role
+            if(!ProxyDiscord.inst().getVerificationManager().hasVerifiedRole(this.links.get(uuid.toString()))) {
+                return LinkResult.ALREADY_LINKED_NOT_VERIFIED;
+            }
+
+            return LinkResult.ALREADY_LINKED;
+        }
+
+        this.links.put(uuid.toString(), discordId);
+
+        VerificationResult result =  ProxyDiscord.inst().getVerificationManager().checkVerificationStatus(discordId);
+
+        Optional<Player> onlinePlayer = proxy.getPlayer(uuid);
 
         if(onlinePlayer.isPresent()) {
             if(result == VerificationResult.VERIFIED) {
@@ -176,7 +219,7 @@ public class LinkingManager {
 
     public void saveLinks() {
         try {
-            File folder = Main.inst().getDataDirectory().toFile();
+            File folder = ProxyDiscord.inst().getDataDirectory().toFile();
             File saveFile = new File(folder, "links.sav");
 
             if (!saveFile.exists() && !saveFile.createNewFile()) {
@@ -195,7 +238,7 @@ public class LinkingManager {
 
     private void loadLinks() {
         try {
-            File folder = Main.inst().getDataDirectory().toFile();
+            File folder = ProxyDiscord.inst().getDataDirectory().toFile();
             File saveFile = new File(folder, "links.sav");
 
             if (!saveFile.exists()) {
@@ -218,7 +261,7 @@ public class LinkingManager {
     }
 
     private void findChannel() {
-        Optional <TextChannel> linkingChannel = Main.inst().getDiscord().getApi().getTextChannelById(linkingChannelId);
+        Optional <TextChannel> linkingChannel = ProxyDiscord.inst().getDiscord().getApi().getTextChannelById(linkingChannelId);
 
         if(!linkingChannel.isPresent()) {
             logger.warn("Unable to find linking channel. Did you put a valid channel ID in the config?");

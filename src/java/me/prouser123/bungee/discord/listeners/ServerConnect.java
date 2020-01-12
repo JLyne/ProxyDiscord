@@ -4,7 +4,7 @@ import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.player.ServerPreConnectEvent;
 import com.velocitypowered.api.proxy.ServerConnection;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
-import me.prouser123.bungee.discord.Main;
+import me.prouser123.bungee.discord.ProxyDiscord;
 import me.prouser123.bungee.discord.VerificationManager;
 import me.prouser123.bungee.discord.VerificationResult;
 import me.prouser123.bungee.discord.ChatMessages;
@@ -17,7 +17,7 @@ public class ServerConnect {
     private static VerificationManager verificationManager = null;
 
     public ServerConnect() {
-        ServerConnect.verificationManager = Main.inst().getVerificationManager();
+        ServerConnect.verificationManager = ProxyDiscord.inst().getVerificationManager();
     }
 
     @Subscribe
@@ -50,7 +50,7 @@ public class ServerConnect {
         message.color(TextColor.RED);
 
         if(unverifiedServer != null) {
-            Main.inst().getDebugLogger().info("Blocking unverified player " + e.getPlayer().getUsername() + " from joining " + e.getOriginalServer().getServerInfo().getName());
+            ProxyDiscord.inst().getDebugLogger().info("Blocking unverified player " + e.getPlayer().getUsername() + " from joining " + e.getOriginalServer().getServerInfo().getName());
             Optional<ServerConnection> currentServer = e.getPlayer().getCurrentServer();
 
             if (currentServer.isPresent() && currentServer.get().getServer().equals(unverifiedServer)) {
@@ -60,7 +60,7 @@ public class ServerConnect {
                 e.setResult(ServerPreConnectEvent.ServerResult.allowed(unverifiedServer));
             }
         } else {
-            Main.inst().getDebugLogger().info("Disconnecting unverified player " + e.getPlayer().getUsername());
+            ProxyDiscord.inst().getDebugLogger().info("Disconnecting unverified player " + e.getPlayer().getUsername());
             e.getPlayer().disconnect(message.build());
         }
     }

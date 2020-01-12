@@ -10,7 +10,7 @@ import org.javacord.api.listener.message.MessageCreateListener;
 
 import me.prouser123.bungee.discord.Constants;
 import me.prouser123.bungee.discord.Discord;
-import me.prouser123.bungee.discord.Main;
+import me.prouser123.bungee.discord.ProxyDiscord;
 
 public class ServerInfo implements MessageCreateListener, BaseCommand {
 	
@@ -66,12 +66,12 @@ public class ServerInfo implements MessageCreateListener, BaseCommand {
 
 			EmbedBuilder embed = new EmbedBuilder()
         		.setAuthor("BungeeCord Server Information", Constants.url, Constants.authorIconURL)
-            	.addInlineField("Players", Main.inst().getProxy().getPlayerCount() + "/" + Main.inst().getProxy().getConfiguration().getShowMaxPlayers())
+            	.addInlineField("Players", ProxyDiscord.inst().getProxy().getPlayerCount() + "/" + ProxyDiscord.inst().getProxy().getConfiguration().getShowMaxPlayers())
             	.addInlineField("Uptime", uptime_output)
             	.addInlineField("Memory", Runtime.getRuntime().freeMemory() / 1024 / 1024 + "/" + Runtime.getRuntime().totalMemory() / 1024 / 1024 + " MB free")
-            	.addInlineField("Servers", Integer.toString(Main.inst().getProxy().getAllServers().size()))
+            	.addInlineField("Servers", Integer.toString(ProxyDiscord.inst().getProxy().getAllServers().size()))
             	.addInlineField("Bot Owner", bot_owner)
-            	.addInlineField("Server Version", System.getProperty("os.name") + ", " + Main.inst().getProxy().getVersion());
+            	.addInlineField("Server Version", System.getProperty("os.name") + ", " + ProxyDiscord.inst().getProxy().getVersion());
         	
         	// Set footer
         	Discord.setFooter(embed);

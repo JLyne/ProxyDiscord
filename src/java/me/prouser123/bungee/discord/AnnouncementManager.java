@@ -20,8 +20,8 @@ public class AnnouncementManager {
     private final Logger logger;
 
     public AnnouncementManager(String announcementChannelId) {
-        this.proxy = Main.inst().getProxy();
-        this.logger = Main.inst().getLogger();
+        this.proxy = ProxyDiscord.inst().getProxy();
+        this.logger = ProxyDiscord.inst().getLogger();
 
         this.announcementChannelId = announcementChannelId;
 
@@ -29,7 +29,7 @@ public class AnnouncementManager {
             findChannel();
         }
 
-        Main.inst().getDiscord().getApi().addReconnectListener(event -> {
+        ProxyDiscord.inst().getDiscord().getApi().addReconnectListener(event -> {
             if(announcementChannelId != null) {
                 findChannel();
             }
@@ -89,7 +89,7 @@ public class AnnouncementManager {
             return;
         }
 
-        Optional <TextChannel> announcementChannel = Main.inst().getDiscord().getApi().getTextChannelById(announcementChannelId);
+        Optional <TextChannel> announcementChannel = ProxyDiscord.inst().getDiscord().getApi().getTextChannelById(announcementChannelId);
 
         if(!announcementChannel.isPresent()) {
             logger.warn("Unable to find announcement channel. Did you put a valid channel ID in the config?");
@@ -103,7 +103,7 @@ public class AnnouncementManager {
 
         announcementChannel.get().getMessages(1).thenAcceptAsync(messages -> {
             if(messages.getNewestMessage().isPresent()) {
-                Main.inst().getDebugLogger().info("Retrieved latest announcement");
+                ProxyDiscord.inst().getDebugLogger().info("Retrieved latest announcement");
                 lastMessage = messages.getNewestMessage().get();
             }
         }).exceptionally(e -> {
