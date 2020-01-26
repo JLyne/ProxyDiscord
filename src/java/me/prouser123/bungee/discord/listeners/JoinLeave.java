@@ -45,6 +45,10 @@ public class JoinLeave {
 	public void onServerConnected(ServerPreConnectEvent event) {
 		Player player = event.getPlayer();
 
+		if(!event.getResult().isAllowed() || event.getPlayer() == null) {
+			return;
+		}
+
 		if(!firstJoin.get(player.getUniqueId())) {
 			return;
 		}
@@ -92,6 +96,10 @@ public class JoinLeave {
 	@Subscribe(order = PostOrder.LAST)
 	public void onDisconnect(DisconnectEvent event) {
 		Player player = event.getPlayer();
+
+		if(event.getPlayer() == null) {
+			return;
+		}
 
 		if(!firstJoin.get(player.getUniqueId())) {
 			loggingManager.logLeave(player);
