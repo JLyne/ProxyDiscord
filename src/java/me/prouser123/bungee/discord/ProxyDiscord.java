@@ -14,7 +14,7 @@ import me.prouser123.bungee.discord.bot.commands.listeners.UserRoleRemove;
 import me.prouser123.bungee.discord.commands.Link;
 import me.prouser123.bungee.discord.commands.Save;
 import me.prouser123.bungee.discord.commands.Unlink;
-//import me.prouser123.bungee.discord.listeners.DeluxeQueues;
+import me.prouser123.bungee.discord.listeners.DeluxeQueues;
 import me.prouser123.bungee.discord.listeners.JoinLeave;
 import me.prouser123.bungee.discord.listeners.ServerConnect;
 
@@ -139,7 +139,7 @@ public class ProxyDiscord {
 		initAnnouncements();
 
 		proxy.getEventManager().register(this, new JoinLeave());
-		//proxy.getEventManager().register(this, new DeluxeQueues());
+		proxy.getEventManager().register(this, new DeluxeQueues());
 
 		VelocityCommandManager commandManager = new VelocityCommandManager(proxy, this);
 		commandManager.registerCommand(new Link());
