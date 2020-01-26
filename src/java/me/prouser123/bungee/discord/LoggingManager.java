@@ -1,5 +1,6 @@
 package me.prouser123.bungee.discord;
 
+import com.velocitypowered.api.event.PostOrder;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.player.PlayerChatEvent;
 import com.velocitypowered.api.proxy.Player;
@@ -51,7 +52,7 @@ public class LoggingManager {
             findChannel();
         }
 
-        //proxy.getPluginManager().registerListener(Main.inst(), this);
+        proxy.getEventManager().register(ProxyDiscord.inst(), this);
 
         ProxyDiscord.inst().getDiscord().getApi().addReconnectListener(event -> {
             if(loggingChannelId != null) {
@@ -76,8 +77,12 @@ public class LoggingManager {
         sendLogMessage(getPlayerLogName(player) + " has left the network.");
     }
 
-    @Subscribe
+    @Subscribe(order = PostOrder.LATE)
     public void onPlayerChat(PlayerChatEvent e) {
+        if(!e.getResult().isAllowed()) {
+            return;
+        }
+
         Player sender = e.getPlayer();
         String message = e.getMessage().replace("```", "");
 
