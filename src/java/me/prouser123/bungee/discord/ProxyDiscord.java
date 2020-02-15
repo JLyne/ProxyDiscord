@@ -4,6 +4,7 @@ import co.aikar.commands.VelocityCommandManager;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
 import com.velocitypowered.api.event.proxy.ProxyShutdownEvent;
+import com.velocitypowered.api.plugin.Dependency;
 import com.velocitypowered.api.plugin.Plugin;
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.ProxyServer;
@@ -29,7 +30,9 @@ import javax.inject.Inject;
 import ninja.leaping.configurate.yaml.YAMLConfigurationLoader;
 
 @Plugin(id = "proxydiscord", name = "ProxyDiscord", version = "0.1-SNAPSHOT",
-        description = "", authors = {"Jim (NotKatuen)"})
+        description = "", authors = {"Jim (NotKatuen)"}, dependencies = {
+		@Dependency(id="luckperms")
+})
 public class ProxyDiscord {
 	private static ProxyDiscord instance;
 
