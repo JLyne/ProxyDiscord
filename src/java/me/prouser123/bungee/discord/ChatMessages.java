@@ -74,7 +74,7 @@ public class ChatMessages {
             Color color;
 
             try {
-                color = Color.decode(message.getString("colour"));
+                color = Color.decode(message.getNode("colour").getString(""));
             } catch (NumberFormatException e) {
                 color = Color.LIGHT_GRAY;
             }

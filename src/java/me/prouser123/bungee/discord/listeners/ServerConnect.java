@@ -1,5 +1,6 @@
 package me.prouser123.bungee.discord.listeners;
 
+import com.velocitypowered.api.event.PostOrder;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.player.ServerPreConnectEvent;
 import com.velocitypowered.api.proxy.ServerConnection;
@@ -20,7 +21,7 @@ public class ServerConnect {
         ServerConnect.verificationManager = ProxyDiscord.inst().getVerificationManager();
     }
 
-    @Subscribe
+    @Subscribe(order = PostOrder.FIRST)
     public void onServerConnect(ServerPreConnectEvent e) {
         RegisteredServer unverifiedServer = verificationManager.getUnverifiedServer();
 

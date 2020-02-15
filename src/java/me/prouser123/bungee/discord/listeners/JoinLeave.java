@@ -1,5 +1,6 @@
 package me.prouser123.bungee.discord.listeners;
 
+import com.velocitypowered.api.event.PostOrder;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.connection.DisconnectEvent;
 import com.velocitypowered.api.event.connection.PostLoginEvent;
@@ -35,14 +36,18 @@ public class JoinLeave {
         logger.info("Hello there, it's a test plugin I made!");
     }
 
-	@Subscribe
+	@Subscribe(order = PostOrder.LAST)
 	public void onPostLogin(PostLoginEvent event) {
 		firstJoin.put(event.getPlayer().getUniqueId(), true);
 	}
 
-	@Subscribe
+	@Subscribe(order = PostOrder.NORMAL)
 	public void onServerConnected(ServerPreConnectEvent event) {
 		Player player = event.getPlayer();
+
+		if(!event.getResult().isAllowed() || event.getPlayer() == null) {
+			return;
+		}
 
 		if(!firstJoin.get(player.getUniqueId())) {
 			return;
@@ -88,9 +93,13 @@ public class JoinLeave {
 		}
 	}
 	
-	@Subscribe
+	@Subscribe(order = PostOrder.LAST)
 	public void onDisconnect(DisconnectEvent event) {
 		Player player = event.getPlayer();
+
+		if(event.getPlayer() == null) {
+			return;
+		}
 
 		if(!firstJoin.get(player.getUniqueId())) {
 			loggingManager.logLeave(player);

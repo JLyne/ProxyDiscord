@@ -1,10 +1,12 @@
 package me.prouser123.bungee.discord;
 
+import com.velocitypowered.api.plugin.PluginContainer;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.proxy.ServerConnection;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 //import me.glaremasters.deluxequeues.DeluxeQueues;
+import me.glaremasters.deluxequeues.DeluxeQueues;
 import net.kyori.text.TextComponent;
 import net.kyori.text.format.TextColor;
 import net.luckperms.api.LuckPerms;
@@ -253,13 +255,11 @@ public class VerificationManager {
             return;
         }
 
-        //TODO: DeluxeQueues
         //Remove player from any queues
-//        DeluxeQueues deluxeQueues = (DeluxeQueues) proxy.getPluginManager().getPlugin("DeluxeQueues");
-//
-//        if(deluxeQueues != null) {
-//            deluxeQueues.getQueueHandler().clearPlayer(player);
-//        }
+        Optional<PluginContainer> deluxeQueues = proxy.getPluginManager().getPlugin("deluxequeues");
+
+        deluxeQueues.ifPresent(
+                plugin -> ((DeluxeQueues) plugin.getInstance().get()).getQueueHandler().clearPlayer(player));
 
         Optional<ServerConnection> currentServer = player.getCurrentServer();
 
