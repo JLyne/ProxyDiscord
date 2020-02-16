@@ -24,8 +24,10 @@ public class ServerConnect {
     @Subscribe(order = PostOrder.FIRST)
     public void onServerConnect(ServerPreConnectEvent e) {
         RegisteredServer unverifiedServer = verificationManager.getUnverifiedServer();
+        RegisteredServer server = e.getOriginalServer();
+        server = e.getResult().getServer().orElse(server);
 
-        if(e.getOriginalServer().equals(unverifiedServer)) {
+        if(server.equals(unverifiedServer)) {
             return;
         }
 
@@ -60,6 +62,8 @@ public class ServerConnect {
             } else {
                 e.setResult(ServerPreConnectEvent.ServerResult.allowed(unverifiedServer));
             }
+
+            //
         } else {
             ProxyDiscord.inst().getDebugLogger().info("Disconnecting unverified player " + e.getPlayer().getUsername());
             e.getPlayer().disconnect(message.build());
