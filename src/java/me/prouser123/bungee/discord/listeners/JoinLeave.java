@@ -41,7 +41,7 @@ public class JoinLeave {
 		firstJoin.put(event.getPlayer().getUniqueId(), true);
 	}
 
-	@Subscribe(order = PostOrder.NORMAL)
+	@Subscribe(order = PostOrder.FIRST)
 	public void onServerConnected(ServerPreConnectEvent event) {
 		Player player = event.getPlayer();
 

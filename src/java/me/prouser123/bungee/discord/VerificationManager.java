@@ -7,6 +7,8 @@ import com.velocitypowered.api.proxy.ServerConnection;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 //import me.glaremasters.deluxequeues.DeluxeQueues;
 import me.glaremasters.deluxequeues.DeluxeQueues;
+import me.prouser123.bungee.discord.events.PlayerUnverifiedEvent;
+import me.prouser123.bungee.discord.events.PlayerVerifiedEvent;
 import net.kyori.text.TextComponent;
 import net.kyori.text.format.TextColor;
 import net.luckperms.api.LuckPerms;
@@ -209,6 +211,8 @@ public class VerificationManager {
         } catch(IllegalStateException e) {
              logger.warn("Failed to update permissions: " + e.getMessage());
         }
+
+        proxy.getEventManager().fireAndForget(new PlayerVerifiedEvent(player));
     }
 
     private void removeVerifiedPermission(Player player, RemovalReason reason) {
@@ -284,6 +288,7 @@ public class VerificationManager {
             player.sendMessage(message.build());
         }
 
+        proxy.getEventManager().fireAndForget(new PlayerUnverifiedEvent(player));
         kickManager.addPlayer(player);
     }
 

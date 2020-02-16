@@ -47,7 +47,7 @@ dependencies {
     compile "co.aikar:acf-velocity:0.5.0-SNAPSHOT"
     compile group: 'com.velocitypowered', name: 'velocity-api', version:'1.0.0-SNAPSHOT'
     compile 'org.spongepowered:configurate-yaml:3.6'
-    compile name: 'DeluxeQueues'
+    compileOnly name: 'DeluxeQueues'
     annotationProcessor 'com.velocitypowered:velocity-api:1.0.0-SNAPSHOT'
     implementation  'org.javacord:javacord'
 }

@@ -47,6 +47,7 @@ public class ProxyDiscord {
 	private static VerificationManager verificationManager;
 	private static KickManager kickManager;
 	private static AnnouncementManager announcementManager;
+	private static RedirectManager redirectManager;
 	private static LoggingManager loggingManager;
 
 	@Inject
@@ -83,6 +84,10 @@ public class ProxyDiscord {
 
 	public AnnouncementManager getAnnouncementManager() {
 		return announcementManager;
+	}
+
+	public RedirectManager getRedirectManager() {
+		return redirectManager;
 	}
 
 	public LoggingManager getLoggingManager() {
@@ -141,6 +146,7 @@ public class ProxyDiscord {
 		initLinking();
 		initVerification();
 		initAnnouncements();
+		redirectManager = new RedirectManager();
 
 		proxy.getEventManager().register(this, new JoinLeave());
 		proxy.getEventManager().register(this, new DeluxeQueues());
