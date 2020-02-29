@@ -20,8 +20,6 @@ public class JoinLeave {
 	private static KickManager kickManager = null;
 	private static LoggingManager loggingManager = null;
 
-	private HashMap<UUID, Boolean> firstJoin;
-
 	private final ProxyServer proxy;
     private final Logger logger;
 
@@ -32,14 +30,7 @@ public class JoinLeave {
         verificationManager = ProxyDiscord.inst().getVerificationManager();
 		kickManager = ProxyDiscord.inst().getKickManager();
 		loggingManager = ProxyDiscord.inst().getLoggingManager();
-		firstJoin = new HashMap<>();
-        logger.info("Hello there, it's a test plugin I made!");
     }
-
-	@Subscribe(order = PostOrder.LAST)
-	public void onPostLogin(PostLoginEvent event) {
-		firstJoin.put(event.getPlayer().getUniqueId(), true);
-	}
 
 	@Subscribe(order = PostOrder.FIRST)
 	public void onServerConnected(ServerPreConnectEvent event) {
@@ -49,11 +40,10 @@ public class JoinLeave {
 			return;
 		}
 
-		if(!firstJoin.get(player.getUniqueId())) {
+		if(player.getCurrentServer().isPresent()) {
 			return;
 		}
 
-		firstJoin.put(player.getUniqueId(), false);
 		loggingManager.logJoin(player);
 
 		String text;
@@ -101,11 +91,6 @@ public class JoinLeave {
 			return;
 		}
 
-		if(!firstJoin.get(player.getUniqueId())) {
-			loggingManager.logLeave(player);
-		}
-
-		firstJoin.remove(player.getUniqueId());
 		kickManager.removePlayer(player);
 	}
 }
