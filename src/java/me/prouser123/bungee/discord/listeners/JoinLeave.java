@@ -36,7 +36,7 @@ public class JoinLeave {
 	public void onServerConnected(ServerPreConnectEvent event) {
 		Player player = event.getPlayer();
 
-		if(!event.getResult().isAllowed() || event.getPlayer() == null) {
+		if(!event.getResult().isAllowed()) {
 			return;
 		}
 
@@ -87,10 +87,7 @@ public class JoinLeave {
 	public void onDisconnect(DisconnectEvent event) {
 		Player player = event.getPlayer();
 
-		if(event.getPlayer() == null) {
-			return;
-		}
-
+		loggingManager.logLeave(player);
 		kickManager.removePlayer(player);
 	}
 }
