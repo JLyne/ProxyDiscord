@@ -1,6 +1,5 @@
 package me.prouser123.bungee.discord;
 
-import com.google.common.collect.HashBiMap;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
 import net.kyori.text.TextComponent;
@@ -9,10 +8,11 @@ import org.slf4j.Logger;
 
 import java.util.Iterator;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 public class KickManager {
-    private final HashBiMap<Long, Player> kickablePlayers;
+    private final ConcurrentHashMap<Player, Long> kickablePlayers;
     private final int kickTime;
 
     private final ProxyServer proxy;
@@ -22,7 +22,7 @@ public class KickManager {
         this.proxy = ProxyDiscord.inst().getProxy();
         this.logger = ProxyDiscord.inst().getLogger();
 
-        kickablePlayers = HashBiMap.create(64);
+        kickablePlayers = new ConcurrentHashMap<>();
         this.kickTime = kickTime;
 
         this.kickPlayers();
@@ -33,16 +33,17 @@ public class KickManager {
             return;
         }
 
-        if (!kickablePlayers.containsValue(player)) {
-            ProxyDiscord.inst().getDebugLogger().info("Adding player " + player.getUsername() + " to kickable list");
+        Long previous = kickablePlayers.putIfAbsent(player, System.currentTimeMillis());
 
-            kickablePlayers.put(System.currentTimeMillis(), player);
+        if(previous == null) {
+            ProxyDiscord.inst().getDebugLogger().info("Added player " + player.getUsername() + " to kickable list");
         }
     }
 
     public void removePlayer(Player player) {
-        ProxyDiscord.inst().getDebugLogger().info("Removing player " + player.getUsername() + " from kickable list");
-        kickablePlayers.inverse().remove(player);
+        if(kickablePlayers.remove(player) != null) {
+            ProxyDiscord.inst().getDebugLogger().info("Removed player " + player.getUsername() + " from kickable list");
+        }
     }
 
     private void kickPlayers() {
@@ -56,8 +57,8 @@ public class KickManager {
 
             while (iterator.hasNext()) {
                 Map.Entry pair = (Map.Entry) iterator.next();
-                Player player = (Player) pair.getValue();
-                Long addedTime =(Long) pair.getKey();
+                Long addedTime = (Long) pair.getValue();
+                Player player = (Player) pair.getKey();
                 TextComponent message;
 
                 if(!player.isActive()) {
@@ -65,9 +66,7 @@ public class KickManager {
                     continue;
                 }
 
-                ProxyDiscord.inst().getDebugLogger().info("Player " + player.getUsername() + " added time " + addedTime);
-                ProxyDiscord.inst().getDebugLogger().info("Player " + player.getUsername() + " elapsed time " + (now - addedTime) / 1000);
-                ProxyDiscord.inst().getDebugLogger().info("Kick time: " + kickTime);
+                ProxyDiscord.inst().getDebugLogger().info("Player " + player.getUsername() + " elapsed time " + (now - addedTime) / 1000 + ". Kick time: " + kickTime);
 
                 if(((now - addedTime) / 1000) > kickTime) {
                     switch(verificationManager.checkVerificationStatus(player)) {
@@ -84,6 +83,7 @@ public class KickManager {
                     }
 
                     ProxyDiscord.inst().getDebugLogger().info("Kicking player " + player.getUsername() + " for exceeding unverified kick time");
+                    iterator.remove();
                     player.disconnect(message);
                 }
             }
