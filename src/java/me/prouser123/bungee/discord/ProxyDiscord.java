@@ -6,6 +6,7 @@ import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
 import com.velocitypowered.api.event.proxy.ProxyShutdownEvent;
 import com.velocitypowered.api.plugin.Dependency;
 import com.velocitypowered.api.plugin.Plugin;
+import com.velocitypowered.api.plugin.PluginContainer;
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.ProxyServer;
 import me.prouser123.bungee.discord.bot.commands.listeners.Reconnect;
@@ -21,6 +22,7 @@ import me.prouser123.bungee.discord.listeners.ServerConnect;
 
 import java.io.*;
 import java.nio.file.Path;
+import java.util.Optional;
 
 import com.google.common.io.ByteStreams;
 import ninja.leaping.configurate.ConfigurationNode;
@@ -32,7 +34,7 @@ import ninja.leaping.configurate.yaml.YAMLConfigurationLoader;
 @Plugin(id = "proxydiscord", name = "ProxyDiscord", version = "1.0-SNAPSHOT",
         description = "Discord account linking", authors = {"Jim (NotKatuen)"}, dependencies = {
 		@Dependency(id = "luckperms"),
-		@Dependency(id = "deluxequeues")
+		@Dependency(id = "deluxequeues", optional = true)
 })
 public class ProxyDiscord {
 	private static ProxyDiscord instance;
@@ -149,7 +151,9 @@ public class ProxyDiscord {
 		redirectManager = new RedirectManager();
 
 		proxy.getEventManager().register(this, new JoinLeave());
-		proxy.getEventManager().register(this, new DeluxeQueues());
+
+		Optional<PluginContainer> plugin = proxy.getPluginManager().getPlugin("deluxequeues");
+        plugin.ifPresent(deluxequeues -> proxy.getEventManager().register(this, new DeluxeQueues()));
 
 		VelocityCommandManager commandManager = new VelocityCommandManager(proxy, this);
 		commandManager.registerCommand(new Link());
