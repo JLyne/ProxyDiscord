@@ -113,12 +113,12 @@ public class LoggingManager {
             proxy.getScheduler().buildTask(ProxyDiscord.inst(), () -> {
                 String message = event.getReadableMessageContent();
                 Long discordId = event.getMessage().getAuthor().getId();
-                String linked = ProxyDiscord.inst().getLinkingManager().getLinked(discordId);
+                UUID linked = ProxyDiscord.inst().getLinkingManager().getLinked(discordId);
 
                 event.deleteMessage();
 
                 if(linked != null) {
-                    sendDiscordMessage(UUID.fromString(linked), message);
+                    sendDiscordMessage(linked, message);
                 }
             }).schedule();
         });

@@ -61,8 +61,18 @@ public class LinkingManager {
         return this.links.containsKey(player.getUniqueId().toString());
     }
 
-    public String getLinked(Long discordId) {
-        return this.links.inverse().get(discordId);
+    public boolean isLinked(UUID uuid) {
+        return this.links.containsKey(uuid.toString());
+    }
+
+    public boolean isLinked(long discordId) {
+        return this.links.inverse().containsKey(discordId);
+    }
+
+    public UUID getLinked(Long discordId) {
+        String linked = this.links.inverse().get(discordId);
+
+        return linked != null ? UUID.fromString(linked) : null;
     }
 
     public String getLinked(User user) {
@@ -215,6 +225,14 @@ public class LinkingManager {
 
     public void unlink(Player player) {
         this.links.remove(player.getUniqueId().toString());
+    }
+
+    public void unlink(UUID uuid) {
+        this.links.remove(uuid.toString());
+    }
+
+    public void unlink(long discordId) {
+        this.links.inverse().remove(discordId);
     }
 
     public void saveLinks() {

@@ -150,14 +150,14 @@ public class VerificationManager {
             return VerificationResult.VERIFIED;
         }
 
-        String linked = linkingManager.getLinked(discordId);
+        UUID linked = linkingManager.getLinked(discordId);
 
         if(linked == null) {
             ProxyDiscord.inst().getDebugLogger().info("Discord id " + discordId.toString() + " has not been linked to a player. Sad.");
             return VerificationResult.NOT_LINKED;
         }
 
-        Optional<Player> player = proxy.getPlayer(UUID.fromString(linked));
+        Optional<Player> player = proxy.getPlayer(linked);
 
         if(player.isPresent()) {
             if(player.get().hasPermission(bypassPermission)) {

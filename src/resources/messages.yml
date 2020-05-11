@@ -60,6 +60,9 @@ link-other-discord-already-linked-unknown: |-
 link-other-success: |-
   [player] has been linked to [discord]
 
+# When a mod link via /link player discord, and the player doesn't exist
+link-other-not-found: 'Unknown player: [player].'
+
 link-other-not-verified: |-
   [player] has been linked to [discord], but they do not appear to have the [role] role.
 
@@ -71,14 +74,23 @@ unlink-not-linked: 'You have not linked a discord account.'
 
 # When a mod unlinks a player via /unlink player
 unlink-other-success: |-
-  [player]'s discord account has been unlinked
+  [player]'s discord account has been unlinked.
+
+unlink-other-discord-success: |-
+  Discord ID [player] has been unlinked.
+
+# When a mod unlink via /unlink player, and the player doesn't exist
+unlink-other-not-found: 'Unknown player: [player].'
 
 # When a mod unlink via /unlink player, and the player doesn't have a discord account linked
 unlink-other-not-linked: '[player] has not linked a discord account.'
 
+# When a mod unlink via /unlink player, and the player doesn't have a discord account linked
+unlink-other-discord-not-linked: 'Discord ID [player] is not linked to any Minecraft account.'
+
 # Sent to the target player when a mod unlinks their account via /unlink player
 unlink-by-other-success: |-
-  You discord account has been unlinked by [player]
+  You discord account has been unlinked by [player].
 
 # When a player loses their access due to their discord account losing the required role
 verification-gained-role: |-

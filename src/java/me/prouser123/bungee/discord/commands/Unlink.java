@@ -2,7 +2,6 @@ package me.prouser123.bungee.discord.commands;
 
 import co.aikar.commands.BaseCommand;
 import co.aikar.commands.annotation.*;
-import co.aikar.commands.velocity.contexts.OnlinePlayer;
 import com.velocitypowered.api.proxy.Player;
 import me.prouser123.bungee.discord.LinkingManager;
 import me.prouser123.bungee.discord.ProxyDiscord;
@@ -10,57 +9,118 @@ import me.prouser123.bungee.discord.ChatMessages;
 import me.prouser123.bungee.discord.VerificationManager;
 import net.kyori.text.TextComponent;
 import net.kyori.text.format.TextColor;
+import net.luckperms.api.LuckPerms;
+import net.luckperms.api.LuckPermsProvider;
+import java.util.UUID;
 
 @CommandAlias("discord")
 public class Unlink extends BaseCommand {
+    private static VerificationManager verificationManager = null;
     private static LinkingManager linker = null;
 
     public Unlink() {
         Unlink.linker = ProxyDiscord.inst().getLinkingManager();
+        Unlink.verificationManager = ProxyDiscord.inst().getVerificationManager();
     }
 
     @Subcommand("unlink")
     @CommandAlias("unlink")
     @CommandCompletion("@players")
     @CommandPermission("discord.unlink")
-    public void onUnlink(Player player, @Optional OnlinePlayer target) {
+    public void onUnlink(Player player, @Optional String target) {
         //Unlinking another player
-        if(target != null && player.hasPermission("discord.unlink.others")) {
-            Player targetPlayer = target.getPlayer();
-
-            if(linker.isLinked(targetPlayer)) {
-                VerificationManager verificationManager = ProxyDiscord.inst().getVerificationManager();
-
-                linker.unlink(targetPlayer);
-                verificationManager.checkVerificationStatus(targetPlayer);
-
-                TextComponent.Builder playerMessage = TextComponent.builder()
-                       .content(ChatMessages.getMessage("unlink-other-success")
-                                        .replace("[player]", targetPlayer.getUsername()))
-                       .color(TextColor.GREEN);
-
-                TextComponent.Builder targetUsername = TextComponent.builder()
-                       .content(ChatMessages.getMessage("unlink-by-other-success")
-                                        .replace("[player]", player.getUsername()))
-                       .color(TextColor.YELLOW);
-
-                player.sendMessage(playerMessage.build());
-                targetPlayer.sendMessage(targetUsername.build());
-            } else {
-                TextComponent.Builder playerMessage = TextComponent.builder()
-                       .content(ChatMessages.getMessage("unlink-other-not-linked")
-                                        .replace("[player]", targetPlayer.getUsername()))
-                       .color(TextColor.RED);
-
-                player.sendMessage(playerMessage.build());
+        if(target != null) {
+            if(!player.hasPermission("discord.unlink.others")) {
+                return;
             }
 
-           return;
-        }
+            Long discordId = null;
 
-        if(linker.isLinked(player)) {
-            VerificationManager verificationManager = ProxyDiscord.inst().getVerificationManager();
+            try {
+                discordId = Long.parseLong(target);
+            } catch (NumberFormatException ignored) {
+            }
 
+            if(discordId != null) {
+                UUID uuid = linker.getLinked(discordId);
+
+                if(uuid != null) {
+                    Player onlinePlayer = ProxyDiscord.inst().getProxy().getPlayer(uuid).orElse(null);
+                    linker.unlink(discordId);
+
+                    TextComponent.Builder playerMessage = TextComponent.builder()
+                           .content(ChatMessages.getMessage("unlink-other-discord-success")
+                                            .replace("[player]", target))
+                           .color(TextColor.GREEN);
+
+                    player.sendMessage(playerMessage.build());
+
+                    if(onlinePlayer != null) {
+                        TextComponent.Builder targetMessage = TextComponent.builder()
+                           .content(ChatMessages.getMessage("unlink-by-other-success")
+                                            .replace("[player]", player.getUsername()))
+                           .color(TextColor.YELLOW);
+
+                        verificationManager.checkVerificationStatus(onlinePlayer);
+                        onlinePlayer.sendMessage(targetMessage.build());
+                    }
+                } else {
+                    TextComponent.Builder playerMessage = TextComponent.builder()
+                           .content(ChatMessages.getMessage("unlink-other-discord-not-linked")
+                                            .replace("[player]", target))
+                           .color(TextColor.RED);
+
+                    player.sendMessage(playerMessage.build());
+                }
+
+                return;
+            }
+
+            LuckPerms luckPermsApi = LuckPermsProvider.get();
+
+            luckPermsApi.getUserManager().lookupUniqueId(target).thenAccept((UUID uuid) -> {
+                if(uuid == null) {
+                    TextComponent.Builder playerMessage = TextComponent.builder()
+                           .content(ChatMessages.getMessage("unlink-other-not-found")
+                                            .replace("[player]", target))
+                           .color(TextColor.GREEN);
+
+                    player.sendMessage(playerMessage.build());
+
+                    return;
+                }
+
+                Player onlinePlayer = ProxyDiscord.inst().getProxy().getPlayer(uuid).orElse(null);
+
+                if(linker.isLinked(uuid)) {
+                    linker.unlink(uuid);
+
+                    TextComponent.Builder playerMessage = TextComponent.builder()
+                           .content(ChatMessages.getMessage("unlink-other-success")
+                                            .replace("[player]", target))
+                           .color(TextColor.GREEN);
+
+                    player.sendMessage(playerMessage.build());
+
+                    if(onlinePlayer != null) {
+                        TextComponent.Builder targetMessage = TextComponent.builder()
+                           .content(ChatMessages.getMessage("unlink-by-other-success")
+                                            .replace("[player]", player.getUsername()))
+                           .color(TextColor.YELLOW);
+
+                        verificationManager.checkVerificationStatus(onlinePlayer);
+                        onlinePlayer.sendMessage(targetMessage.build());
+                    }
+                } else {
+                    TextComponent.Builder playerMessage = TextComponent.builder()
+                           .content(ChatMessages.getMessage("unlink-other-not-linked")
+                                            .replace("[player]", target))
+                           .color(TextColor.RED);
+
+                    player.sendMessage(playerMessage.build());
+                }
+            });
+        } else if(linker.isLinked(player)) {
             linker.unlink(player);
             verificationManager.checkVerificationStatus(player);
             player.sendMessage(TextComponent.of(ChatMessages.getMessage("unlink-success")).color(TextColor.GREEN));
