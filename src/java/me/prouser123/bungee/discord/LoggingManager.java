@@ -2,6 +2,7 @@ package me.prouser123.bungee.discord;
 
 import com.velocitypowered.api.event.PostOrder;
 import com.velocitypowered.api.event.Subscribe;
+import com.velocitypowered.api.event.command.CommandExecuteEvent;
 import com.velocitypowered.api.event.player.PlayerChatEvent;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
@@ -86,7 +87,23 @@ public class LoggingManager {
         Player sender = e.getPlayer();
         String message = e.getMessage().replace("```", "");
 
-        sendLogMessage(getPlayerLogName(sender) + "\n" + message);
+        sendLogMessage("[CHAT] " + getPlayerLogName(sender) + "\n" + message);
+    }
+
+    @Subscribe(order = PostOrder.LATE)
+    public void onPlayerCommand(CommandExecuteEvent e) {
+        if(!e.getResult().isAllowed()) {
+            return;
+        }
+
+        if(!(e.getCommandSource() instanceof Player)) {
+            return;
+        }
+
+        Player sender = (Player) e.getCommandSource();
+        String message = e.getCommand().replace("```", "");
+
+        sendLogMessage("[COMMAND] " + getPlayerLogName(sender) + "\n/" + message);
     }
 
     private void findChannel() {
@@ -129,7 +146,7 @@ public class LoggingManager {
     private String getPlayerLogName(Player player) {
         Long discordId = ProxyDiscord.inst().getLinkingManager().getLinked(player);
         Optional<ServerConnection> server = player.getCurrentServer();
-        String serverName = server.isPresent() ? server.get().getServerInfo().getName() : "none";
+        String serverName = server.isPresent() ? server.get().getServerInfo().getName() : "";
 
         if(discordId != null) {
             return "[" + serverName + "][" + player.getUsername() + "](<@!" + discordId.toString() + ">)";
@@ -170,7 +187,7 @@ public class LoggingManager {
             String text = "&l&bDISCORD>&r " + prefix + user.getFriendlyName() + suffix + "&r: " + message;
 
             proxy.broadcast(LegacyComponentSerializer.legacy().deserialize(text, '&'));
-            sendLogMessage("[DISCORD]" + getPlayerLogName(user) + "\n" + message);
+            sendLogMessage("[DISCORD] []" + getPlayerLogName(user) + "\n" + message);
         } catch (IllegalStateException e) {
             logger.warn("Failed to send Discord message: " + e.getMessage());
         }
