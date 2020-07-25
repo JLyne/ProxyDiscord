@@ -26,30 +26,24 @@ public class DeluxeQueues {
 
 	@Subscribe
 	public void onPlayerJoinQueue(PlayerQueueEvent event) {
-		ProxyDiscord.inst().getLogger().info("PlayerQueueEvent");
-
 		if(event.isCancelled()) {
-			ProxyDiscord.inst().getLogger().info("Ignoring cancelled event");
 			return;
 		}
 
         RegisteredServer unverifiedServer = verificationManager.getUnverifiedServer();
 
         if(event.getServer().equals(unverifiedServer)) {
-        	ProxyDiscord.inst().getLogger().info("Ignoring unverified server");
             return;
         }
 
         VerificationResult result = verificationManager.checkVerificationStatus(event.getPlayer());
 
         if(result == VerificationResult.VERIFIED) {
-        	ProxyDiscord.inst().getLogger().info("Verified");
-
             Optional<ServerConnection> currentServer = event.getPlayer().getCurrentServer();
 
             if(currentServer.isPresent() && currentServer.get().getServer().equals(verificationManager.getUnverifiedServer())) {
-                if(deluxeQueues != null && deluxeQueues.getWaitingServer() != null) {
-                    event.getPlayer().createConnectionRequest(deluxeQueues.getWaitingServer()).fireAndForget();
+                if(deluxeQueues != null && deluxeQueues.getWaitingServer().isPresent()) {
+                    event.getPlayer().createConnectionRequest(deluxeQueues.getWaitingServer().get()).fireAndForget();
                 }
             }
 
@@ -57,8 +51,6 @@ public class DeluxeQueues {
         }
 
 		event.setCancelled(true);
-
-        ProxyDiscord.inst().getLogger().info("Cancelling event");
 
         switch(result) {
             case NOT_LINKED:
