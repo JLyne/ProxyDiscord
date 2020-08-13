@@ -5,8 +5,6 @@ import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.proxy.ServerConnection;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
-//import me.glaremasters.deluxequeues.DeluxeQueues;
-import me.glaremasters.deluxequeues.DeluxeQueues;
 import me.prouser123.bungee.discord.events.PlayerUnverifiedEvent;
 import me.prouser123.bungee.discord.events.PlayerVerifiedEvent;
 import net.kyori.adventure.text.TextComponent;
@@ -19,6 +17,8 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.javacord.api.entity.permission.Role;
 import org.javacord.api.entity.user.User;
 import org.slf4j.Logger;
+import uk.co.notnull.proxyqueues.ProxyQueues;
+import uk.co.notnull.proxyqueues.queues.ProxyQueue;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -263,7 +263,7 @@ public class VerificationManager {
         Optional<PluginContainer> deluxeQueues = proxy.getPluginManager().getPlugin("deluxequeues");
 
         deluxeQueues.ifPresent(
-                plugin -> ((DeluxeQueues) plugin.getInstance().get()).getQueueHandler().clearPlayer(player));
+                plugin -> ((ProxyQueues) plugin.getInstance().get()).getQueueHandler().clearPlayer(player));
 
         Optional<ServerConnection> currentServer = player.getCurrentServer();
 

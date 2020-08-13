@@ -5,23 +5,23 @@ import com.velocitypowered.api.plugin.PluginContainer;
 import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.proxy.ServerConnection;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
-import me.glaremasters.deluxequeues.events.PlayerQueueEvent;
 import me.prouser123.bungee.discord.*;
+import uk.co.notnull.proxyqueues.events.PlayerQueueEvent;
 
 import java.util.Optional;
 
-public class DeluxeQueues {
+public class ProxyQueues {
 	private static VerificationManager verificationManager = null;
     private final ProxyServer proxy;
-    private me.glaremasters.deluxequeues.DeluxeQueues deluxeQueues = null;
+    private uk.co.notnull.proxyqueues.ProxyQueues proxyQueues = null;
 
-    public DeluxeQueues() {
+    public ProxyQueues() {
 		verificationManager = ProxyDiscord.inst().getVerificationManager();
 		proxy = ProxyDiscord.inst().getProxy();
 
 		Optional<PluginContainer> plugin = proxy.getPluginManager().getPlugin("deluxequeues");
 
-        plugin.ifPresent(pluginContainer -> deluxeQueues = (me.glaremasters.deluxequeues.DeluxeQueues) pluginContainer.getInstance().orElse(null));
+        plugin.ifPresent(pluginContainer -> proxyQueues = (uk.co.notnull.proxyqueues.ProxyQueues) pluginContainer.getInstance().orElse(null));
 	}
 
 	@Subscribe
@@ -42,8 +42,8 @@ public class DeluxeQueues {
             Optional<ServerConnection> currentServer = event.getPlayer().getCurrentServer();
 
             if(currentServer.isPresent() && currentServer.get().getServer().equals(verificationManager.getUnverifiedServer())) {
-                if(deluxeQueues != null && deluxeQueues.getWaitingServer().isPresent()) {
-                    event.getPlayer().createConnectionRequest(deluxeQueues.getWaitingServer().get()).fireAndForget();
+                if(proxyQueues != null && proxyQueues.getWaitingServer().isPresent()) {
+                    event.getPlayer().createConnectionRequest(proxyQueues.getWaitingServer().get()).fireAndForget();
                 }
             }
 

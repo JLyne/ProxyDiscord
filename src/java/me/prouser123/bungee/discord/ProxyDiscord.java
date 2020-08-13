@@ -16,7 +16,7 @@ import me.prouser123.bungee.discord.bot.commands.listeners.UserRoleRemove;
 import me.prouser123.bungee.discord.commands.Link;
 import me.prouser123.bungee.discord.commands.Save;
 import me.prouser123.bungee.discord.commands.Unlink;
-import me.prouser123.bungee.discord.listeners.DeluxeQueues;
+import me.prouser123.bungee.discord.listeners.ProxyQueues;
 import me.prouser123.bungee.discord.listeners.JoinLeave;
 import me.prouser123.bungee.discord.listeners.ServerConnect;
 
@@ -34,7 +34,7 @@ import ninja.leaping.configurate.yaml.YAMLConfigurationLoader;
 @Plugin(id = "proxydiscord", name = "ProxyDiscord", version = "1.0-SNAPSHOT",
         description = "Discord account linking", authors = {"Jim (NotKatuen)"}, dependencies = {
 		@Dependency(id = "luckperms"),
-		@Dependency(id = "deluxequeues", optional = true)
+		@Dependency(id = "proxyqueues", optional = true)
 })
 public class ProxyDiscord {
 	private static ProxyDiscord instance;
@@ -152,8 +152,8 @@ public class ProxyDiscord {
 
 		proxy.getEventManager().register(this, new JoinLeave());
 
-		Optional<PluginContainer> plugin = proxy.getPluginManager().getPlugin("deluxequeues");
-        plugin.ifPresent(deluxequeues -> proxy.getEventManager().register(this, new DeluxeQueues()));
+		Optional<PluginContainer> plugin = proxy.getPluginManager().getPlugin("proxyqueues");
+        plugin.ifPresent(proxyQueues -> proxy.getEventManager().register(this, new ProxyQueues()));
 
 		VelocityCommandManager commandManager = new VelocityCommandManager(proxy, this);
 		commandManager.registerCommand(new Link());
