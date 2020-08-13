@@ -2,19 +2,22 @@ package me.prouser123.bungee.discord;
 
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
-import net.kyori.text.TextComponent;
-import net.kyori.text.format.TextColor;
-import net.kyori.text.format.TextDecoration;
+import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.javacord.api.entity.channel.TextChannel;
 import org.javacord.api.entity.message.Message;
+import org.javacord.api.listener.message.MessageCreateListener;
+import org.javacord.api.util.event.ListenerManager;
 import org.slf4j.Logger;
 
 import java.util.Optional;
 
 public class AnnouncementManager {
-    private String announcementChannelId;
+    private final String announcementChannelId;
     private String announcementChannelName = null;
     private Message lastMessage = null;
+    private ListenerManager<MessageCreateListener> listener = null;
 
     private final ProxyServer proxy;
     private final Logger logger;
@@ -52,26 +55,26 @@ public class AnnouncementManager {
         lastMessage = message;
         TextComponent.Builder announcement;
         String content = "\n" + message.getReadableContent();
+        String heading;
 
         if(isNew) {
-            String heading = ChatMessages.getMessage("announcement-new").replace("[channel]", announcementChannelName);
-            announcement = TextComponent.builder().content(heading);
+            heading = ChatMessages.getMessage("announcement-new").replace("[channel]", announcementChannelName);
         } else {
-            String heading = ChatMessages.getMessage("announcement-latest").replace("[channel]", announcementChannelName);
-            announcement = TextComponent.builder().content(heading);
+            heading = ChatMessages.getMessage("announcement-latest").replace("[channel]", announcementChannelName);
         }
 
-        announcement.color(TextColor.DARK_GREEN).decoration(TextDecoration.BOLD, true);
+        announcement = TextComponent.builder().content(heading)
+                .color(NamedTextColor.DARK_GREEN).decoration(TextDecoration.BOLD, true);
 
         TextComponent text = TextComponent.of(content.length() > 250 ? content.subSequence(0, 250) + "..." : content)
-                .color(TextColor.GOLD)
+                .color(NamedTextColor.GOLD)
                 .decoration(TextDecoration.BOLD, false);
 
         announcement.append(text);
 
         if(content.length() > 250) {
             TextComponent readMore = TextComponent.of("\n" + ChatMessages.getMessage("announcement-read-more"))
-                    .color(TextColor.LIGHT_PURPLE)
+                    .color(NamedTextColor.LIGHT_PURPLE)
                     .decoration(TextDecoration.BOLD, false);
 
             announcement.append(readMore);
@@ -80,7 +83,7 @@ public class AnnouncementManager {
         if(player != null) {
             player.sendMessage(announcement.build());
         } else {
-            proxy.broadcast(announcement.build());
+            proxy.sendMessage(announcement.build());
         }
     }
 
@@ -89,9 +92,14 @@ public class AnnouncementManager {
             return;
         }
 
-        Optional <TextChannel> announcementChannel = ProxyDiscord.inst().getDiscord().getApi().getTextChannelById(announcementChannelId);
+        Optional <TextChannel> announcementChannel = ProxyDiscord.inst().getDiscord().getApi()
+                .getTextChannelById(announcementChannelId);
 
         if(!announcementChannel.isPresent()) {
+            if(listener != null) {
+                listener.remove();
+            }
+
             logger.warn("Unable to find announcement channel. Did you put a valid channel ID in the config?");
             return;
         }
@@ -99,7 +107,10 @@ public class AnnouncementManager {
         announcementChannelName = "#" + announcementChannel.toString().replaceAll(".*\\[|].*", "");
         logger.info("Announcements enabled for channel: " + announcementChannelName + " (id: " + announcementChannelId + ")");
 
-        announcementChannel.get().addMessageCreateListener(messageCreateEvent -> sendAnnouncement(messageCreateEvent.getMessage()));
+        if(listener == null) {
+            listener = announcementChannel.get()
+                    .addMessageCreateListener(messageCreateEvent -> sendAnnouncement(messageCreateEvent.getMessage()));
+        }
 
         announcementChannel.get().getMessages(1).thenAcceptAsync(messages -> {
             if(messages.getNewestMessage().isPresent()) {

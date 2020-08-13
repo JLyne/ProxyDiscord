@@ -8,7 +8,7 @@ import com.velocitypowered.api.proxy.Player;
 import me.prouser123.bungee.discord.ChatMessages;
 import me.prouser123.bungee.discord.LinkingManager;
 import me.prouser123.bungee.discord.ProxyDiscord;
-import net.kyori.text.TextComponent;
+import net.kyori.adventure.text.TextComponent;
 
 public class Save extends BaseCommand {
     private static LinkingManager linker = null;

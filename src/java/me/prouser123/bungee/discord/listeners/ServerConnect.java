@@ -9,8 +9,8 @@ import me.prouser123.bungee.discord.ProxyDiscord;
 import me.prouser123.bungee.discord.VerificationManager;
 import me.prouser123.bungee.discord.VerificationResult;
 import me.prouser123.bungee.discord.ChatMessages;
-import net.kyori.text.TextComponent;
-import net.kyori.text.format.TextColor;
+import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.format.NamedTextColor;
 
 import java.util.Optional;
 
@@ -50,7 +50,7 @@ public class ServerConnect {
                 message = TextComponent.builder().content("An error has occurred.");
         }
 
-        message.color(TextColor.RED);
+        message.color(NamedTextColor.RED);
 
         if(unverifiedServer != null) {
             ProxyDiscord.inst().getDebugLogger().info("Blocking unverified player " + e.getPlayer().getUsername() + " from joining " + e.getOriginalServer().getServerInfo().getName());

@@ -3,17 +3,13 @@ package me.prouser123.bungee.discord.listeners;
 import com.velocitypowered.api.event.PostOrder;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.connection.DisconnectEvent;
-import com.velocitypowered.api.event.connection.PostLoginEvent;
 import com.velocitypowered.api.event.player.ServerPreConnectEvent;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
 import me.prouser123.bungee.discord.*;
-import net.kyori.text.TextComponent;
-import net.kyori.text.format.TextColor;
+import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.slf4j.Logger;
-
-import java.util.HashMap;
-import java.util.UUID;
 
 public class JoinLeave {
 	private static VerificationManager verificationManager = null;
@@ -50,14 +46,14 @@ public class JoinLeave {
 		VerificationResult result = verificationManager.checkVerificationStatus(player);
 
 		player.sendMessage(TextComponent.of(ChatMessages.getMessage("join-welcome"))
-				.color(TextColor.GREEN));
+				.color(NamedTextColor.GREEN));
 
 		switch(result) {
 			case NOT_LINKED:
 				logger.info("Unlinked player " + player.getUsername() + " joined");
 
 				text = ChatMessages.getMessage("join-not-linked");
-				player.sendMessage(TextComponent.of(text).color(TextColor.YELLOW));
+				player.sendMessage(TextComponent.of(text).color(NamedTextColor.YELLOW));
 
 				kickManager.addPlayer(player);
 				break;
@@ -66,7 +62,7 @@ public class JoinLeave {
 				logger.info("Linked and unverified player " + player.getUsername() + " joined");
 
 				text = ChatMessages.getMessage("join-linked-not-verified");
-				player.sendMessage(TextComponent.of(text).color(TextColor.YELLOW));
+				player.sendMessage(TextComponent.of(text).color(NamedTextColor.YELLOW));
 
 				kickManager.addPlayer(player);
 				break;
@@ -79,7 +75,7 @@ public class JoinLeave {
 		}
 
 		if(!ProxyDiscord.inst().getDiscord().isConnected()) {
-			player.sendMessage(TextComponent.of(ChatMessages.getMessage("discord-issues")).color(TextColor.RED));
+			player.sendMessage(TextComponent.of(ChatMessages.getMessage("discord-issues")).color(NamedTextColor.RED));
 		}
 	}
 	

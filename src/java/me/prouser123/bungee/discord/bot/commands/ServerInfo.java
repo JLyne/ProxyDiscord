@@ -65,8 +65,8 @@ public class ServerInfo implements MessageCreateListener, BaseCommand {
 			}
 
 			EmbedBuilder embed = new EmbedBuilder()
-        		.setAuthor("BungeeCord Server Information", Constants.url, Constants.authorIconURL)
-            	.addInlineField("Players", ProxyDiscord.inst().getProxy().getPlayerCount() + "/" + ProxyDiscord.inst().getProxy().getConfiguration().getShowMaxPlayers())
+        		.setAuthor("Velocity Server Information", Constants.url, Constants.authorIconURL)
+            	.addInlineField("Players", Integer.toString(ProxyDiscord.inst().getProxy().getPlayerCount()))
             	.addInlineField("Uptime", uptime_output)
             	.addInlineField("Memory", Runtime.getRuntime().freeMemory() / 1024 / 1024 + "/" + Runtime.getRuntime().totalMemory() / 1024 / 1024 + " MB free")
             	.addInlineField("Servers", Integer.toString(ProxyDiscord.inst().getProxy().getAllServers().size()))

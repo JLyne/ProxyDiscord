@@ -2,11 +2,12 @@ package me.prouser123.bungee.discord;
 
 import com.google.common.collect.HashBiMap;
 import com.velocitypowered.api.proxy.ProxyServer;
-import net.kyori.text.TextComponent;
-import net.kyori.text.event.ClickEvent;
-import net.kyori.text.event.HoverEvent;
-import net.kyori.text.format.TextColor;
 import com.velocitypowered.api.proxy.Player;
+import net.kyori.adventure.inventory.Book;
+import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.text.event.HoverEvent;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.javacord.api.entity.channel.TextChannel;
 import org.javacord.api.entity.user.User;
 import org.slf4j.Logger;
@@ -92,7 +93,7 @@ public class LinkingManager {
 
         if(this.links.containsKey(uuid)) {
             TextComponent message = TextComponent.of(ChatMessages.getMessage("link-already-linked"))
-                    .color(TextColor.RED);
+                    .color(NamedTextColor.RED);
 
             player.sendMessage(message);
 
@@ -103,7 +104,7 @@ public class LinkingManager {
         String url = linkingUrl.replace("[token]", token);
 
         TextComponent message = TextComponent.of(ChatMessages.getMessage("link"))
-                .color(TextColor.LIGHT_PURPLE)
+                .color(NamedTextColor.LIGHT_PURPLE)
                 .clickEvent(ClickEvent.openUrl(url))
                 .hoverEvent(HoverEvent.showText(TextComponent.of("Discord account linking instructions")));
 
@@ -165,12 +166,12 @@ public class LinkingManager {
         if(onlinePlayer.isPresent()) {
             if(result == VerificationResult.VERIFIED) {
                 onlinePlayer.get().sendMessage(TextComponent.of(ChatMessages.getMessage("link-success"))
-                        .color(TextColor.GREEN));
+                        .color(NamedTextColor.GREEN));
 
                 return LinkResult.SUCCESS;
             } else {
                 onlinePlayer.get().sendMessage(TextComponent.of(ChatMessages.getMessage("link-not-verified"))
-                        .color(TextColor.YELLOW));
+                        .color(NamedTextColor.YELLOW));
 
                 return LinkResult.NOT_VERIFIED;
             }
@@ -209,12 +210,12 @@ public class LinkingManager {
         if(onlinePlayer.isPresent()) {
             if(result == VerificationResult.VERIFIED) {
                 onlinePlayer.get().sendMessage(TextComponent.of(ChatMessages.getMessage("link-success"))
-                        .color(TextColor.GREEN));
+                        .color(NamedTextColor.GREEN));
 
                 return LinkResult.SUCCESS;
             } else {
                 onlinePlayer.get().sendMessage(TextComponent.of(ChatMessages.getMessage("link-not-verified"))
-                        .color(TextColor.YELLOW));
+                        .color(NamedTextColor.YELLOW));
 
                 return LinkResult.NOT_VERIFIED;
             }

@@ -2,8 +2,8 @@ package me.prouser123.bungee.discord;
 
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
-import net.kyori.text.TextComponent;
-import net.kyori.text.format.TextColor;
+import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.slf4j.Logger;
 
 import java.util.Iterator;
@@ -75,11 +75,11 @@ public class KickManager {
 
                         case LINKED_NOT_VERIFIED:
                             message = TextComponent.of(ChatMessages.getMessage("kicked-linked-not-verified")).color(
-                                    TextColor.RED);
+                                    NamedTextColor.RED);
                             break;
                         case NOT_LINKED:
                         default:
-                            message = TextComponent.of(ChatMessages.getMessage("kicked-not-linked")).color(TextColor.RED);
+                            message = TextComponent.of(ChatMessages.getMessage("kicked-not-linked")).color(NamedTextColor.RED);
                     }
 
                     ProxyDiscord.inst().getDebugLogger().info("Kicking player " + player.getUsername() + " for exceeding unverified kick time");

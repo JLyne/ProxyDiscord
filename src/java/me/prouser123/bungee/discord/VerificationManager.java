@@ -9,8 +9,8 @@ import com.velocitypowered.api.proxy.server.RegisteredServer;
 import me.glaremasters.deluxequeues.DeluxeQueues;
 import me.prouser123.bungee.discord.events.PlayerUnverifiedEvent;
 import me.prouser123.bungee.discord.events.PlayerVerifiedEvent;
-import net.kyori.text.TextComponent;
-import net.kyori.text.format.TextColor;
+import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.LuckPermsProvider;
 import net.luckperms.api.node.Node;
@@ -250,7 +250,7 @@ public class VerificationManager {
                 message = TextComponent.builder().content("Something unexpected happened.");
         }
 
-        message.color(TextColor.RED);
+        message.color(NamedTextColor.RED);
 
         if(unverifiedServer == null) {
             ProxyDiscord.inst().getDebugLogger().info("No unverified server defined. Kicking " + player.getUsername());

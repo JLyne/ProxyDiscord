@@ -7,7 +7,7 @@ import com.velocitypowered.api.event.player.PlayerChatEvent;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.proxy.ServerConnection;
-import net.kyori.text.serializer.legacy.LegacyComponentSerializer;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.LuckPermsProvider;
 import net.luckperms.api.cacheddata.CachedMetaData;
@@ -186,7 +186,7 @@ public class LoggingManager {
 
             String text = "&l&bDISCORD>&r " + prefix + user.getFriendlyName() + suffix + "&r: " + message;
 
-            proxy.broadcast(LegacyComponentSerializer.legacy().deserialize(text, '&'));
+            proxy.sendMessage(LegacyComponentSerializer.builder().extractUrls().build().deserialize(text));
             sendLogMessage("[DISCORD] []" + getPlayerLogName(user) + "\n" + message);
         } catch (IllegalStateException e) {
             logger.warn("Failed to send Discord message: " + e.getMessage());

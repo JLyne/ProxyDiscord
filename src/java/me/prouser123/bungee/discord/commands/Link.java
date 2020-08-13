@@ -2,14 +2,13 @@ package me.prouser123.bungee.discord.commands;
 
 import co.aikar.commands.BaseCommand;
 import co.aikar.commands.annotation.*;
-import co.aikar.commands.velocity.contexts.OnlinePlayer;
 import com.velocitypowered.api.proxy.Player;
 import me.prouser123.bungee.discord.ChatMessages;
 import me.prouser123.bungee.discord.LinkResult;
 import me.prouser123.bungee.discord.LinkingManager;
 import me.prouser123.bungee.discord.ProxyDiscord;
-import net.kyori.text.TextComponent;
-import net.kyori.text.format.TextColor;
+import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.LuckPermsProvider;
 import org.javacord.api.entity.user.User;
@@ -37,7 +36,7 @@ public class Link extends BaseCommand {
 
             //Missing discord id, return expected format
             if (discordId == null) {
-                player.sendMessage(TextComponent.of("Format: /link <player> <discordid>").color(TextColor.RED));
+                player.sendMessage(TextComponent.of("Format: /link <player> <discordid>").color(NamedTextColor.RED));
 
                 return;
             }
@@ -45,7 +44,7 @@ public class Link extends BaseCommand {
             try {
                 Long.parseLong(discordId);
             } catch (NumberFormatException e) {
-                player.sendMessage(TextComponent.of("Discord ID " + discordId + " is invalid.").color(TextColor.RED));
+                player.sendMessage(TextComponent.of("Discord ID " + discordId + " is invalid.").color(NamedTextColor.RED));
                 return;
             }
 
@@ -56,7 +55,7 @@ public class Link extends BaseCommand {
                     TextComponent.Builder playerMessage = TextComponent.builder()
                             .content(ChatMessages.getMessage("link-not-found")
                                              .replace("[player]", target))
-                            .color(TextColor.GREEN);
+                            .color(NamedTextColor.GREEN);
 
                     player.sendMessage(playerMessage.build());
 
@@ -72,7 +71,7 @@ public class Link extends BaseCommand {
                     if (linkedDiscord.toString().equals(discordId)) {
                         String message = ChatMessages.getMessage("link-other-already-linked-same")
                                 .replace("[player]", target);
-                        player.sendMessage(TextComponent.of(message).color(TextColor.RED));
+                        player.sendMessage(TextComponent.of(message).color(NamedTextColor.RED));
                     } else {
                         //Attempt to get username of linked discord account
                         ProxyDiscord.inst().getDiscord().getApi().getUserById(linkedDiscord).thenAcceptAsync(user -> {
@@ -80,12 +79,12 @@ public class Link extends BaseCommand {
                                     .replace("[player]", target)
                                     .replace("[discord]", user.getDiscriminatedName());
 
-                            player.sendMessage(TextComponent.of(message).color(TextColor.RED));
+                            player.sendMessage(TextComponent.of(message).color(NamedTextColor.RED));
                         }).exceptionally(error -> {
                             String message = ChatMessages.getMessage("link-other-already-linked-unknown")
                                     .replace("[player]", target);
 
-                            player.sendMessage(TextComponent.of(message).color(TextColor.RED));
+                            player.sendMessage(TextComponent.of(message).color(NamedTextColor.RED));
 
                             return null;
                         });
@@ -116,9 +115,9 @@ public class Link extends BaseCommand {
 
                                 message = message.replace("[discord]", discordUsername);
 
-                                player.sendMessage(TextComponent.of(message).color(TextColor.RED));
+                                player.sendMessage(TextComponent.of(message).color(NamedTextColor.RED));
                             }).exceptionally(error -> {
-                        player.sendMessage(TextComponent.of(error.toString()).color(TextColor.RED));
+                        player.sendMessage(TextComponent.of(error.toString()).color(NamedTextColor.RED));
                         return null;
                     });
 
@@ -136,16 +135,16 @@ public class Link extends BaseCommand {
                                 .replace("[discord]", user.getDiscriminatedName())
                                 .replace("[player]", target);
 
-                        player.sendMessage(TextComponent.of(message).color(TextColor.GREEN));
+                        player.sendMessage(TextComponent.of(message).color(NamedTextColor.GREEN));
                     } else if (result == LinkResult.NOT_VERIFIED) {
                         String message = ChatMessages.getMessage("link-other-not-verified")
                                 .replace("[discord]", user.getDiscriminatedName())
                                 .replace("[player]", target);
 
-                        player.sendMessage(TextComponent.of(message).color(TextColor.YELLOW));
+                        player.sendMessage(TextComponent.of(message).color(NamedTextColor.YELLOW));
                     }
                 }).exceptionally(error -> {
-                    player.sendMessage(TextComponent.of(error.toString()).color(TextColor.RED));
+                    player.sendMessage(TextComponent.of(error.toString()).color(NamedTextColor.RED));
                     return null;
                 });
             });

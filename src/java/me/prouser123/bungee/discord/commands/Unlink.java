@@ -7,8 +7,8 @@ import me.prouser123.bungee.discord.LinkingManager;
 import me.prouser123.bungee.discord.ProxyDiscord;
 import me.prouser123.bungee.discord.ChatMessages;
 import me.prouser123.bungee.discord.VerificationManager;
-import net.kyori.text.TextComponent;
-import net.kyori.text.format.TextColor;
+import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.LuckPermsProvider;
 import java.util.UUID;
@@ -51,7 +51,7 @@ public class Unlink extends BaseCommand {
                     TextComponent.Builder playerMessage = TextComponent.builder()
                            .content(ChatMessages.getMessage("unlink-other-discord-success")
                                             .replace("[player]", target))
-                           .color(TextColor.GREEN);
+                           .color(NamedTextColor.GREEN);
 
                     player.sendMessage(playerMessage.build());
 
@@ -59,7 +59,7 @@ public class Unlink extends BaseCommand {
                         TextComponent.Builder targetMessage = TextComponent.builder()
                            .content(ChatMessages.getMessage("unlink-by-other-success")
                                             .replace("[player]", player.getUsername()))
-                           .color(TextColor.YELLOW);
+                           .color(NamedTextColor.YELLOW);
 
                         verificationManager.checkVerificationStatus(onlinePlayer);
                         onlinePlayer.sendMessage(targetMessage.build());
@@ -68,7 +68,7 @@ public class Unlink extends BaseCommand {
                     TextComponent.Builder playerMessage = TextComponent.builder()
                            .content(ChatMessages.getMessage("unlink-other-discord-not-linked")
                                             .replace("[player]", target))
-                           .color(TextColor.RED);
+                           .color(NamedTextColor.RED);
 
                     player.sendMessage(playerMessage.build());
                 }
@@ -83,7 +83,7 @@ public class Unlink extends BaseCommand {
                     TextComponent.Builder playerMessage = TextComponent.builder()
                            .content(ChatMessages.getMessage("unlink-other-not-found")
                                             .replace("[player]", target))
-                           .color(TextColor.GREEN);
+                           .color(NamedTextColor.GREEN);
 
                     player.sendMessage(playerMessage.build());
 
@@ -98,7 +98,7 @@ public class Unlink extends BaseCommand {
                     TextComponent.Builder playerMessage = TextComponent.builder()
                            .content(ChatMessages.getMessage("unlink-other-success")
                                             .replace("[player]", target))
-                           .color(TextColor.GREEN);
+                           .color(NamedTextColor.GREEN);
 
                     player.sendMessage(playerMessage.build());
 
@@ -106,7 +106,7 @@ public class Unlink extends BaseCommand {
                         TextComponent.Builder targetMessage = TextComponent.builder()
                            .content(ChatMessages.getMessage("unlink-by-other-success")
                                             .replace("[player]", player.getUsername()))
-                           .color(TextColor.YELLOW);
+                           .color(NamedTextColor.YELLOW);
 
                         verificationManager.checkVerificationStatus(onlinePlayer);
                         onlinePlayer.sendMessage(targetMessage.build());
@@ -115,7 +115,7 @@ public class Unlink extends BaseCommand {
                     TextComponent.Builder playerMessage = TextComponent.builder()
                            .content(ChatMessages.getMessage("unlink-other-not-linked")
                                             .replace("[player]", target))
-                           .color(TextColor.RED);
+                           .color(NamedTextColor.RED);
 
                     player.sendMessage(playerMessage.build());
                 }
@@ -123,9 +123,9 @@ public class Unlink extends BaseCommand {
         } else if(linker.isLinked(player)) {
             linker.unlink(player);
             verificationManager.checkVerificationStatus(player);
-            player.sendMessage(TextComponent.of(ChatMessages.getMessage("unlink-success")).color(TextColor.GREEN));
+            player.sendMessage(TextComponent.of(ChatMessages.getMessage("unlink-success")).color(NamedTextColor.GREEN));
         } else {
-            player.sendMessage(TextComponent.of(ChatMessages.getMessage("unlink-not-linked")).color(TextColor.RED));
+            player.sendMessage(TextComponent.of(ChatMessages.getMessage("unlink-not-linked")).color(NamedTextColor.RED));
         }
     }
 }

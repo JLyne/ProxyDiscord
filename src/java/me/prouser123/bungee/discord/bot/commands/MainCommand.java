@@ -15,10 +15,6 @@ public class MainCommand implements MessageCreateListener, BaseCommand {
 	public MainCommand() {
 		array = new ArrayList<>();
 		subArray = new ArrayList<>();
-		
-		// Debug information
-		ProxyDiscord.inst().getDebugLogger().info("[MainCommand@Init] Loaded MainCommand and Array");
-		ProxyDiscord.inst().getDebugLogger().info("[MainCommand@Init] Arr: " + array);
 	}
 	
 	/**
@@ -28,23 +24,10 @@ public class MainCommand implements MessageCreateListener, BaseCommand {
     @Override
     public void onMessageCreate(MessageCreateEvent event) {
         // Check if the message content equals "!bd"
-        if (event.getMessage().getContent().equalsIgnoreCase("!bd")) {
-        	
+        if(event.getMessage().getContent().equalsIgnoreCase("!pd")) {
         	// Create and send the Main Command Embed
         	event.getChannel().sendMessage(this.createMainCommandEmbed(event));
         	event.getChannel().sendMessage(this.createSubCommandEmbed(event));
-        	
-        	
-//        	EmbedBuilder embed2 = new EmbedBuilder();
-//
-//        	if (JoinLeave.logChannel != null) {
-//            	embed2.setTitle("Enabled Features");
-//            	embed2.addField("Join / Leave Messages", "Message to a channel when a player joins the network.");
-//        	} else {
-//        		embed2.addField("Disabled Features", "Join / Leave Messages");
-//        	}
-//
-        	//event.getChannel().sendMessage(embed2);
         }
     }
     
@@ -57,15 +40,6 @@ public class MainCommand implements MessageCreateListener, BaseCommand {
     		
     		// Debug information
     		ProxyDiscord.inst().getDebugLogger().info("[MainCommand@OnMessage] Command: " + split[0] + ", HelpText: " + split[1]);
-    		
-    		// Currently not required as there are no main bot that require it.
-    		// Instead we will just add the field.
-    		
-    		//if (this.isGoD(split[1])) {
-    		//	this.runGoD(split, embed, event);
-    		//} else {
-        	//	embed.addField(split[0], split[1]);
-    		//}
 
         	embed.addField(split[0], split[1]);
     	}
