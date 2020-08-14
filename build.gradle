@@ -4,7 +4,7 @@ plugins {
     id 'maven'
 }
 
-group = 'me.prouser123.bungee'
+group = 'uk.co.not-null.proxydiscord'
 version = 'RTGAME'
 
 description = """discord"""
@@ -26,7 +26,6 @@ sourceSets {
 repositories {
     mavenCentral()
     maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
-    maven { url "https://packagecloud.io/Prouser123/mcdev/maven2/" }
     maven { url "https://repo.codemc.org/repository/maven-public" }
     maven { url "https://repo.velocitypowered.com/snapshots/" }
     maven { url "https://repo.aikar.co/content/groups/aikar/" }
@@ -60,7 +59,7 @@ compileJava {
 }
 
 shadowJar {
-    relocate 'co.aikar.commands', 'me.prouser123.bungee.discord.ProxyDiscord.acf'
+    relocate 'co.aikar.commands', 'uk.co.notnull.proxydiscord.acf'
 }
 
 build.dependsOn shadowJar
