@@ -3,10 +3,6 @@ package uk.co.notnull.proxydiscord;
 import com.google.common.collect.HashBiMap;
 import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.proxy.Player;
-import net.kyori.adventure.text.TextComponent;
-import net.kyori.adventure.text.event.ClickEvent;
-import net.kyori.adventure.text.event.HoverEvent;
-import net.kyori.adventure.text.format.NamedTextColor;
 import org.javacord.api.entity.channel.TextChannel;
 import org.javacord.api.entity.user.User;
 import org.slf4j.Logger;
@@ -19,17 +15,17 @@ import java.util.concurrent.TimeUnit;
 public class LinkingManager {
     private HashBiMap<String, Long> links;
     private HashBiMap<String, String> pendingLinks;
-    private final String linkingUrl;
+    private final String linkingSecret;
     private final String linkingChannelId;
 
     private final ProxyServer proxy;
     private final Logger logger;
 
-    public LinkingManager(String linkingUrl, String linkingChannelId) {
+    public LinkingManager(String linkingChannelId, String linkingSecret) {
         this.proxy = ProxyDiscord.inst().getProxy();
         this.logger = ProxyDiscord.inst().getLogger();
 
-        this.linkingUrl = linkingUrl;
+        this.linkingSecret = linkingSecret;
         this.linkingChannelId = linkingChannelId;
         this.loadLinks();
 
@@ -87,41 +83,32 @@ public class LinkingManager {
         return this.links.get(uuid.toString());
     }
 
-    public void startLink(Player player) {
-        String uuid = player.getUniqueId().toString();
-
-        if(this.links.containsKey(uuid)) {
-            TextComponent message = TextComponent.of(ChatMessages.getMessage("link-already-linked"))
-                    .color(NamedTextColor.RED);
-
-            player.sendMessage(message);
-
-            return;
-        }
-
-        String token = getLinkingToken(uuid);
-        String url = linkingUrl.replace("[token]", token);
-
-        TextComponent message = TextComponent.of(ChatMessages.getMessage("link"))
-                .color(NamedTextColor.LIGHT_PURPLE)
-                .clickEvent(ClickEvent.openUrl(url))
-                .hoverEvent(HoverEvent.showText(TextComponent.of("Discord account linking instructions")));
-
-        player.sendMessage(message);
+    public String getLinkingToken(Player player) {
+        return getLinkingToken(player.getUniqueId().toString());
     }
 
-    private String getLinkingToken(String uuid) {
-        if (this.pendingLinks.containsValue(uuid)) {
+    public String getLinkingToken(String uuid) {
+        if(this.pendingLinks.containsValue(uuid)) {
             return this.pendingLinks.inverse().get(uuid);
+        }
+
+        if(this.links.containsKey(uuid)) {
+            return "";
         }
 
         String token;
 
+        String characters = "0123456789ABCDEFGHIJKLMNPQRUVWXYZ";
+        SecureRandom rnd = new SecureRandom();
+
         do {
-            SecureRandom rnd = new SecureRandom();
-            byte[] bytes = new byte[8];
-            rnd.nextBytes(bytes);
-            token = Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);
+           StringBuilder sb = new StringBuilder(8);
+
+           for(int i = 0; i < 8; i++) {
+               sb.append(characters.charAt(rnd.nextInt(characters.length())));
+           }
+
+           token = sb.toString();
         } while(this.pendingLinks.containsKey(token));
 
         this.pendingLinks.put(token, uuid);
@@ -158,23 +145,7 @@ public class LinkingManager {
         this.links.put(player, discordId);
         this.pendingLinks.remove(token);
 
-        VerificationResult result =  ProxyDiscord.inst().getVerificationManager().checkVerificationStatus(discordId);
-
-        Optional<Player> onlinePlayer = proxy.getPlayer(UUID.fromString(player));
-
-        if(onlinePlayer.isPresent()) {
-            if(result == VerificationResult.VERIFIED) {
-                onlinePlayer.get().sendMessage(TextComponent.of(ChatMessages.getMessage("link-success"))
-                        .color(NamedTextColor.GREEN));
-
-                return LinkResult.SUCCESS;
-            } else {
-                onlinePlayer.get().sendMessage(TextComponent.of(ChatMessages.getMessage("link-not-verified"))
-                        .color(NamedTextColor.YELLOW));
-
-                return LinkResult.NOT_VERIFIED;
-            }
-        }
+        VerificationResult result = ProxyDiscord.inst().getVerificationManager().checkVerificationStatus(discordId);
 
         return result == VerificationResult.VERIFIED ? LinkResult.SUCCESS : LinkResult.NOT_VERIFIED;
     }
@@ -202,23 +173,7 @@ public class LinkingManager {
 
         this.links.put(uuid.toString(), discordId);
 
-        VerificationResult result =  ProxyDiscord.inst().getVerificationManager().checkVerificationStatus(discordId);
-
-        Optional<Player> onlinePlayer = proxy.getPlayer(uuid);
-
-        if(onlinePlayer.isPresent()) {
-            if(result == VerificationResult.VERIFIED) {
-                onlinePlayer.get().sendMessage(TextComponent.of(ChatMessages.getMessage("link-success"))
-                        .color(NamedTextColor.GREEN));
-
-                return LinkResult.SUCCESS;
-            } else {
-                onlinePlayer.get().sendMessage(TextComponent.of(ChatMessages.getMessage("link-not-verified"))
-                        .color(NamedTextColor.YELLOW));
-
-                return LinkResult.NOT_VERIFIED;
-            }
-        }
+        VerificationResult result = ProxyDiscord.inst().getVerificationManager().checkVerificationStatus(discordId);
 
         return result == VerificationResult.VERIFIED ? LinkResult.SUCCESS : LinkResult.NOT_VERIFIED;
     }
@@ -271,6 +226,8 @@ public class LinkingManager {
 
             this.links = (HashBiMap<String, Long>) save.readObject();
             this.pendingLinks = (HashBiMap<String, String>) save.readObject();
+
+            this.pendingLinks.replaceAll((value, key) -> value.toUpperCase());
         } catch (IOException | ClassNotFoundException | ClassCastException e) {
             this.links = HashBiMap.create(1024);
             this.pendingLinks = HashBiMap.create(1024);
@@ -281,8 +238,12 @@ public class LinkingManager {
     private void findChannel() {
         Optional <TextChannel> linkingChannel = ProxyDiscord.inst().getDiscord().getApi().getTextChannelById(linkingChannelId);
 
-        if(!linkingChannel.isPresent()) {
+        if(linkingChannel.isEmpty()) {
             logger.warn("Unable to find linking channel. Did you put a valid channel ID in the config?");
         }
+    }
+
+    public String getLinkingSecret() {
+        return linkingSecret;
     }
 }

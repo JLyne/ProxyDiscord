@@ -1,5 +1,7 @@
 package uk.co.notnull.proxydiscord.bot.commands;
 
+import net.luckperms.api.LuckPerms;
+import net.luckperms.api.LuckPermsProvider;
 import org.javacord.api.entity.message.MessageAuthor;
 import org.javacord.api.entity.message.embed.EmbedBuilder;
 import org.javacord.api.event.message.MessageCreateEvent;
@@ -8,6 +10,10 @@ import uk.co.notnull.proxydiscord.ChatMessages;
 import uk.co.notnull.proxydiscord.LinkResult;
 import uk.co.notnull.proxydiscord.LinkingManager;
 import uk.co.notnull.proxydiscord.ProxyDiscord;
+
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 public class Link implements MessageCreateListener, BaseCommand {
 	private final base base;
@@ -41,7 +47,7 @@ public class Link implements MessageCreateListener, BaseCommand {
 
         MessageAuthor author = event.getMessageAuthor();
         Long id = author.getId();
-        String token = event.getMessageContent().replace("!link ", "");
+        String token = event.getMessageContent().replace("!link ", "").toUpperCase();
         LinkResult result = LinkResult.UNKNOWN_ERROR;
 
         try {
@@ -58,39 +64,65 @@ public class Link implements MessageCreateListener, BaseCommand {
     }
 
     private void sendEmbedResponse(LinkResult result, MessageCreateEvent event) {
-        EmbedBuilder embed = null;
+        LinkingManager linkingManager = ProxyDiscord.inst().getLinkingManager();
+        LuckPerms luckPermsApi = LuckPermsProvider.get();
+
+        CompletableFuture<EmbedBuilder> embed = null;
+        UUID linked = linkingManager.getLinked(event.getMessageAuthor().getId());
 
         switch(result) {
             case UNKNOWN_ERROR:
-                embed = ChatMessages.getEmbed("embed-link-error");
+                embed = CompletableFuture.completedFuture(ChatMessages.getEmbed("embed-link-error"));
                 break;
 
             case NO_TOKEN:
-                embed = ChatMessages.getEmbed("embed-link-no-token");
+                embed = CompletableFuture.completedFuture(ChatMessages.getEmbed("embed-link-no-token"));
                 break;
 
             case INVALID_TOKEN:
-                embed = ChatMessages.getEmbed("embed-link-invalid-token");
+                embed = CompletableFuture.completedFuture(ChatMessages.getEmbed("embed-link-invalid-token"));
                 break;
 
+            //FIXME: Reduce duplication here
             case ALREADY_LINKED:
-                embed = ChatMessages.getEmbed("embed-link-already-linked");
+                embed = CompletableFuture.supplyAsync(() -> {
+                    String username = luckPermsApi.getUserManager().lookupUsername(linked).join();
+                    Map<String, String> replacements = Map.of(
+                            "[discord]", "<@!" + event.getMessageAuthor().getId() + ">",
+                            "[minecraft]", (username != null) ? username : "Unknown account (" + linked.toString() + ")");
+
+                    return ChatMessages.getEmbed("embed-link-already-linked", replacements);
+                });
                 break;
 
             case NOT_VERIFIED:
             case ALREADY_LINKED_NOT_VERIFIED:
-                embed = ChatMessages.getEmbed("embed-link-success-not-verified");
+                embed = CompletableFuture.supplyAsync(() -> {
+                    String username = luckPermsApi.getUserManager().lookupUsername(linked).join();
+                    Map<String, String> replacements = Map.of(
+                            "[discord]", "<@!" + event.getMessageAuthor().getId() + ">",
+                            "[minecraft]", (username != null) ? username : "Unknown account (" + linked.toString() + ")");
+
+                    return ChatMessages.getEmbed("embed-link-success-not-verified", replacements);
+                });
                 break;
 
             case SUCCESS:
-                embed = ChatMessages.getEmbed("embed-link-success");
+                embed = CompletableFuture.supplyAsync(() -> {
+                    String username = luckPermsApi.getUserManager().lookupUsername(linked).join();
+                    Map<String, String> replacements = Map.of(
+                            "[discord]", "<@!" + event.getMessageAuthor().getId() + ">",
+                            "[minecraft]", (username != null) ? username : "Unknown account (" + linked.toString() + ")");
+
+                    return ChatMessages.getEmbed("embed-link-success", replacements);
+                });
                 break;
         }
 
-        if(embed != null) {
-            ProxyDiscord.inst().getDebugLogger().info(embed.toString());
-            event.getChannel().sendMessage("<@!" + event.getMessageAuthor().getId() + ">", embed);
-        }
+        embed.thenAccept((EmbedBuilder e) -> {
+            ProxyDiscord.inst().getDebugLogger().info(e.toString());
+            event.getChannel().sendMessage("<@!" + event.getMessageAuthor().getId() + ">", e);
+        });
     }
 
     private void sendResponse(LinkResult result, MessageCreateEvent event) {

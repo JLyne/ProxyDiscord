@@ -124,7 +124,6 @@ public class Unlink extends BaseCommand {
         } else if(linker.isLinked(player)) {
             linker.unlink(player);
             verificationManager.checkVerificationStatus(player);
-            player.sendMessage(TextComponent.of(ChatMessages.getMessage("unlink-success")).color(NamedTextColor.GREEN));
         } else {
             player.sendMessage(TextComponent.of(ChatMessages.getMessage("unlink-not-linked")).color(NamedTextColor.RED));
         }

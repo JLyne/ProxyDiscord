@@ -3,7 +3,7 @@ package uk.co.notnull.proxydiscord.listeners;
 import com.velocitypowered.api.event.PostOrder;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.connection.DisconnectEvent;
-import com.velocitypowered.api.event.player.ServerPreConnectEvent;
+import com.velocitypowered.api.event.player.PlayerChooseInitialServerEvent;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
 import net.kyori.adventure.text.TextComponent;
@@ -29,20 +29,11 @@ public class JoinLeave {
     }
 
 	@Subscribe(order = PostOrder.FIRST)
-	public void onServerConnected(ServerPreConnectEvent event) {
+	public void onChooseInitialServer(PlayerChooseInitialServerEvent event) {
 		Player player = event.getPlayer();
-
-		if(!event.getResult().isAllowed()) {
-			return;
-		}
-
-		if(player.getCurrentServer().isPresent()) {
-			return;
-		}
 
 		loggingManager.logJoin(player);
 
-		String text;
 		VerificationResult result = verificationManager.checkVerificationStatus(player);
 
 		player.sendMessage(TextComponent.of(ChatMessages.getMessage("join-welcome"))
@@ -52,17 +43,11 @@ public class JoinLeave {
 			case NOT_LINKED:
 				logger.info("Unlinked player " + player.getUsername() + " joined");
 
-				text = ChatMessages.getMessage("join-not-linked");
-				player.sendMessage(TextComponent.of(text).color(NamedTextColor.YELLOW));
-
 				kickManager.addPlayer(player);
 				break;
 
 			case LINKED_NOT_VERIFIED:
 				logger.info("Linked and unverified player " + player.getUsername() + " joined");
-
-				text = ChatMessages.getMessage("join-linked-not-verified");
-				player.sendMessage(TextComponent.of(text).color(NamedTextColor.YELLOW));
 
 				kickManager.addPlayer(player);
 				break;
@@ -85,5 +70,6 @@ public class JoinLeave {
 
 		loggingManager.logLeave(player);
 		kickManager.removePlayer(player);
+		verificationManager.clearPlayerStatus(player);
 	}
 }

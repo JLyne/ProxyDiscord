@@ -1,30 +1,25 @@
 package uk.co.notnull.proxydiscord.listeners;
 
+import com.velocitypowered.api.event.PostOrder;
 import com.velocitypowered.api.event.Subscribe;
-import com.velocitypowered.api.plugin.PluginContainer;
-import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.proxy.ServerConnection;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import uk.co.notnull.proxydiscord.ChatMessages;
 import uk.co.notnull.proxydiscord.ProxyDiscord;
 import uk.co.notnull.proxydiscord.VerificationManager;
 import uk.co.notnull.proxydiscord.VerificationResult;
+import uk.co.notnull.proxydiscord.events.PlayerVerifyStateChangeEvent;
 import uk.co.notnull.proxyqueues.events.PlayerQueueEvent;
 
 import java.util.Optional;
 
 public class ProxyQueues {
-	private static VerificationManager verificationManager = null;
-    private final ProxyServer proxy;
-    private uk.co.notnull.proxyqueues.ProxyQueues proxyQueues = null;
+	private static VerificationManager verificationManager;
+	private final uk.co.notnull.proxyqueues.ProxyQueues proxyQueues;
 
-    public ProxyQueues() {
+    public ProxyQueues(uk.co.notnull.proxyqueues.ProxyQueues plugin) {
 		verificationManager = ProxyDiscord.inst().getVerificationManager();
-		proxy = ProxyDiscord.inst().getProxy();
-
-		Optional<PluginContainer> plugin = proxy.getPluginManager().getPlugin("deluxequeues");
-
-        plugin.ifPresent(pluginContainer -> proxyQueues = (uk.co.notnull.proxyqueues.ProxyQueues) pluginContainer.getInstance().orElse(null));
+		proxyQueues = plugin;
 	}
 
 	@Subscribe
@@ -45,7 +40,7 @@ public class ProxyQueues {
             Optional<ServerConnection> currentServer = event.getPlayer().getCurrentServer();
 
             if(currentServer.isPresent() && currentServer.get().getServer().equals(verificationManager.getUnverifiedServer())) {
-                if(proxyQueues != null && proxyQueues.getWaitingServer().isPresent()) {
+                if(proxyQueues.getWaitingServer().isPresent()) {
                     event.getPlayer().createConnectionRequest(proxyQueues.getWaitingServer().get()).fireAndForget();
                 }
             }
@@ -65,5 +60,13 @@ public class ProxyQueues {
             default:
                 event.setReason("An error has occurred.");
         }
+	}
+
+	@Subscribe(order = PostOrder.NORMAL)
+	public void onPlayerVerifyStateChange(PlayerVerifyStateChangeEvent e) {
+    	//Remove player from any queue
+        if(e.getPreviousState() == VerificationResult.VERIFIED) {
+        	proxyQueues.getQueueHandler().clearPlayer(e.getPlayer());
+		}
 	}
 }

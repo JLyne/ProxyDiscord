@@ -1,10 +1,13 @@
 package uk.co.notnull.proxydiscord;
 
+import com.velocitypowered.api.event.PostOrder;
+import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.slf4j.Logger;
+import uk.co.notnull.proxydiscord.events.PlayerVerifyStateChangeEvent;
 
 import java.util.Iterator;
 import java.util.Map;
@@ -26,6 +29,7 @@ public class KickManager {
         this.kickTime = kickTime;
 
         this.kickPlayers();
+        proxy.getEventManager().register(ProxyDiscord.inst(), this);
     }
 
     public void addPlayer(Player player) {
@@ -88,5 +92,14 @@ public class KickManager {
                 }
             }
         }).delay(10, TimeUnit.SECONDS).repeat(10, TimeUnit.SECONDS).schedule();
+    }
+
+    @Subscribe(order = PostOrder.NORMAL)
+    public void onPlayerVerifyStateChange(PlayerVerifyStateChangeEvent event) {
+        if(event.getState() == VerificationResult.VERIFIED) {
+            removePlayer(event.getPlayer());
+        } else {
+            addPlayer(event.getPlayer());
+        }
     }
 }

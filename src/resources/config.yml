@@ -4,7 +4,7 @@
 # Bot token
 token: bot-token-here
 
-linking-url: 'https://minecraft.rtgame.co.uk/linking?token=[token]'
+linking-secret: ')2z#*MR^BrGVygg7'
 
 # Channel to accept !link requests from
 linking-channel-id: '123456789'
@@ -21,6 +21,9 @@ bypass-permission: 'discord.bypass'
 # Server unverified players are allowed on to link/verify
 unverified-server: 'waiting'
 
+# Server to redirect newly verified players to, if their original destination is unknown
+default-verified-server: 'waiting'
+
 # Channel to log joins/leaves/chats etc in
 log-channel-id: '123456789'
 
@@ -31,4 +34,4 @@ announcement-channel-id: '610046112996261908'
 debug-enabled: false
 
 # Time in seconds to wait before kicking unverified players
-unverified-kick-time: 10
+unverified-kick-time: 3600

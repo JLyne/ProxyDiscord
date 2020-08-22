@@ -1,4 +1,4 @@
-package uk.co.notnull.proxydiscord.bot.commands.listeners;
+package uk.co.notnull.proxydiscord.bot.listeners;
 
 import uk.co.notnull.proxydiscord.ProxyDiscord;
 import uk.co.notnull.proxydiscord.VerificationManager;

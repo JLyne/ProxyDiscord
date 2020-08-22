@@ -4,38 +4,18 @@
 # Welcome message for new unlinked players
 join-welcome: 'Welcome to the RTGame Subscriber Minecraft Server!'
 
-# When player joins without a discord account linked
-join-not-linked: |-
-  You need to link your Discord account and have the [role] role to play on this server.
-  Please type /link and follow the instructions to link your Discord account.
-
-# When player joins with a discord account like, but lacks the required role
-join-linked-not-verified: |-
-  Your Discord account has been linked, but you don't appear to have the [role] role.
-  Please double check your Twitch subscription and Discord connections, or wait for Discord to grant you the role.
-
 # When a player tries to join a server requiring linking/role, without a discord account linked
 server-change-not-linked: |-
   You need to link your Discord account and have the [role] role to join this server.
-  Please type /link and follow the instructions to link your Discord account.
+  Please follow the instructions to link your Discord account.
 
 # When a player tries to join a server requiring linking/role, with a discord account linked, but lacking the required role
 server-change-linked-not-verified: |-
   You need to have the [role] role on your Discord account to join this server.
   Please double check your Twitch subscription and Discord connections, or wait for Discord to grant you the role.
 
-# When a player uses /link
-link: 'Click here and follow the instructions to link your Discord account.'
-
-# When a player users /link, but already has a discord account linked
-link-already-linked: 'You have already linked a discord account. Use /unlink to unlink it first.'
-
 link-success: |-
   You've successfully linked your Discord account - Enjoy the server!
-
-link-not-verified: |-
-  Your Discord account has been linked, but you don't appear to have the [role] role.
-  Please double check your Twitch subscription and Discord connections, or wait for Discord to grant you the role.
 
 # When a mod uses /link player discordid, but the player is already linked to the same discord account
 link-other-already-linked-same: |-
@@ -65,9 +45,6 @@ link-other-not-found: 'Unknown player: [player].'
 
 link-other-not-verified: |-
   [player] has been linked to [discord], but they do not appear to have the [role] role.
-
-# When a player uses /unlink
-unlink-success: 'Your discord account has been unlinked.'
 
 # When a player uses /unlink without a discord account linked
 unlink-not-linked: 'You have not linked a discord account.'
@@ -102,7 +79,7 @@ verification-lost-role: |-
   Please check your Twitch subscription and Discord connections, or wait for Discord to update your roles.
 
 # When a player loses their access due unlinking their discord account
-verification-lost-unlinked: 'Your Discord account has been unlinked, use /link to re-link it.'
+verification-lost-unlinked: 'Your Discord account has been unlinked.'
 
 # Added to the above when the user is moved back to the unverified server (instead of being kicked)
 verification-lost-moved: 'You have been moved back to the [server] server.'
@@ -130,13 +107,13 @@ discord-link-success-not-verified: |-
 # Discord bot response for link attempt with no token
 discord-link-no-token: |-
   Sorry [user], you need to provide a token.
-  If you don't know your token (**it's __not__ your username!**), please use the `/link` command **in-game**.
+  If you don't know your token (**it's __not__ your username!**), please connect to the server and follow the instructions.
   If you still need help, ask a `@Minecraft Server Mod`.
 
 # Discord bot response for link attempt with invalid token
 discord-link-invalid-token: |-
   Sorry [user], that token isn't valid, please double check it.
-  If you don't know your token (**it's __not__ your username!**), please use the `/link` command **in-game**.
+  If you don't know your token (**it's __not__ your username!**), please connect to the server and follow the instructions.
   If you still need help, ask a `@Minecraft Server Mod`.
 
 # Discord bot response for link attempt with another account already linked
@@ -153,7 +130,7 @@ save-success: |-
 embed-link-success:
   title: 'Accounts linked successfully'
   description: |-
-    Your accounts have been linked, and you may now play on the server.
+    Your accounts [discord] and **[minecraft]** have been linked, and you may now play on the server.
     Have fun, and be sure to check out <#598947870246305839> for rules and FAQs.
   thumbnail: 'https://cdn.discordapp.com/attachments/457984159458000908/608397929081864233/success_3.png'
   colour: '#22d518'
@@ -166,7 +143,7 @@ embed-link-no-token:
     - |-
       What's my token?
     - |-
-      You can get your token by connecting to the server, typing `/link` in the **in-game** chat, and following the instructions.
+      You can get your token by connecting to the server, and following the instructions.
     - 'Will my Minecraft username work instead?'
     - |-
       No. Only tokens generated via the above method will work.
@@ -185,7 +162,7 @@ embed-link-invalid-token:
     - |-
       What's my token?
     - |-
-      You can get your token by connecting to the server, typing `/link` in the **in-game** chat, and following the instructions.
+      You can get your token by connecting to the server, and following the instructions.
     - 'Will my Minecraft username work instead?'
     - |-
       No. Only tokens generated via the above method will work.
@@ -199,27 +176,32 @@ embed-link-invalid-token:
 embed-link-already-linked:
   title: 'Account already linked'
   description: |-
-    Your Minecraft account is already linked to another discord account.
-    Please type `/unlink` **in-game** to unlink the other account first.
-  thumbnail: 'https://cdn.discordapp.com/attachments/457984159458000908/608397931678007317/error_3.png'
-  colour: '#d52a18'
+    Your Discord account [discord] is already linked to the Minecraft account **[minecraft]**.
+
+    If this is correct, no further action is required, and you can play on the server.
+
+    If this is incorrect, please connect to the server using **[minecraft]**, and type `/unlink` in chat to unlink this account. You can then link another account.
+
+    If you do not recognise or have access to the **[minecraft]** account, please ask a <@&352082397744988162> for assistance.
+  thumbnail: 'https://cdn.discordapp.com/attachments/457984159458000908/608397930151542785/alert_3.png'
+  colour: '#ffac22'
 
 embed-link-success-not-verified:
   title: 'Half way there'
   description: |-
-    Your accounts have been linked, but you are missing the [role] role, which is required to play on the server.
+    Your accounts [discord] and **[minecraft]** have been linked, but you are missing the [role] role, which is required to play on the server.
   fields:
     - 'Things to try'
     - |-
       **1)** Check you are [subscribed to RTGameCrowd](https://www.twitch.tv/subs/rtgamecrowd) on Twitch. Any tier will do, including prime.
-      **2)** Check you have connected your Twitch account to Discord. You'll find this in **User Settings > Connections**.
+      **2)** Check you have [connected your Twitch account to Discord](https://support.discord.com/hc/en-us/articles/212112068-Twitch-Integration-FAQ). You'll find this in **User Settings > Connections**.
     - 'If you have done both of the above'
     - |-
-      You may have to wait for Discord to update your roles.
-      This is an automatic process that may take up to **an hour**.
+      Discord checks Twitch subscribers **once an hour**, please try waiting an hour.
     - 'Still Stuck?'
     - |-
-      If you've tried the above and still need help, ask a <@&352082397744988162>.
+      Please ensure you have **tried the above suggestions** before asking for help, they are likely to solve your problem.
+      If you have tried the above and still need help, ask a <@&352082397744988162> for assistance.
   thumbnail: 'https://cdn.discordapp.com/attachments/457984159458000908/608397930151542785/alert_3.png'
   colour: '#ffac22'
 

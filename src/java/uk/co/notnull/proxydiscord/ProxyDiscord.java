@@ -9,15 +9,17 @@ import com.velocitypowered.api.plugin.Plugin;
 import com.velocitypowered.api.plugin.PluginContainer;
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.ProxyServer;
-import uk.co.notnull.proxydiscord.bot.commands.listeners.Reconnect;
-import uk.co.notnull.proxydiscord.bot.commands.listeners.ServerMemberBan;
-import uk.co.notnull.proxydiscord.bot.commands.listeners.UserRoleAdd;
-import uk.co.notnull.proxydiscord.bot.commands.listeners.UserRoleRemove;
+import com.velocitypowered.api.proxy.messages.MinecraftChannelIdentifier;
+import uk.co.notnull.proxydiscord.bot.listeners.Reconnect;
+import uk.co.notnull.proxydiscord.bot.listeners.ServerMemberBan;
+import uk.co.notnull.proxydiscord.bot.listeners.UserRoleAdd;
+import uk.co.notnull.proxydiscord.bot.listeners.UserRoleRemove;
 import uk.co.notnull.proxydiscord.commands.Link;
 import uk.co.notnull.proxydiscord.commands.Save;
 import uk.co.notnull.proxydiscord.commands.Unlink;
 import uk.co.notnull.proxydiscord.listeners.ProxyQueues;
 import uk.co.notnull.proxydiscord.listeners.JoinLeave;
+import uk.co.notnull.proxydiscord.listeners.SendStatus;
 import uk.co.notnull.proxydiscord.listeners.ServerConnect;
 
 import java.io.*;
@@ -34,9 +36,11 @@ import ninja.leaping.configurate.yaml.YAMLConfigurationLoader;
 @Plugin(id = "proxydiscord", name = "ProxyDiscord", version = "1.0-SNAPSHOT",
         description = "Discord account linking", authors = {"Jim (NotKatuen)"}, dependencies = {
 		@Dependency(id = "luckperms"),
-		@Dependency(id = "proxyqueues", optional = true)
+		@Dependency(id = "proxyqueues", optional = true),
+		@Dependency(id = "floodgate", optional = true)
 })
 public class ProxyDiscord {
+	private static MinecraftChannelIdentifier statusIdentifier;
 	private static ProxyDiscord instance;
 
 	private ConfigurationNode configuration;
@@ -52,6 +56,8 @@ public class ProxyDiscord {
 	private static RedirectManager redirectManager;
 	private static LoggingManager loggingManager;
 
+	private boolean floodgateEnabled = false;
+
 	@Inject
     @DataDirectory
     private Path dataDirectory;
@@ -60,7 +66,11 @@ public class ProxyDiscord {
     	  return instance;
     }
 
-    ConfigurationNode getConfig() {
+	public static MinecraftChannelIdentifier getStatusIdentifier() {
+		return statusIdentifier;
+	}
+
+	ConfigurationNode getConfig() {
     	return configuration;
     }
 
@@ -105,6 +115,7 @@ public class ProxyDiscord {
     	this.logger = logger;
 
 		instance = this;
+		statusIdentifier = MinecraftChannelIdentifier.create("proxydiscord", "status");
 	}
 
 	@Subscribe
@@ -139,7 +150,7 @@ public class ProxyDiscord {
 		// Setup Debug Logging
 		debugLogger = new DebugLogger();
 
-		discord = new Discord(getConfig().getNode("token").getString(),  botCommandConfiguration);
+		discord = new Discord(getConfig().getNode("token").getString(), botCommandConfiguration);
 		kickManager = new KickManager(getConfig().getNode("unverified-kick-time").getInt(120));
 
 		new ChatMessages(messagesConfiguration);
@@ -152,8 +163,14 @@ public class ProxyDiscord {
 
 		proxy.getEventManager().register(this, new JoinLeave());
 
-		Optional<PluginContainer> plugin = proxy.getPluginManager().getPlugin("proxyqueues");
-        plugin.ifPresent(proxyQueues -> proxy.getEventManager().register(this, new ProxyQueues()));
+		Optional<PluginContainer> proxyQueues = proxy.getPluginManager().getPlugin("proxyqueues");
+        proxyQueues.flatMap(PluginContainer::getInstance).ifPresent(instance -> {
+			proxy.getEventManager().register(this,
+											 new ProxyQueues((uk.co.notnull.proxyqueues.ProxyQueues) instance));
+		});
+
+        Optional<PluginContainer> floodgate = proxy.getPluginManager().getPlugin("floodgate");
+        floodgateEnabled = floodgate.isPresent();
 
 		VelocityCommandManager commandManager = new VelocityCommandManager(proxy, this);
 		commandManager.registerCommand(new Link());
@@ -162,15 +179,16 @@ public class ProxyDiscord {
 	}
 
 	private void initLinking() {
-		String linkingUrl = getConfig().getNode("linking-url").getString();
 		String linkingChannelId = getConfig().getNode("linking-channel-id").getString();
+		String linkingSecret = getConfig().getNode("linking-secret").getString();
 
-		linkingManager = new LinkingManager(linkingUrl, linkingChannelId);
+		linkingManager = new LinkingManager(linkingChannelId, linkingSecret);
 	}
 
 	private void initVerification() {
 		verificationManager = new VerificationManager(getConfig());
 		proxy.getEventManager().register(this, new ServerConnect());
+		proxy.getEventManager().register(this, new SendStatus());
 
 		discord.getApi().addUserRoleAddListener(new UserRoleAdd());
 		discord.getApi().addUserRoleRemoveListener(new UserRoleRemove());
@@ -217,7 +235,7 @@ public class ProxyDiscord {
 	public void onProxyShutdown(ProxyShutdownEvent event) {
     	linkingManager.saveLinks();
 
-		if (discord.getApi() != null) {
+		if(discord.getApi() != null) {
 			discord.getApi().disconnect();
 		}
 	}
@@ -232,5 +250,9 @@ public class ProxyDiscord {
 
 	public Path getDataDirectory() {
 		return dataDirectory;
+	}
+
+	public boolean isFloodgateEnabled() {
+		return floodgateEnabled;
 	}
 }
