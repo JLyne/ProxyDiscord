@@ -32,9 +32,9 @@ public class LoggingManager {
     private final String loggingChannelId;
     private final Integer lockDummy = 0;
 
-    private AtomicInteger logsPerMessage = new AtomicInteger(1); //Number of logs to combine together into one message, to avoid rate limits and falling behind
-    private AtomicInteger unsentLogs = new AtomicInteger(0); //Number of unsent logs in current message
-    private AtomicInteger queuedToSend = new AtomicInteger(0); //Number of messages waiting to be sent by javacord
+    private final AtomicInteger logsPerMessage = new AtomicInteger(1); //Number of logs to combine together into one message, to avoid rate limits and falling behind
+    private final AtomicInteger unsentLogs = new AtomicInteger(0); //Number of unsent logs in current message
+    private final AtomicInteger queuedToSend = new AtomicInteger(0); //Number of messages waiting to be sent by javacord
 
     private MessageBuilder currentMessage; //Current unsent message
     private ListenerManager<MessageCreateListener> logListener = null;
@@ -113,7 +113,7 @@ public class LoggingManager {
 
         Optional <TextChannel> loggingChannel = ProxyDiscord.inst().getDiscord().getApi().getTextChannelById(loggingChannelId);
 
-        if(!loggingChannel.isPresent()) {
+        if(loggingChannel.isEmpty()) {
             logger.warn("Unable to find logging channel. Did you put a valid channel ID in the config?");
             return;
         }

@@ -247,7 +247,7 @@ public class VerificationManager {
     public void populateUsers() {
         Optional<Role> verifiedRole = ProxyDiscord.inst().getDiscord().getApi().getRoleById(verifiedRoleId);
 
-        if(!verifiedRole.isPresent()) {
+        if(verifiedRole.isEmpty()) {
             if(verifiedRoleId != null && !verifiedRoleId.isEmpty()) {
                 logger.warn("Failed to load verified role (" + verifiedRoleId + "). Is the ID correct or is discord down?)");
             }

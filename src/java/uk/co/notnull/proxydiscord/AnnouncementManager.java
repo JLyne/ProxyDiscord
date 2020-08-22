@@ -95,7 +95,7 @@ public class AnnouncementManager {
         Optional <TextChannel> announcementChannel = ProxyDiscord.inst().getDiscord().getApi()
                 .getTextChannelById(announcementChannelId);
 
-        if(!announcementChannel.isPresent()) {
+        if(announcementChannel.isEmpty()) {
             if(listener != null) {
                 listener.remove();
             }
