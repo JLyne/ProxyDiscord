@@ -64,12 +64,6 @@ public class VerificationManager {
             populateUsers();
         }
 
-        ProxyDiscord.inst().getDiscord().getApi().addReconnectListener(event -> {
-            if(verifiedRoleId != null) {
-                populateUsers();
-            }
-        });
-
         proxy.getEventManager().register(ProxyDiscord.inst(), this);
     }
 

@@ -13,7 +13,9 @@ public class Reconnect implements ReconnectListener {
     public void onReconnect(ReconnectEvent reconnectEvent) {
         VerificationManager verificationManager = ProxyDiscord.inst().getVerificationManager();
 
-        verificationManager.populateUsers();
+        if(verificationManager.getVerifiedRoleId() != null) {
+            verificationManager.populateUsers();
+        }
     }
 }
 
