@@ -2,6 +2,9 @@ package uk.co.notnull.proxydiscord;
 
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
+import de.themoep.minedown.adventure.MineDown;
+import de.themoep.minedown.adventure.MineDownParser;
+import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -66,11 +69,14 @@ public class AnnouncementManager {
         announcement = TextComponent.builder().content(heading)
                 .color(NamedTextColor.DARK_GREEN).decoration(TextDecoration.BOLD, true);
 
-        TextComponent text = TextComponent.of(content.length() > 250 ? content.subSequence(0, 250) + "..." : content)
-                .color(NamedTextColor.GOLD)
-                .decoration(TextDecoration.BOLD, false);
+        String text = content.length() > 250 ? content.subSequence(0, 250) + "..." : content;
 
-        announcement.append(text);
+        Component component = new MineDown(text)
+                .disable(MineDownParser.Option.ADVANCED_FORMATTING)
+                .disable(MineDownParser.Option.LEGACY_COLORS).toComponent()
+                .color(NamedTextColor.GOLD).decoration(TextDecoration.BOLD, false);
+
+        announcement.append(component);
 
         if(content.length() > 250) {
             TextComponent readMore = TextComponent.of("\n" + ChatMessages.getMessage("announcement-read-more"))
