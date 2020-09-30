@@ -1,6 +1,7 @@
 package uk.co.notnull.proxydiscord;
 
 import com.velocitypowered.api.proxy.ProxyServer;
+import org.javacord.api.entity.intent.Intent;
 import uk.co.notnull.proxydiscord.bot.commands.Link;
 import uk.co.notnull.proxydiscord.bot.commands.MainCommand;
 import uk.co.notnull.proxydiscord.bot.commands.ServerInfo;
@@ -40,7 +41,9 @@ public class Discord {
 		// Create an Instance of the DiscordApi
 		try {
 			logger.info("Connecting to Discord...");
-			api = new DiscordApiBuilder().setToken(token).login().join();
+			api = new DiscordApiBuilder().setToken(token)
+					.setIntents(Intent.GUILDS, Intent.GUILD_MEMBERS, Intent.GUILD_MESSAGES)
+					.login().join();
 
 			/*
 			 *  FIXME: Seems to be a race condition here, which causes the various config channel/role ids to not be found
