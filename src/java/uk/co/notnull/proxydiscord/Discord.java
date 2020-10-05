@@ -42,22 +42,15 @@ public class Discord {
 		try {
 			logger.info("Connecting to Discord...");
 			api = new DiscordApiBuilder().setToken(token)
-					.setIntents(Intent.GUILDS, Intent.GUILD_MEMBERS, Intent.GUILD_MESSAGES)
+					.setIntents(Intent.GUILDS, Intent.GUILD_MEMBERS, Intent.GUILD_MESSAGES, Intent.GUILD_PRESENCES)
+					.setWaitForUsersOnStartup(true)
+					.setWaitForServersOnStartup(true)
 					.login().join();
-
-			/*
-			 *  FIXME: Seems to be a race condition here, which causes the various config channel/role ids to not be found
-			 *  Which naturally breaks everything
-			 *  Adding a sleep for now
-			 */
-			logger.info("Waiting a sec...");
-			Thread.sleep(4000);
 
 			connected = true;
 		} catch (CompletionException IllegalStateException) {
 			logger.warn("Connection Error. Did you put a valid token in the config?");
 			return;
-		} catch(InterruptedException ignored) {
 		}
 
 		// Print the invite url of the bot
