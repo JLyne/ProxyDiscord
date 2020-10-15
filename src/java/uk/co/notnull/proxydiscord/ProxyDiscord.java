@@ -45,7 +45,6 @@ public class ProxyDiscord {
 
 	private ConfigurationNode configuration;
 	private ConfigurationNode messagesConfiguration;
-	private ConfigurationNode botCommandConfiguration;
 	private DebugLogger debugLogger;
 	private Discord discord;
 
@@ -138,19 +137,10 @@ public class ProxyDiscord {
 			logger.error("Error loading messages.yml");
 		}
 
-		// Setup bot config
-		loadResource("bot-command-options.yml");
-		try {
-			botCommandConfiguration = YAMLConfigurationLoader.builder().setFile(
-					new File(dataDirectory.toAbsolutePath().toString(), "bot-command-options.yml")).build().load();
-		} catch (IOException e) {
-			logger.error("Error loading bot-command-options.yml");
-		}
-
 		// Setup Debug Logging
 		debugLogger = new DebugLogger();
 
-		discord = new Discord(getConfig().getNode("token").getString(), botCommandConfiguration);
+		discord = new Discord(getConfig().getNode("token").getString());
 		kickManager = new KickManager(getConfig().getNode("unverified-kick-time").getInt(120));
 
 		new ChatMessages(messagesConfiguration);

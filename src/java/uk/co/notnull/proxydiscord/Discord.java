@@ -6,7 +6,6 @@ import uk.co.notnull.proxydiscord.bot.commands.Link;
 import uk.co.notnull.proxydiscord.bot.commands.MainCommand;
 import uk.co.notnull.proxydiscord.bot.commands.ServerInfo;
 import uk.co.notnull.proxydiscord.bot.commands.sub.BotInfo;
-import ninja.leaping.configurate.ConfigurationNode;
 import org.javacord.api.DiscordApiBuilder;
 import org.javacord.api.entity.message.embed.EmbedBuilder;
 
@@ -21,8 +20,6 @@ public class Discord {
 	 */
 	private DiscordApi api; // Api Instance
 
-	private final ConfigurationNode commandConfiguration;
-
 	private boolean connected = false;
 
 	private final ProxyServer proxy;
@@ -32,11 +29,10 @@ public class Discord {
 	 * Class
 	 * @param token bot token
 	 */
-	public Discord(String token, ConfigurationNode commandConfiguration) {
+	public Discord(String token) {
 		this.proxy = ProxyDiscord.inst().getProxy();
         this.logger = ProxyDiscord.inst().getLogger();
 		// Bot token
-		this.commandConfiguration = commandConfiguration;
 
 		// Create an Instance of the DiscordApi
 		try {
@@ -89,23 +85,12 @@ public class Discord {
 
 		// Register Main Command Class
 		api.addMessageCreateListener(new MainCommand());
-
-		// Attempt to register server-info from the config, falling back to the defaults.
-		if (!commandConfiguration.getNode("server-info").isVirtual()) {
-			api.addMessageCreateListener(
-					new ServerInfo(0, commandConfiguration.getNode("server-info.command").getString(),
-								   commandConfiguration.getNode("server-info.description").getString()));
-		} else {
-			logger.warn(
-					"[Bot Command Options] Missing the server-info path. You will not be able to customize the !serverinfo command.");
-			api.addMessageCreateListener(new ServerInfo(0, "!serverinfo", "Show server information."));
-		}
-
-		api.addMessageCreateListener(new Link(1, "!link", "Allows players to link their discord account"));
+		api.addMessageCreateListener(new Link(0, "!link", "Allows players to link their discord account"));
 	}
 
 	private void registerSubCommands() {
 		api.addMessageCreateListener(new BotInfo(0, "!pd botinfo", "Show bot information."));
+		api.addMessageCreateListener(new ServerInfo(1, "!pd serverinfo", "Show server information."));
 	}
 
 	// Sets the footer, done here to keep it standardised.
