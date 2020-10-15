@@ -4,6 +4,7 @@ import com.velocitypowered.api.event.PostOrder;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
+import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.slf4j.Logger;
@@ -52,46 +53,50 @@ public class KickManager {
 
     private void kickPlayers() {
         proxy.getScheduler().buildTask(ProxyDiscord.inst(), () -> {
-            ProxyDiscord.inst().getDebugLogger().info("Running kick task");
 
-            Long now = System.currentTimeMillis();
-            VerificationManager verificationManager = ProxyDiscord.inst().getVerificationManager();
-
-            Iterator iterator = kickablePlayers.entrySet().iterator();
-
-            while (iterator.hasNext()) {
-                Map.Entry pair = (Map.Entry) iterator.next();
-                Long addedTime = (Long) pair.getValue();
-                Player player = (Player) pair.getKey();
-                TextComponent message;
-
-                if(!player.isActive()) {
-                    iterator.remove();
-                    continue;
-                }
-
-                ProxyDiscord.inst().getDebugLogger().info("Player " + player.getUsername() + " elapsed time " + (now - addedTime) / 1000 + ". Kick time: " + kickTime);
-
-                if(((now - addedTime) / 1000) > kickTime) {
-                    switch(verificationManager.checkVerificationStatus(player)) {
-                        case VERIFIED:
-                            continue;
-
-                        case LINKED_NOT_VERIFIED:
-                            message = TextComponent.of(ChatMessages.getMessage("kicked-linked-not-verified")).color(
-                                    NamedTextColor.RED);
-                            break;
-                        case NOT_LINKED:
-                        default:
-                            message = TextComponent.of(ChatMessages.getMessage("kicked-not-linked")).color(NamedTextColor.RED);
-                    }
-
-                    ProxyDiscord.inst().getDebugLogger().info("Kicking player " + player.getUsername() + " for exceeding unverified kick time");
-                    iterator.remove();
-                    player.disconnect(message);
-                }
-            }
         }).delay(10, TimeUnit.SECONDS).repeat(10, TimeUnit.SECONDS).schedule();
+    }
+
+    private void kickTask() {
+        ProxyDiscord.inst().getDebugLogger().info("Running kick task");
+
+        Long now = System.currentTimeMillis();
+        VerificationManager verificationManager = ProxyDiscord.inst().getVerificationManager();
+
+        Iterator iterator = kickablePlayers.entrySet().iterator();
+
+        while (iterator.hasNext()) {
+            Map.Entry pair = (Map.Entry) iterator.next();
+            Long addedTime = (Long) pair.getValue();
+            Player player = (Player) pair.getKey();
+            TextComponent message;
+
+            if(!player.isActive()) {
+                iterator.remove();
+                continue;
+            }
+
+            ProxyDiscord.inst().getDebugLogger().info("Player " + player.getUsername() + " elapsed time " + (now - addedTime) / 1000 + ". Kick time: " + kickTime);
+
+            if(((now - addedTime) / 1000) > kickTime) {
+                switch(verificationManager.checkVerificationStatus(player)) {
+                    case VERIFIED:
+                        continue;
+
+                    case LINKED_NOT_VERIFIED:
+                        message = Component.text(ChatMessages.getMessage("kicked-linked-not-verified")).color(
+                                NamedTextColor.RED);
+                        break;
+                    case NOT_LINKED:
+                    default:
+                        message = Component.text(ChatMessages.getMessage("kicked-not-linked")).color(NamedTextColor.RED);
+                }
+
+                ProxyDiscord.inst().getDebugLogger().info("Kicking player " + player.getUsername() + " for exceeding unverified kick time");
+                iterator.remove();
+                player.disconnect(message);
+            }
+        }
     }
 
     @Subscribe(order = PostOrder.NORMAL)

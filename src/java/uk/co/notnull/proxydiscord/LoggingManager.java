@@ -7,8 +7,10 @@ import com.velocitypowered.api.event.player.PlayerChatEvent;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.proxy.ServerConnection;
-import de.themoep.minedown.adventure.MineDown;
-import de.themoep.minedown.adventure.MineDownParser;
+//import de.themoep.minedown.adventure.MineDown;
+//import de.themoep.minedown.adventure.MineDownParser;
+import net.kyori.adventure.identity.Identity;
+import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -19,7 +21,6 @@ import net.luckperms.api.cacheddata.CachedMetaData;
 import net.luckperms.api.model.user.User;
 import net.luckperms.api.model.user.UserManager;
 import net.luckperms.api.query.QueryOptions;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.javacord.api.entity.channel.TextChannel;
 import org.javacord.api.entity.message.MessageBuilder;
 import org.javacord.api.entity.message.MessageDecoration;
@@ -190,18 +191,20 @@ public class LoggingManager {
             String prefix = ( metaData.getPrefix() != null) ?  metaData.getPrefix() : "";
             String suffix = ( metaData.getSuffix() != null) ?  metaData.getSuffix() : "";
 
-            TextComponent.Builder component = TextComponent.builder();
+            TextComponent.Builder component = Component.text();
 
-            component.append(TextComponent.of("DISCORD> ")
+            component.append(Component.text("DISCORD> ")
                                      .color(NamedTextColor.AQUA).decoration(TextDecoration.BOLD, true));
 
             component.append(LegacyComponentSerializer.legacyAmpersand()
                                      .deserialize("&r" + prefix + user.getFriendlyName() + suffix + "&r: "));
 
-            component.append(new MineDown(message)
-                .disable(MineDownParser.Option.ADVANCED_FORMATTING).toComponent());
+//            component.append(new MineDown(message)
+//                .disable(MineDownParser.Option.ADVANCED_FORMATTING).toComponent());
 
-            proxy.sendMessage(component.build());
+            component.append(Component.text(message));
+
+            proxy.getAllPlayers().forEach(player -> player.sendMessage(Identity.nil(), component.build()));
             sendLogMessage("[DISCORD] []" + getPlayerLogName(user) + "\n" + message);
         } catch (IllegalStateException e) {
             logger.warn("Failed to send Discord message: " + e.getMessage());

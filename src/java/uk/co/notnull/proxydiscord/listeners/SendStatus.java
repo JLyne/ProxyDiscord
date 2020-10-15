@@ -6,7 +6,8 @@ import com.velocitypowered.api.event.PostOrder;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.player.ServerPostConnectEvent;
 import com.velocitypowered.api.proxy.Player;
-import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.identity.Identity;
+import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.geysermc.floodgate.FloodgateAPI;
 import uk.co.notnull.proxydiscord.*;
@@ -38,7 +39,7 @@ public class SendStatus {
     public void onPlayerVerifyStatusChange(PlayerVerifyStateChangeEvent e) {
 		ProxyDiscord.inst().getDebugLogger().info("PlayerVerifyStateChangeEvent");
 		if(e.getState() == VerificationResult.VERIFIED) {
-			e.getPlayer().sendMessage(TextComponent.of(ChatMessages.getMessage("link-success"))
+			e.getPlayer().sendMessage(Identity.nil(), Component.text(ChatMessages.getMessage("link-success"))
 											 .color(NamedTextColor.GREEN));
 		} else {
 			sendStatusPacket(e.getPlayer(), e.getState());

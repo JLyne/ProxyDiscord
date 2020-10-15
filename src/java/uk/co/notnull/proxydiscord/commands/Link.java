@@ -3,6 +3,8 @@ package uk.co.notnull.proxydiscord.commands;
 import co.aikar.commands.BaseCommand;
 import co.aikar.commands.annotation.*;
 import com.velocitypowered.api.proxy.Player;
+import net.kyori.adventure.identity.Identity;
+import net.kyori.adventure.text.Component;
 import uk.co.notnull.proxydiscord.ChatMessages;
 import uk.co.notnull.proxydiscord.LinkResult;
 import uk.co.notnull.proxydiscord.LinkingManager;
@@ -35,7 +37,7 @@ public class Link extends BaseCommand {
 
         //Missing discord id, return expected format
         if (discordId == null) {
-            player.sendMessage(TextComponent.of("Format: /link <player> <discordid>").color(NamedTextColor.RED));
+            player.sendMessage(Identity.nil(), Component.text("Format: /link <player> <discordid>").color(NamedTextColor.RED));
 
             return;
         }
@@ -43,7 +45,7 @@ public class Link extends BaseCommand {
         try {
             Long.parseLong(discordId);
         } catch (NumberFormatException e) {
-            player.sendMessage(TextComponent.of("Discord ID " + discordId + " is invalid.").color(NamedTextColor.RED));
+            player.sendMessage(Identity.nil(), Component.text("Discord ID " + discordId + " is invalid.").color(NamedTextColor.RED));
             return;
         }
 
@@ -51,12 +53,12 @@ public class Link extends BaseCommand {
 
         luckPermsApi.getUserManager().lookupUniqueId(target).thenAccept((UUID uuid) -> {
             if (uuid == null) {
-                TextComponent.Builder playerMessage = TextComponent.builder()
+                TextComponent.Builder playerMessage = Component.text()
                         .content(ChatMessages.getMessage("link-not-found")
                                          .replace("[player]", target))
                         .color(NamedTextColor.GREEN);
 
-                player.sendMessage(playerMessage.build());
+                player.sendMessage(Identity.nil(), playerMessage.build());
 
                 return;
             }
@@ -70,7 +72,7 @@ public class Link extends BaseCommand {
                 if (linkedDiscord.toString().equals(discordId)) {
                     String message = ChatMessages.getMessage("link-other-already-linked-same")
                             .replace("[player]", target);
-                    player.sendMessage(TextComponent.of(message).color(NamedTextColor.RED));
+                    player.sendMessage(Identity.nil(), Component.text(message).color(NamedTextColor.RED));
                 } else {
                     //Attempt to get username of linked discord account
                     ProxyDiscord.inst().getDiscord().getApi().getUserById(linkedDiscord).thenAcceptAsync(user -> {
@@ -78,12 +80,12 @@ public class Link extends BaseCommand {
                                 .replace("[player]", target)
                                 .replace("[discord]", user.getDiscriminatedName());
 
-                        player.sendMessage(TextComponent.of(message).color(NamedTextColor.RED));
+                        player.sendMessage(Identity.nil(), Component.text(message).color(NamedTextColor.RED));
                     }).exceptionally(error -> {
                         String message = ChatMessages.getMessage("link-other-already-linked-unknown")
                                 .replace("[player]", target);
 
-                        player.sendMessage(TextComponent.of(message).color(NamedTextColor.RED));
+                        player.sendMessage(Identity.nil(), Component.text(message).color(NamedTextColor.RED));
 
                         return null;
                     });
@@ -114,9 +116,9 @@ public class Link extends BaseCommand {
 
                             message = message.replace("[discord]", discordUsername);
 
-                            player.sendMessage(TextComponent.of(message).color(NamedTextColor.RED));
+                            player.sendMessage(Identity.nil(), Component.text(message).color(NamedTextColor.RED));
                         }).exceptionally(error -> {
-                    player.sendMessage(TextComponent.of(error.toString()).color(NamedTextColor.RED));
+                    player.sendMessage(Identity.nil(), Component.text(error.toString()).color(NamedTextColor.RED));
                     return null;
                 });
 
@@ -134,16 +136,16 @@ public class Link extends BaseCommand {
                             .replace("[discord]", user.getDiscriminatedName())
                             .replace("[player]", target);
 
-                    player.sendMessage(TextComponent.of(message).color(NamedTextColor.GREEN));
+                    player.sendMessage(Identity.nil(), Component.text(message).color(NamedTextColor.GREEN));
                 } else if (result == LinkResult.NOT_VERIFIED) {
                     String message = ChatMessages.getMessage("link-other-not-verified")
                             .replace("[discord]", user.getDiscriminatedName())
                             .replace("[player]", target);
 
-                    player.sendMessage(TextComponent.of(message).color(NamedTextColor.YELLOW));
+                    player.sendMessage(Identity.nil(), Component.text(message).color(NamedTextColor.YELLOW));
                 }
             }).exceptionally(error -> {
-                player.sendMessage(TextComponent.of(error.toString()).color(NamedTextColor.RED));
+                player.sendMessage(Identity.nil(), Component.text(error.toString()).color(NamedTextColor.RED));
                 return null;
             });
         });

@@ -5,6 +5,8 @@ import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.player.ServerPreConnectEvent;
 import com.velocitypowered.api.proxy.ServerConnection;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
+import net.kyori.adventure.identity.Identity;
+import net.kyori.adventure.text.Component;
 import uk.co.notnull.proxydiscord.*;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -37,13 +39,13 @@ public class ServerConnect {
 
         switch(result) {
             case NOT_LINKED:
-                message = TextComponent.builder().content(ChatMessages.getMessage("server-change-not-linked"));
+                message = Component.text().content(ChatMessages.getMessage("server-change-not-linked"));
                 break;
             case LINKED_NOT_VERIFIED:
-                message = TextComponent.builder().content(ChatMessages.getMessage("server-change-linked-not-verified"));
+                message = Component.text().content(ChatMessages.getMessage("server-change-linked-not-verified"));
                 break;
             default:
-                message = TextComponent.builder().content("An error has occurred.");
+                message = Component.text().content("An error has occurred.");
         }
 
         message.color(NamedTextColor.RED);
@@ -54,9 +56,9 @@ public class ServerConnect {
 
             if (currentServer.isPresent() && verificationManager.isUnverifiedServer(currentServer.get().getServer())) {
                 e.setResult(ServerPreConnectEvent.ServerResult.denied());
-                e.getPlayer().sendMessage(message.build());
-            } else {
-                e.setResult(ServerPreConnectEvent.ServerResult.allowed(unverifiedServer));
+                e.getPlayer().sendMessage(Identity.nil(), message.build());
+            } else if(verificationManager.getLinkingServer() != null) {
+                e.setResult(ServerPreConnectEvent.ServerResult.allowed(verificationManager.getLinkingServer()));
             }
 
             //

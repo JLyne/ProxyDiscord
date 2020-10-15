@@ -7,6 +7,7 @@ import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.proxy.ServerConnection;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
+import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -67,7 +68,7 @@ public class RedirectManager {
     }
 
     private void sendToUnverifiedServer(Player player, String message) {
-        TextComponent.Builder component = TextComponent.builder();
+        TextComponent.Builder component = Component.text();
 
         component.color(NamedTextColor.RED).content(message);
 
@@ -90,14 +91,14 @@ public class RedirectManager {
                     TextComponent extra = Component.text(" " + text.replace("[server]", linkingServer.getServerInfo().getName()));
                     component.append(extra);
 
-                    player.sendMessage(component.build());
+                    player.sendMessage(Identity.nil(), component.build());
                 } else {
                     ProxyDiscord.inst().getDebugLogger().info("Failed to move " + player.getUsername() + " to " + linkingServer.getServerInfo().getName() + ". Kicking.");
                     player.disconnect(component.build());
                 }
             });
         } else {
-            player.sendMessage(component.build());
+            player.sendMessage(Identity.nil(), component.build());
         }
     }
 
