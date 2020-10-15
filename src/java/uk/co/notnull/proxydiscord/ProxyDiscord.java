@@ -203,9 +203,9 @@ public class ProxyDiscord {
 	}
 
 	private void initAnnouncements() {
-		String announcementChannelId = getConfig().getNode("announcement-channel-id").getString();
+		ConfigurationNode announcementChannels = getConfig().getNode("announcement-channels");
 
-		announcementManager = new AnnouncementManager(announcementChannelId);
+		announcementManager = new AnnouncementManager(announcementChannels);
 	}
 
 	private void loadResource(String resource) {

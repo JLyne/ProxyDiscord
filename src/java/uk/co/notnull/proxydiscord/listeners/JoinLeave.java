@@ -54,7 +54,6 @@ public class JoinLeave {
 
 			case VERIFIED:
 				logger.info("Verified player " + player.getUsername() + " joined");
-				ProxyDiscord.inst().getAnnouncementManager().sendLatestAnnouncement(player);
 
 				break;
 		}
