@@ -18,8 +18,12 @@ verified-permission: 'group.verified'
 # Permission to allow bypassing the verification requirements
 bypass-permission: 'discord.bypass'
 
-# Server unverified players are allowed on to link/verify
-unverified-server: 'waiting'
+# Server to send players to when unlinked/unverified, if they try to join a server requiring verification
+linking-server: 'linking'
+
+# Server unverified players are allowed on without linking/verifying
+unverified-servers:
+  - 'linking'
 
 # Server to redirect newly verified players to, if their original destination is unknown
 default-verified-server: 'waiting'

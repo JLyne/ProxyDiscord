@@ -3,7 +3,6 @@ package uk.co.notnull.proxydiscord.listeners;
 import com.velocitypowered.api.event.PostOrder;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.proxy.ServerConnection;
-import com.velocitypowered.api.proxy.server.RegisteredServer;
 import uk.co.notnull.proxydiscord.ChatMessages;
 import uk.co.notnull.proxydiscord.ProxyDiscord;
 import uk.co.notnull.proxydiscord.VerificationManager;
@@ -28,9 +27,7 @@ public class ProxyQueues {
 			return;
 		}
 
-        RegisteredServer unverifiedServer = verificationManager.getUnverifiedServer();
-
-        if(event.getServer().equals(unverifiedServer)) {
+        if(verificationManager.isUnverifiedServer(event.getServer())) {
             return;
         }
 
@@ -39,7 +36,7 @@ public class ProxyQueues {
         if(result == VerificationResult.VERIFIED) {
             Optional<ServerConnection> currentServer = event.getPlayer().getCurrentServer();
 
-            if(currentServer.isPresent() && currentServer.get().getServer().equals(verificationManager.getUnverifiedServer())) {
+            if(currentServer.isPresent() && verificationManager.isUnverifiedServer(currentServer.get().getServer())) {
                 if(proxyQueues.getWaitingServer().isPresent()) {
                     event.getPlayer().createConnectionRequest(proxyQueues.getWaitingServer().get()).fireAndForget();
                 }

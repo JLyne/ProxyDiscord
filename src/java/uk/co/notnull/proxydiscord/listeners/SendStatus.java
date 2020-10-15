@@ -51,7 +51,7 @@ public class SendStatus {
         player.getCurrentServer().ifPresent(connection -> {
         	ProxyDiscord.inst().getDebugLogger().info(connection.getServer().getServerInfo().getName());
 
-        	if(!connection.getServer().equals(verificationManager.getUnverifiedServer())) {
+        	if(!verificationManager.isLinkingServer(connection.getServer())) {
         		return;
 			}
 

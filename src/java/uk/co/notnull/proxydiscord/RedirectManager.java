@@ -7,6 +7,7 @@ import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.proxy.ServerConnection;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
+import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.slf4j.Logger;
@@ -20,16 +21,11 @@ public class RedirectManager {
 
     private final ProxyServer proxy;
     private final Logger logger;
-    private final RegisteredServer unverifiedServer;
-    private final RegisteredServer defaultVerifiedServer;
 
     public RedirectManager() {
         this.proxy = ProxyDiscord.inst().getProxy();
         this.logger = ProxyDiscord.inst().getLogger();
         this.verificationManager = ProxyDiscord.inst().getVerificationManager();
-
-        unverifiedServer = verificationManager.getUnverifiedServer();
-        defaultVerifiedServer = verificationManager.getDefaultVerifiedServer();
 
         destinations = new HashMap<>();
         proxy.getEventManager().register(ProxyDiscord.inst(), this);
@@ -39,8 +35,8 @@ public class RedirectManager {
     public void onPlayerConnect(ServerPreConnectEvent event) {
         Optional<RegisteredServer> redirectServer = event.getResult().getServer();
 
-        if(redirectServer.isPresent() && redirectServer.get().equals(unverifiedServer)) {
-            if(!event.getOriginalServer().equals(unverifiedServer)) {
+        if(redirectServer.isPresent() && verificationManager.isUnverifiedServer(redirectServer.get())) {
+            if(!verificationManager.isUnverifiedServer(event.getOriginalServer())) {
                 destinations.put(event.getPlayer().getUniqueId(), event.getOriginalServer());
             }
         } else {
@@ -75,7 +71,7 @@ public class RedirectManager {
 
         component.color(NamedTextColor.RED).content(message);
 
-        if(unverifiedServer == null) {
+        if(verificationManager.getUnverifiedServers().isEmpty()) {
             ProxyDiscord.inst().getDebugLogger().info("No unverified server defined. Kicking " + player.getUsername());
             player.disconnect(component.build());
 
@@ -83,19 +79,20 @@ public class RedirectManager {
         }
 
         Optional<ServerConnection> currentServer = player.getCurrentServer();
+        RegisteredServer linkingServer = verificationManager.getLinkingServer();
 
-        if(currentServer.isPresent() && !currentServer.get().getServer().equals(unverifiedServer)) {
-            ProxyDiscord.inst().getDebugLogger().info("Moving " + player.getUsername() + " to " + unverifiedServer.getServerInfo().getName());
+        if(currentServer.isPresent() && linkingServer != null && !verificationManager.isUnverifiedServer(currentServer.get().getServer())) {
+            ProxyDiscord.inst().getDebugLogger().info("Moving " + player.getUsername() + " to " + linkingServer.getServerInfo().getName());
 
-            player.createConnectionRequest(unverifiedServer).connect().thenAccept(result -> {
+            player.createConnectionRequest(linkingServer).connect().thenAccept(result -> {
                 if(result.isSuccessful()) {
                     String text = ChatMessages.getMessage("verification-lost-moved");
-                    TextComponent extra = TextComponent.of(" " + text.replace("[server]", unverifiedServer.getServerInfo().getName()));
+                    TextComponent extra = Component.text(" " + text.replace("[server]", linkingServer.getServerInfo().getName()));
                     component.append(extra);
 
                     player.sendMessage(component.build());
                 } else {
-                    ProxyDiscord.inst().getDebugLogger().info("Failed to move " + player.getUsername() + " to " + unverifiedServer.getServerInfo().getName() + ". Kicking.");
+                    ProxyDiscord.inst().getDebugLogger().info("Failed to move " + player.getUsername() + " to " + linkingServer.getServerInfo().getName() + ". Kicking.");
                     player.disconnect(component.build());
                 }
             });
@@ -106,7 +103,9 @@ public class RedirectManager {
 
     private void sendToDestinationServer(Player player) {
         player.getCurrentServer().ifPresent(connection -> {
-            if(!connection.getServer().equals(unverifiedServer)) {
+            RegisteredServer defaultVerifiedServer = verificationManager.getDefaultVerifiedServer();
+
+            if(!verificationManager.isLinkingServer(connection.getServer())) {
                 return;
             }
 

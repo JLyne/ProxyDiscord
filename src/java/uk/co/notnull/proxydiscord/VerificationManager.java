@@ -1,8 +1,5 @@
 package uk.co.notnull.proxydiscord;
 
-import com.velocitypowered.api.event.PostOrder;
-import com.velocitypowered.api.event.Subscribe;
-import com.velocitypowered.api.event.connection.DisconnectEvent;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
@@ -22,11 +19,13 @@ import java.util.concurrent.ConcurrentHashMap;
 public class VerificationManager {
     private final LinkingManager linkingManager;
 
-    private final String verifiedPermission;
-    private final String bypassPermission;
-    private final String verifiedRoleId;
-    private final RegisteredServer unverifiedServer;
-    private final RegisteredServer defaultVerifiedServer;
+    private final Set<RegisteredServer> unverifiedServers;
+    private RegisteredServer defaultVerifiedServer;
+    private RegisteredServer linkingServer;
+
+    private String verifiedPermission;
+    private String bypassPermission;
+    private String verifiedRoleId;
 
     private final Set<Long> verifiedRoleUsers;
 
@@ -41,16 +40,38 @@ public class VerificationManager {
         verifiedRoleUsers = ConcurrentHashMap.newKeySet();
         linkingManager = ProxyDiscord.inst().getLinkingManager();
         lastKnownStatuses = new ConcurrentHashMap<>();
+        unverifiedServers = new HashSet<>();
 
+        proxy.getEventManager().register(ProxyDiscord.inst(), this);
+        parseConfig(config);
+    }
+
+    public void parseConfig(ConfigurationNode config) {
         verifiedRoleId = config.getNode("verify-role-id").getString();
         verifiedPermission = config.getNode("verified-permission").getString();
         bypassPermission = config.getNode("bypass-permission").getString();
+        String linkingServerName = config.getNode("linking-server").getString();
+        linkingServer = proxy.getServer(linkingServerName).orElse(null);
 
-        String unverifiedServerName = config.getNode("unverified-server").getString();
-        unverifiedServer = proxy.getServer(unverifiedServerName).orElse(null);
+        unverifiedServers.clear();
 
-        if(unverifiedServer == null && unverifiedServerName != null && !unverifiedServerName.isEmpty()) {
-            logger.warn("Unverified server (" + unverifiedServerName + ") does not exist!");
+        if(linkingServer == null && linkingServerName != null && !linkingServerName.isEmpty()) {
+            logger.warn("Linking server (" + linkingServerName + ") does not exist!");
+        } else if(linkingServer != null) {
+            unverifiedServers.add(linkingServer);
+        }
+
+        List<? extends ConfigurationNode> unverifiedServerNames = config.getNode("unverified-servers").getChildrenList();
+
+        for(ConfigurationNode unverifiedServerName : unverifiedServerNames) {
+            String name = unverifiedServerName.getString();
+            Optional<RegisteredServer> server = proxy.getServer(name);
+
+            server.ifPresent(unverifiedServers::add);
+
+            if(server.isEmpty() && name != null && !name.isEmpty()) {
+                logger.warn("Unverified server (" + name + ") does not exist!");
+            }
         }
 
         String defaultVerifiedServerName = config.getNode("default-verified-server").getString();
@@ -63,8 +84,6 @@ public class VerificationManager {
         if(verifiedRoleId != null) {
             populateUsers();
         }
-
-        proxy.getEventManager().register(ProxyDiscord.inst(), this);
     }
 
     public void addUser(User user) {
@@ -276,11 +295,23 @@ public class VerificationManager {
         return role.orElse(null);
     }
 
-    public RegisteredServer getUnverifiedServer() {
-        return unverifiedServer;
+    public Set<RegisteredServer> getUnverifiedServers() {
+        return unverifiedServers;
+    }
+
+    public boolean isUnverifiedServer(RegisteredServer server) {
+        return unverifiedServers.contains(server);
     }
 
     public RegisteredServer getDefaultVerifiedServer() {
         return defaultVerifiedServer;
+    }
+
+    public RegisteredServer getLinkingServer() {
+        return linkingServer;
+    }
+
+    public boolean isLinkingServer(RegisteredServer server) {
+        return server.equals(linkingServer);
     }
 }

@@ -20,11 +20,10 @@ public class ServerConnect {
 
     @Subscribe(order = PostOrder.FIRST)
     public void onServerConnect(ServerPreConnectEvent e) {
-        RegisteredServer unverifiedServer = verificationManager.getUnverifiedServer();
         RegisteredServer server = e.getOriginalServer();
         server = e.getResult().getServer().orElse(server);
 
-        if(server.equals(unverifiedServer)) {
+        if(verificationManager.isUnverifiedServer(server)) {
             return;
         }
 
@@ -49,11 +48,11 @@ public class ServerConnect {
 
         message.color(NamedTextColor.RED);
 
-        if(unverifiedServer != null) {
+        if(!verificationManager.getUnverifiedServers().isEmpty()) {
             ProxyDiscord.inst().getDebugLogger().info("Blocking unverified player " + e.getPlayer().getUsername() + " from joining " + e.getOriginalServer().getServerInfo().getName());
             Optional<ServerConnection> currentServer = e.getPlayer().getCurrentServer();
 
-            if (currentServer.isPresent() && currentServer.get().getServer().equals(unverifiedServer)) {
+            if (currentServer.isPresent() && verificationManager.isUnverifiedServer(currentServer.get().getServer())) {
                 e.setResult(ServerPreConnectEvent.ServerResult.denied());
                 e.getPlayer().sendMessage(message.build());
             } else {
