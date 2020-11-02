@@ -10,10 +10,7 @@ import com.velocitypowered.api.plugin.PluginContainer;
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.proxy.messages.MinecraftChannelIdentifier;
-import uk.co.notnull.proxydiscord.bot.listeners.Reconnect;
-import uk.co.notnull.proxydiscord.bot.listeners.ServerMemberBan;
-import uk.co.notnull.proxydiscord.bot.listeners.UserRoleAdd;
-import uk.co.notnull.proxydiscord.bot.listeners.UserRoleRemove;
+import uk.co.notnull.proxydiscord.bot.listeners.*;
 import uk.co.notnull.proxydiscord.commands.Link;
 import uk.co.notnull.proxydiscord.commands.Save;
 import uk.co.notnull.proxydiscord.commands.Unlink;
@@ -183,6 +180,8 @@ public class ProxyDiscord {
 		discord.getApi().addUserRoleAddListener(new UserRoleAdd());
 		discord.getApi().addUserRoleRemoveListener(new UserRoleRemove());
 		discord.getApi().addServerMemberBanListener(new ServerMemberBan());
+		discord.getApi().addServerMemberJoinListener(new ServerMemberJoin());
+		discord.getApi().addServerMemberLeaveListener(new ServerMemberLeave());
 		discord.getApi().addReconnectListener(new Reconnect());
 	}
 
