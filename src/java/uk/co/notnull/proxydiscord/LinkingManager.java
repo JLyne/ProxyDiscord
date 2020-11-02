@@ -13,8 +13,8 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 public class LinkingManager {
-    private HashBiMap<String, Long> links;
-    private HashBiMap<String, String> pendingLinks;
+    private HashBiMap<UUID, Long> links;
+    private HashBiMap<String, UUID> pendingLinks;
     private final String linkingSecret;
     private final String linkingChannelId;
 
@@ -54,11 +54,11 @@ public class LinkingManager {
     }
 
     public boolean isLinked(Player player) {
-        return this.links.containsKey(player.getUniqueId().toString());
+        return this.links.containsKey(player.getUniqueId());
     }
 
     public boolean isLinked(UUID uuid) {
-        return this.links.containsKey(uuid.toString());
+        return this.links.containsKey(uuid);
     }
 
     public boolean isLinked(long discordId) {
@@ -66,28 +66,26 @@ public class LinkingManager {
     }
 
     public UUID getLinked(Long discordId) {
-        String linked = this.links.inverse().get(discordId);
-
-        return linked != null ? UUID.fromString(linked) : null;
+        return this.links.inverse().get(discordId);
     }
 
-    public String getLinked(User user) {
+    public UUID getLinked(User user) {
         return this.links.inverse().get(user.getId());
     }
 
     public Long getLinked(Player player) {
-        return this.links.get(player.getUniqueId().toString());
+        return this.links.get(player.getUniqueId());
     }
 
     public Long getLinked(UUID uuid) {
-        return this.links.get(uuid.toString());
+        return this.links.get(uuid);
     }
 
     public String getLinkingToken(Player player) {
-        return getLinkingToken(player.getUniqueId().toString());
+        return getLinkingToken(player.getUniqueId());
     }
 
-    public String getLinkingToken(String uuid) {
+    public String getLinkingToken(UUID uuid) {
         if(this.pendingLinks.containsValue(uuid)) {
             return this.pendingLinks.inverse().get(uuid);
         }
@@ -136,7 +134,7 @@ public class LinkingManager {
             return LinkResult.INVALID_TOKEN;
         }
 
-        String player = this.pendingLinks.get(token);
+        UUID player = this.pendingLinks.get(token);
 
         if(player == null) {
             return LinkResult.INVALID_TOKEN;
@@ -162,16 +160,16 @@ public class LinkingManager {
         }
 
         //Discord account already linked
-        if(this.links.containsKey(uuid.toString())) {
+        if(this.links.containsKey(uuid)) {
             //Said account doesn't have verified role
-            if(!ProxyDiscord.inst().getVerificationManager().hasVerifiedRole(this.links.get(uuid.toString()))) {
+            if(!ProxyDiscord.inst().getVerificationManager().hasVerifiedRole(this.links.get(uuid))) {
                 return LinkResult.ALREADY_LINKED_NOT_VERIFIED;
             }
 
             return LinkResult.ALREADY_LINKED;
         }
 
-        this.links.put(uuid.toString(), discordId);
+        this.links.put(uuid, discordId);
 
         VerificationResult result = ProxyDiscord.inst().getVerificationManager().checkVerificationStatus(discordId);
 
@@ -179,11 +177,11 @@ public class LinkingManager {
     }
 
     public void unlink(Player player) {
-        this.links.remove(player.getUniqueId().toString());
+        this.links.remove(player.getUniqueId());
     }
 
     public void unlink(UUID uuid) {
-        this.links.remove(uuid.toString());
+        this.links.remove(uuid);
     }
 
     public void unlink(long discordId) {
@@ -212,22 +210,50 @@ public class LinkingManager {
     private void loadLinks() {
         try {
             File folder = ProxyDiscord.inst().getDataDirectory().toFile();
-            File saveFile = new File(folder, "links.sav");
 
-            if (!saveFile.exists()) {
+            File saveFile = new File(folder, "links.sav");
+            File oldSaveFile = new File(folder, "links_old.sav");
+
+            if (saveFile.exists()) {
+                FileInputStream saveStream = new FileInputStream(saveFile);
+                ObjectInputStream save = new ObjectInputStream(saveStream);
+
+                this.links = (HashBiMap<UUID, Long>) save.readObject();
+                this.pendingLinks = (HashBiMap<String, UUID>) save.readObject();
+            } else if(oldSaveFile.exists()) {
                 this.links = HashBiMap.create(1024);
                 this.pendingLinks = HashBiMap.create(1024);
 
-                return;
+                logger.info("Importing old links file...");
+                FileInputStream saveStream = new FileInputStream(oldSaveFile);
+                ObjectInputStream save = new ObjectInputStream(saveStream);
+
+                HashBiMap<String, Long> links = (HashBiMap<String, Long>) save.readObject();
+                HashBiMap<String, String> pendingLinks = (HashBiMap<String, String>) save.readObject();
+
+                links.forEach((String key, Long value) -> {
+                    try {
+                        this.links.put(UUID.fromString(key), value);
+                    } catch(IllegalArgumentException e) {
+                        logger.warn("Invalid UUID for discord ID " + value + ". Skipping.");
+                    }
+                });
+
+                pendingLinks.forEach((String key, String value) -> {
+                    try {
+                        this.pendingLinks.put(key, UUID.fromString(value));
+                    } catch(IllegalArgumentException e) {
+                        logger.warn("Invalid UUID for linking code " + value + ". Skipping.");
+                    }
+                });
+
+                logger.info("Saving new links file...");
+                saveLinks();
+                logger.info("Imported " + this.links.size() + " linked accounts and " + this.pendingLinks.size() + " pending links.");
+            } else {
+                this.links = HashBiMap.create(1024);
+                this.pendingLinks = HashBiMap.create(1024);
             }
-
-            FileInputStream saveStream = new FileInputStream(saveFile);
-            ObjectInputStream save = new ObjectInputStream(saveStream);
-
-            this.links = (HashBiMap<String, Long>) save.readObject();
-            this.pendingLinks = (HashBiMap<String, String>) save.readObject();
-
-            this.pendingLinks.replaceAll((value, key) -> value.toUpperCase());
         } catch (IOException | ClassNotFoundException | ClassCastException e) {
             this.links = HashBiMap.create(1024);
             this.pendingLinks = HashBiMap.create(1024);
