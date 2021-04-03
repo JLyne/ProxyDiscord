@@ -3,6 +3,7 @@ package uk.co.notnull.proxydiscord.bot.commands;
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.LuckPermsProvider;
 import org.javacord.api.entity.message.MessageAuthor;
+import org.javacord.api.entity.message.MessageBuilder;
 import org.javacord.api.entity.message.embed.EmbedBuilder;
 import org.javacord.api.event.message.MessageCreateEvent;
 import org.javacord.api.listener.message.MessageCreateListener;
@@ -30,7 +31,7 @@ public class Link implements MessageCreateListener, BaseCommand {
         if(linkingManager == null) {
             ProxyDiscord.inst().getLogger().warn("Ignoring link attempt before linking manager is ready.");
             String message = ChatMessages.getMessage("discord-link-error");
-            event.getChannel().sendMessage(message.replace("[user]", "<@!" + event.getMessageAuthor().getId() + ">"));
+            event.getMessage().reply(message.replace("[user]", "<@!" + event.getMessageAuthor().getId() + ">"));
 
             return;
         }
@@ -120,8 +121,8 @@ public class Link implements MessageCreateListener, BaseCommand {
         }
 
         embed.thenAccept((EmbedBuilder e) -> {
+            event.getMessage().reply(e);
             ProxyDiscord.inst().getDebugLogger().info(e.toString());
-            event.getChannel().sendMessage("<@!" + event.getMessageAuthor().getId() + ">", e);
         });
     }
 
@@ -156,7 +157,7 @@ public class Link implements MessageCreateListener, BaseCommand {
 
         if(message != null) {
             ProxyDiscord.inst().getDebugLogger().info(message);
-            event.getChannel().sendMessage(message.replace("[user]", "<@!" + event.getMessageAuthor().getId() + ">"));
+            event.getMessage().reply(message.replace("[user]", "<@!" + event.getMessageAuthor().getId() + ">"));
         }
     }
 }

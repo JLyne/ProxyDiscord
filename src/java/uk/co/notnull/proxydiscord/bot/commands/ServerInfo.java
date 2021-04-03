@@ -77,7 +77,7 @@ public class ServerInfo implements MessageCreateListener, BaseCommand {
         	Discord.setFooter(embed);
             
         	// Send the embed
-            event.getChannel().sendMessage(embed);
+            event.getMessage().reply(embed);
         }
     }
 }

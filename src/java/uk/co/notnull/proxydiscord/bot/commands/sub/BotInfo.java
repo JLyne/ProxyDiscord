@@ -61,7 +61,7 @@ public class BotInfo implements MessageCreateListener, BaseSubCommand {
         	Discord.setFooter(embed);
             
         	// Send the embed
-            event.getChannel().sendMessage(embed);
+            event.getMessage().reply(embed);
         }
     }
 }

@@ -26,8 +26,8 @@ public class MainCommand implements MessageCreateListener, BaseCommand {
         // Check if the message content equals "!bd"
         if(event.getMessage().getContent().equalsIgnoreCase("!pd")) {
         	// Create and send the Main Command Embed
-        	event.getChannel().sendMessage(this.createMainCommandEmbed(event));
-        	event.getChannel().sendMessage(this.createSubCommandEmbed(event));
+        	event.getMessage().reply(this.createMainCommandEmbed(event));
+        	event.getMessage().reply(this.createSubCommandEmbed(event));
         }
     }
     

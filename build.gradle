@@ -44,7 +44,7 @@ repositories {
 }
 
 dependencies {
-    implementation group: 'org.javacord', name: 'javacord', version:'3.1.1'
+    implementation group: 'org.javacord', name: 'javacord', version:'3.2.0'
     implementation 'de.themoep:minedown-adventure:1.6.2-SNAPSHOT'
     compileOnly group: 'net.luckperms', name: 'api', version:'5.0'
     compileOnly group: 'org.geysermc', name: 'floodgate-common', version:'1.0-SNAPSHOT'
