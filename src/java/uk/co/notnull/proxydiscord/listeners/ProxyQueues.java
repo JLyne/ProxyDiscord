@@ -3,6 +3,7 @@ package uk.co.notnull.proxydiscord.listeners;
 import com.velocitypowered.api.event.PostOrder;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.proxy.ServerConnection;
+import com.velocitypowered.api.proxy.server.RegisteredServer;
 import uk.co.notnull.proxydiscord.ChatMessages;
 import uk.co.notnull.proxydiscord.ProxyDiscord;
 import uk.co.notnull.proxydiscord.VerificationManager;
@@ -46,6 +47,14 @@ public class ProxyQueues {
         }
 
 		event.setCancelled(true);
+
+        RegisteredServer linkingServer = verificationManager.getLinkingServer();
+		RegisteredServer currentServer = event.getPlayer().getCurrentServer().map(ServerConnection::getServer)
+				.orElse(null);
+
+        if(linkingServer != null && (currentServer == null || !currentServer.equals(linkingServer))) {
+        	event.getPlayer().createConnectionRequest(linkingServer).fireAndForget();
+		}
 
         switch(result) {
             case NOT_LINKED:

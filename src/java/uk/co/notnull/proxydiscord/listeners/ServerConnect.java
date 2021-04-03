@@ -5,13 +5,10 @@ import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.player.ServerPreConnectEvent;
 import com.velocitypowered.api.proxy.ServerConnection;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
-import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
 import uk.co.notnull.proxydiscord.*;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
-
-import java.util.Optional;
 
 public class ServerConnect {
     private static VerificationManager verificationManager = null;
@@ -52,16 +49,14 @@ public class ServerConnect {
 
         if(!verificationManager.getUnverifiedServers().isEmpty()) {
             ProxyDiscord.inst().getDebugLogger().info("Blocking unverified player " + e.getPlayer().getUsername() + " from joining " + e.getOriginalServer().getServerInfo().getName());
-            Optional<ServerConnection> currentServer = e.getPlayer().getCurrentServer();
 
-            if (currentServer.isPresent() && verificationManager.isUnverifiedServer(currentServer.get().getServer())) {
-                e.setResult(ServerPreConnectEvent.ServerResult.denied());
-                e.getPlayer().sendMessage(Identity.nil(), message.build());
-            } else if(verificationManager.getLinkingServer() != null) {
+            RegisteredServer linkingServer = verificationManager.getLinkingServer();
+            RegisteredServer currentServer = e.getPlayer().getCurrentServer().map(ServerConnection::getServer)
+                    .orElse(null);
+
+            if(linkingServer != null && (currentServer == null || !currentServer.equals(linkingServer))) {
                 e.setResult(ServerPreConnectEvent.ServerResult.allowed(verificationManager.getLinkingServer()));
             }
-
-            //
         } else {
             ProxyDiscord.inst().getDebugLogger().info("Disconnecting unverified player " + e.getPlayer().getUsername());
             e.getPlayer().disconnect(message.build());
