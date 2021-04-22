@@ -29,10 +29,6 @@ public class Link implements MessageCreateListener, BaseCommand {
 
         //Fail fast if linking manager isn't ready yet
         if(linkingManager == null) {
-            ProxyDiscord.inst().getLogger().warn("Ignoring link attempt before linking manager is ready.");
-            String message = ChatMessages.getMessage("discord-link-error");
-            event.getMessage().reply(message.replace("[user]", "<@!" + event.getMessageAuthor().getId() + ">"));
-
             return;
         }
 

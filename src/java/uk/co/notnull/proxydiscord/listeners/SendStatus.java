@@ -9,7 +9,7 @@ import com.velocitypowered.api.proxy.Player;
 import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import org.geysermc.floodgate.api.FloodgateApi;
+import uk.co.notnull.platformdetection.PlatformDetectionVelocity;
 import uk.co.notnull.proxydiscord.*;
 import uk.co.notnull.proxydiscord.events.PlayerVerifyStateChangeEvent;
 
@@ -63,9 +63,10 @@ public class SendStatus {
                 hmac.init(keySpec);
 
                 boolean bedrock = false;
-                if(ProxyDiscord.inst().isFloodgateEnabled()) {
-					FloodgateApi floodgateApi = ProxyDiscord.inst().getFloodgateAPI();
-					bedrock = floodgateApi.isFloodgatePlayer(player.getUniqueId());
+                if(ProxyDiscord.inst().isPlatformDetectionEnabled()) {
+					PlatformDetectionVelocity platformDetection = ProxyDiscord.inst().getPlatformDetectionHandler()
+							.getPlatformDetection();
+					bedrock = platformDetection.getPlatform(player).isBedrock();
 				}
 
                 String token = linkingManager.getLinkingToken(player);

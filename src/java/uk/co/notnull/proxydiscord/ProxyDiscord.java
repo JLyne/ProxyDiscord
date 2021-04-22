@@ -10,7 +10,7 @@ import com.velocitypowered.api.plugin.PluginContainer;
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.proxy.messages.MinecraftChannelIdentifier;
-import org.geysermc.floodgate.api.FloodgateApi;
+import uk.co.notnull.platformdetection.PlatformDetectionVelocity;
 import uk.co.notnull.proxydiscord.bot.listeners.*;
 import uk.co.notnull.proxydiscord.commands.Link;
 import uk.co.notnull.proxydiscord.commands.Save;
@@ -35,7 +35,7 @@ import ninja.leaping.configurate.yaml.YAMLConfigurationLoader;
         description = "Discord account linking", authors = {"Jim (NotKatuen)"}, dependencies = {
 		@Dependency(id = "luckperms"),
 		@Dependency(id = "proxyqueues", optional = true),
-		@Dependency(id = "floodgate", optional = true)
+		@Dependency(id = "platform-detection", optional = true)
 })
 public class ProxyDiscord {
 	private static MinecraftChannelIdentifier statusIdentifier;
@@ -53,8 +53,8 @@ public class ProxyDiscord {
 	private static RedirectManager redirectManager;
 	private static LoggingManager loggingManager;
 
-	private boolean floodgateEnabled = false;
-	private FloodgateApi floodgateApi;
+	private boolean platformDetectionEnabled = false;
+	private PlatformDetectionHandler platformDetectionHandler;
 
 	@Inject
     @DataDirectory
@@ -158,12 +158,13 @@ public class ProxyDiscord {
 											 new ProxyQueues((uk.co.notnull.proxyqueues.ProxyQueues) instance));
 		});
 
-        Optional<PluginContainer> floodgate = proxy.getPluginManager().getPlugin("floodgate");
-        floodgateEnabled = floodgate.isPresent();
+        Optional<PluginContainer> platformDetection = proxy.getPluginManager()
+                .getPlugin("platform-detection");
+        platformDetectionEnabled = platformDetection.isPresent();
 
-        if(floodgateEnabled) {
-        	floodgateApi = FloodgateApi.getInstance();
-		}
+        if(platformDetectionEnabled) {
+            this.platformDetectionHandler = new PlatformDetectionHandler((PlatformDetectionVelocity) platformDetection.get().getInstance().get());
+        }
 
 		VelocityCommandManager commandManager = new VelocityCommandManager(proxy, this);
 		commandManager.registerCommand(new Link());
@@ -247,11 +248,11 @@ public class ProxyDiscord {
 		return dataDirectory;
 	}
 
-	public boolean isFloodgateEnabled() {
-		return floodgateEnabled;
+	public boolean isPlatformDetectionEnabled() {
+		return platformDetectionEnabled;
 	}
 
-	public FloodgateApi getFloodgateAPI() {
-		return floodgateApi;
+	public PlatformDetectionHandler getPlatformDetectionHandler() {
+		return platformDetectionHandler;
 	}
 }
