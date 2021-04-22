@@ -10,6 +10,7 @@ import com.velocitypowered.api.plugin.PluginContainer;
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.proxy.messages.MinecraftChannelIdentifier;
+import org.geysermc.floodgate.api.FloodgateApi;
 import uk.co.notnull.proxydiscord.bot.listeners.*;
 import uk.co.notnull.proxydiscord.commands.Link;
 import uk.co.notnull.proxydiscord.commands.Save;
@@ -53,6 +54,7 @@ public class ProxyDiscord {
 	private static LoggingManager loggingManager;
 
 	private boolean floodgateEnabled = false;
+	private FloodgateApi floodgateApi;
 
 	@Inject
     @DataDirectory
@@ -159,6 +161,10 @@ public class ProxyDiscord {
         Optional<PluginContainer> floodgate = proxy.getPluginManager().getPlugin("floodgate");
         floodgateEnabled = floodgate.isPresent();
 
+        if(floodgateEnabled) {
+        	floodgateApi = FloodgateApi.getInstance();
+		}
+
 		VelocityCommandManager commandManager = new VelocityCommandManager(proxy, this);
 		commandManager.registerCommand(new Link());
 		commandManager.registerCommand(new Unlink());
@@ -243,5 +249,9 @@ public class ProxyDiscord {
 
 	public boolean isFloodgateEnabled() {
 		return floodgateEnabled;
+	}
+
+	public FloodgateApi getFloodgateAPI() {
+		return floodgateApi;
 	}
 }

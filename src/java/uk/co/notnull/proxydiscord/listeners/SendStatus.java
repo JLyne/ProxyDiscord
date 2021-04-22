@@ -9,7 +9,7 @@ import com.velocitypowered.api.proxy.Player;
 import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import org.geysermc.floodgate.FloodgateAPI;
+import org.geysermc.floodgate.api.FloodgateApi;
 import uk.co.notnull.proxydiscord.*;
 import uk.co.notnull.proxydiscord.events.PlayerVerifyStateChangeEvent;
 
@@ -62,8 +62,13 @@ public class SendStatus {
                 SecretKeySpec keySpec = new SecretKeySpec(byteKey, "HmacSHA512");
                 hmac.init(keySpec);
 
+                boolean bedrock = false;
+                if(ProxyDiscord.inst().isFloodgateEnabled()) {
+					FloodgateApi floodgateApi = ProxyDiscord.inst().getFloodgateAPI();
+					bedrock = floodgateApi.isFloodgatePlayer(player.getUniqueId());
+				}
+
                 String token = linkingManager.getLinkingToken(player);
-                boolean bedrock = ProxyDiscord.inst().isFloodgateEnabled() && FloodgateAPI.isBedrockPlayer(player);
 
                 byte[] macData = hmac.doFinal(String.format("%s%s%s", status.ordinal(), bedrock ? 1 : 0, token)
                                                       .getBytes(StandardCharsets.UTF_8));
