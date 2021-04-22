@@ -64,8 +64,7 @@ public class SendStatus {
 
                 boolean bedrock = false;
                 if(ProxyDiscord.inst().isPlatformDetectionEnabled()) {
-					PlatformDetectionVelocity platformDetection = ProxyDiscord.inst().getPlatformDetectionHandler()
-							.getPlatformDetection();
+					PlatformDetectionVelocity platformDetection = (PlatformDetectionVelocity) ProxyDiscord.inst().getPlatformDetection();
 					bedrock = platformDetection.getPlatform(player).isBedrock();
 				}
 

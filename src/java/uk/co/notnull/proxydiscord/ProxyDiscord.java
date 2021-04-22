@@ -54,13 +54,13 @@ public class ProxyDiscord {
 	private static LoggingManager loggingManager;
 
 	private boolean platformDetectionEnabled = false;
-	private PlatformDetectionHandler platformDetectionHandler;
+	private Object platformDetection;
 
 	@Inject
     @DataDirectory
     private Path dataDirectory;
 
-    public static ProxyDiscord inst() {
+	public static ProxyDiscord inst() {
     	  return instance;
     }
 
@@ -163,7 +163,7 @@ public class ProxyDiscord {
         platformDetectionEnabled = platformDetection.isPresent();
 
         if(platformDetectionEnabled) {
-            this.platformDetectionHandler = new PlatformDetectionHandler((PlatformDetectionVelocity) platformDetection.get().getInstance().get());
+            this.platformDetection = platformDetection.get().getInstance().orElse(null);
         }
 
 		VelocityCommandManager commandManager = new VelocityCommandManager(proxy, this);
@@ -252,7 +252,7 @@ public class ProxyDiscord {
 		return platformDetectionEnabled;
 	}
 
-	public PlatformDetectionHandler getPlatformDetectionHandler() {
-		return platformDetectionHandler;
+	public Object getPlatformDetection() {
+		return platformDetection;
 	}
 }
