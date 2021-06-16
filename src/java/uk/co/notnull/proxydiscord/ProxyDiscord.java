@@ -10,7 +10,6 @@ import com.velocitypowered.api.plugin.PluginContainer;
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.proxy.messages.MinecraftChannelIdentifier;
-import uk.co.notnull.platformdetection.PlatformDetectionVelocity;
 import uk.co.notnull.proxydiscord.bot.listeners.*;
 import uk.co.notnull.proxydiscord.commands.Link;
 import uk.co.notnull.proxydiscord.commands.Save;
