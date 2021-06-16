@@ -77,7 +77,7 @@ verification-lost-role: |-
 # When a player loses their access due unlinking their discord account
 verification-lost-unlinked: 'Your Discord account has been unlinked.'
 
-# Added to the above when the user is moved back to the unverified server (instead of being kicked)
+# Added to the above when the user is moved back to the linking server (instead of being kicked)
 verification-lost-moved: 'You have been moved back to the [server] server.'
 
 # Discord bot response for successful link

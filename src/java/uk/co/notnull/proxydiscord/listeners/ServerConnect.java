@@ -22,7 +22,7 @@ public class ServerConnect {
         RegisteredServer server = e.getOriginalServer();
         server = e.getResult().getServer().orElse(server);
 
-        if(verificationManager.isUnverifiedServer(server)) {
+        if(verificationManager.isPublicServer(server)) {
             return;
         }
 
@@ -47,7 +47,7 @@ public class ServerConnect {
 
         message.color(NamedTextColor.RED);
 
-        if(!verificationManager.getUnverifiedServers().isEmpty()) {
+        if(!verificationManager.getPublicServers().isEmpty()) {
             ProxyDiscord.inst().getDebugLogger().info("Blocking unverified player " + e.getPlayer().getUsername() + " from joining " + e.getOriginalServer().getServerInfo().getName());
 
             RegisteredServer linkingServer = verificationManager.getLinkingServer();

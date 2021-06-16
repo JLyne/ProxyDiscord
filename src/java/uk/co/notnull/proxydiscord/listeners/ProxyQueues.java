@@ -28,7 +28,7 @@ public class ProxyQueues {
 			return;
 		}
 
-        if(verificationManager.isUnverifiedServer(event.getServer())) {
+        if(verificationManager.isPublicServer(event.getServer())) {
             return;
         }
 
@@ -37,7 +37,7 @@ public class ProxyQueues {
         if(result == VerificationResult.VERIFIED) {
             Optional<ServerConnection> currentServer = event.getPlayer().getCurrentServer();
 
-            if(currentServer.isPresent() && verificationManager.isUnverifiedServer(currentServer.get().getServer())) {
+            if(currentServer.isPresent() && verificationManager.isPublicServer(currentServer.get().getServer())) {
                 if(proxyQueues.getWaitingServer().isPresent()) {
                     event.getPlayer().createConnectionRequest(proxyQueues.getWaitingServer().get()).fireAndForget();
                 }

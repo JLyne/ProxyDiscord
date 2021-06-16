@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
 public class VerificationManager {
     private final LinkingManager linkingManager;
 
-    private final Set<RegisteredServer> unverifiedServers;
+    private final Set<RegisteredServer> publicServers;
     private RegisteredServer defaultVerifiedServer;
     private RegisteredServer linkingServer;
 
@@ -41,7 +41,7 @@ public class VerificationManager {
         verifiedRoleUsers = ConcurrentHashMap.newKeySet();
         linkingManager = ProxyDiscord.inst().getLinkingManager();
         lastKnownStatuses = new ConcurrentHashMap<>();
-        unverifiedServers = new HashSet<>();
+        publicServers = new HashSet<>();
 
         proxy.getEventManager().register(ProxyDiscord.inst(), this);
         parseConfig(config);
@@ -72,24 +72,24 @@ public class VerificationManager {
         String linkingServerName = config.getNode("linking-server").getString();
         linkingServer = proxy.getServer(linkingServerName).orElse(null);
 
-        unverifiedServers.clear();
+        publicServers.clear();
 
         if(linkingServer == null && linkingServerName != null && !linkingServerName.isEmpty()) {
             logger.warn("Linking server (" + linkingServerName + ") does not exist!");
         } else if(linkingServer != null) {
-            unverifiedServers.add(linkingServer);
+            publicServers.add(linkingServer);
         }
 
-        List<? extends ConfigurationNode> unverifiedServerNames = config.getNode("unverified-servers").getChildrenList();
+        List<? extends ConfigurationNode> publicServerNames = config.getNode("public-servers").getChildrenList();
 
-        for(ConfigurationNode unverifiedServerName : unverifiedServerNames) {
-            String name = unverifiedServerName.getString();
+        for(ConfigurationNode serverName : publicServerNames) {
+            String name = serverName.getString();
             Optional<RegisteredServer> server = proxy.getServer(name);
 
-            server.ifPresent(unverifiedServers::add);
+            server.ifPresent(publicServers::add);
 
             if(server.isEmpty() && name != null && !name.isEmpty()) {
-                logger.warn("Unverified server (" + name + ") does not exist!");
+                logger.warn("Public server (" + name + ") does not exist!");
             }
         }
 
@@ -316,12 +316,12 @@ public class VerificationManager {
         }).filter(Objects::nonNull).collect(Collectors.toSet());
     }
 
-    public Set<RegisteredServer> getUnverifiedServers() {
-        return unverifiedServers;
+    public Set<RegisteredServer> getPublicServers() {
+        return publicServers;
     }
 
-    public boolean isUnverifiedServer(RegisteredServer server) {
-        return unverifiedServers.contains(server);
+    public boolean isPublicServer(RegisteredServer server) {
+        return publicServers.contains(server);
     }
 
     public RegisteredServer getDefaultVerifiedServer() {

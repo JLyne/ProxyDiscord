@@ -36,8 +36,8 @@ public class RedirectManager {
     public void onPlayerConnect(ServerPreConnectEvent event) {
         Optional<RegisteredServer> redirectServer = event.getResult().getServer();
 
-        if(redirectServer.isPresent() && verificationManager.isUnverifiedServer(redirectServer.get())) {
-            if(!verificationManager.isUnverifiedServer(event.getOriginalServer())) {
+        if(redirectServer.isPresent() && verificationManager.isPublicServer(redirectServer.get())) {
+            if(!verificationManager.isPublicServer(event.getOriginalServer())) {
                 destinations.put(event.getPlayer().getUniqueId(), event.getOriginalServer());
             }
         } else {
@@ -56,24 +56,24 @@ public class RedirectManager {
 
             case LINKED_NOT_VERIFIED:
                 if(event.getPreviousState() == VerificationResult.VERIFIED) {
-                    sendToUnverifiedServer(player, ChatMessages.getMessage("verification-lost-role"));
+                    sendToLinkingServer(player, ChatMessages.getMessage("verification-lost-role"));
                 }
 
                 break;
             case NOT_LINKED:
                 if(event.getPreviousState() == VerificationResult.VERIFIED) {
-                    sendToUnverifiedServer(player, ChatMessages.getMessage("verification-lost-unlinked"));
+                    sendToLinkingServer(player, ChatMessages.getMessage("verification-lost-unlinked"));
                 }
         }
     }
 
-    private void sendToUnverifiedServer(Player player, String message) {
+    private void sendToLinkingServer(Player player, String message) {
         TextComponent.Builder component = Component.text();
 
         component.color(NamedTextColor.RED).content(message);
 
-        if(verificationManager.getUnverifiedServers().isEmpty()) {
-            ProxyDiscord.inst().getDebugLogger().info("No unverified server defined. Kicking " + player.getUsername());
+        if(verificationManager.getPublicServers().isEmpty()) {
+            ProxyDiscord.inst().getDebugLogger().info("No public servers defined. Kicking " + player.getUsername());
             player.disconnect(component.build());
 
             return;
@@ -82,7 +82,7 @@ public class RedirectManager {
         Optional<ServerConnection> currentServer = player.getCurrentServer();
         RegisteredServer linkingServer = verificationManager.getLinkingServer();
 
-        if(currentServer.isPresent() && linkingServer != null && !verificationManager.isUnverifiedServer(currentServer.get().getServer())) {
+        if(currentServer.isPresent() && linkingServer != null && !verificationManager.isPublicServer(currentServer.get().getServer())) {
             ProxyDiscord.inst().getDebugLogger().info("Moving " + player.getUsername() + " to " + linkingServer.getServerInfo().getName());
 
             player.createConnectionRequest(linkingServer).connect().thenAccept(result -> {

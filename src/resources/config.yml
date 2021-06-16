@@ -19,9 +19,8 @@ bypass-permission: 'discord.bypass'
 # Server to send players to, if they try to join a non-public server without meeting the requirements
 linking-server: 'linking'
 
-# Server unverified players are allowed on without linking/verifying
-unverified-servers:
-  - 'linking'
+# Servers which players can join without linking or verifying
+public-servers: []
 
 # Server to redirect newly verified players to, if their original destination is unknown
 default-verified-server: 'waiting'
