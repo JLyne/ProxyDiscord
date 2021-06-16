@@ -8,7 +8,8 @@ import org.javacord.api.entity.user.User;
 import org.javacord.api.event.server.member.ServerMemberJoinEvent;
 import org.javacord.api.listener.server.member.ServerMemberJoinListener;
 
-import java.util.Optional;
+import java.util.Collections;
+import java.util.Set;
 
 public class ServerMemberJoin implements ServerMemberJoinListener {
 
@@ -22,9 +23,13 @@ public class ServerMemberJoin implements ServerMemberJoinListener {
     public void onServerMemberJoin(ServerMemberJoinEvent serverMemberJoinEvent) {
         User user = serverMemberJoinEvent.getUser();
         Server server = serverMemberJoinEvent.getServer();
-        Optional<Role> role = server.getRoleById(verificationManager.getVerifiedRoleId());
+        Set<Role> roles = verificationManager.getVerifiedRoles();
 
-        if(role.isPresent() && server.getRoles(user).contains(role.get())) {
+        if(roles.isEmpty()) {
+        	return;
+		}
+
+        if(!Collections.disjoint(server.getRoles(user), roles)) {
         	verificationManager.addUser(user);
 		} else {
         	verificationManager.removeUser(user);

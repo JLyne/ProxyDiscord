@@ -1,6 +1,7 @@
 package uk.co.notnull.proxydiscord;
 
 import ninja.leaping.configurate.ConfigurationNode;
+import org.javacord.api.entity.Nameable;
 import org.javacord.api.entity.message.embed.EmbedBuilder;
 import org.javacord.api.entity.permission.Role;
 
@@ -8,6 +9,8 @@ import java.awt.*;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class ChatMessages {
     private static ConfigurationNode messages;
@@ -21,15 +24,20 @@ public class ChatMessages {
     }
 
     public static String getMessage(String id, Map<String, String> replacements) {
-        Role verifiedRole = ProxyDiscord.inst().getVerificationManager().getVerifiedRole();
+        Set<Role> verifiedRoles = ProxyDiscord.inst().getVerificationManager().getVerifiedRoles();
         String message = messages.getNode(id).getString("Message " + id + " does not exist");
+        String roleNames;
 
-        if(verifiedRole != null) {
-            message = message.replace("[role]", verifiedRole.getName());
+        if(verifiedRoles.size() > 1) {
+            roleNames = verifiedRoles.stream().map(Nameable::getName).collect(Collectors.joining());
+        } else {
+            roleNames = !verifiedRoles.isEmpty() ? verifiedRoles.iterator().next().getName() : "Unknown Role";
+        }
 
-            for (Map.Entry<String, String> entry : replacements.entrySet()) {
-                message = message.replace(entry.getKey(), entry.getValue());
-            }
+        message = message.replace("[role]", roleNames);
+
+        for (Map.Entry<String, String> entry : replacements.entrySet()) {
+            message = message.replace(entry.getKey(), entry.getValue());
         }
 
         return message;
@@ -40,8 +48,15 @@ public class ChatMessages {
     }
 
     public static EmbedBuilder getEmbed(String id, Map<String, String> replacements) {
-        Role verifiedRole = ProxyDiscord.inst().getVerificationManager().getVerifiedRole();
-        String roleLink = verifiedRole != null ? "<@&" + verifiedRole.getIdAsString() + ">" : "Unknown Role";
+        Set<Role> verifiedRoles = ProxyDiscord.inst().getVerificationManager().getVerifiedRoles();
+        String roleLink;
+
+        if(verifiedRoles.size() > 1) {
+            roleLink = verifiedRoles.stream()
+                    .map((Role role) -> "<@&" + role.getIdAsString() + ">").collect(Collectors.joining(", "));
+        } else {
+            roleLink = !verifiedRoles.isEmpty() ? "<@&" + verifiedRoles.iterator().next().getIdAsString() + ">" : "Unknown Role";
+        }
 
         if(!id.startsWith("embed")) {
             return null;
