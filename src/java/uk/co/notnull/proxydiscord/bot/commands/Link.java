@@ -45,15 +45,11 @@ public class Link implements MessageCreateListener {
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            if(true) {
-                sendEmbedResponse(result, event);
-            } else {
-                sendResponse(result, event);
-            }
+            sendResponse(result, event);
         }
     }
 
-    private void sendEmbedResponse(LinkResult result, MessageCreateEvent event) {
+    private void sendResponse(LinkResult result, MessageCreateEvent event) {
         LinkingManager linkingManager = ProxyDiscord.inst().getLinkingManager();
         LuckPerms luckPermsApi = LuckPermsProvider.get();
 
@@ -113,41 +109,6 @@ public class Link implements MessageCreateListener {
             event.getMessage().reply(e);
             ProxyDiscord.inst().getDebugLogger().info(e.toString());
         });
-    }
-
-    private void sendResponse(LinkResult result, MessageCreateEvent event) {
-        String message = null;
-
-        switch(result) {
-            case UNKNOWN_ERROR:
-                message = ChatMessages.getMessage("discord-link-error");
-                break;
-
-            case NO_TOKEN:
-                message = ChatMessages.getMessage("discord-link-no-token");
-                break;
-
-            case INVALID_TOKEN:
-                message = ChatMessages.getMessage("discord-link-invalid-token");
-                break;
-
-            case ALREADY_LINKED:
-                message = ChatMessages.getMessage("discord-link-already-linked");
-                break;
-
-            case NOT_VERIFIED:
-                message = ChatMessages.getMessage("discord-link-success-not-verified");
-                break;
-
-            case SUCCESS:
-                message = ChatMessages.getMessage("discord-link-success");
-                break;
-        }
-
-        if(message != null) {
-            ProxyDiscord.inst().getDebugLogger().info(message);
-            event.getMessage().reply(message.replace("[user]", "<@!" + event.getMessageAuthor().getId() + ">"));
-        }
     }
 
     public void setLinkingChannel(TextChannel linkingChannel) {
