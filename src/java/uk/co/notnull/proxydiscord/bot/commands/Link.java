@@ -17,29 +17,27 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
-public class Link implements MessageCreateListener, BaseCommand {
-	private final base base;
-	private final LinkingManager linkingManager;
+public class Link implements MessageCreateListener {
+    private final LinkingManager linkingManager;
     private ListenerManager<MessageCreateListener> messageListener;
 
     public Link(LinkingManager linkingManager, TextChannel linkingChannel) {
-	    base = easyBaseSetup(0, "!link",
-                                                   "Allows players to link their discord account");
-
 	    this.linkingManager = linkingManager;
 	    setLinkingChannel(linkingChannel);
 	}
 
     @Override
     public void onMessageCreate(MessageCreateEvent event) {
+        String command = "!link";
+
         //Ignore random messages
-        if(!event.getMessage().getContent().startsWith(base.command)) {
+        if(!event.getMessage().getContent().startsWith(command)) {
             return;
         }
 
         MessageAuthor author = event.getMessageAuthor();
         Long id = author.getId();
-        String token = event.getMessageContent().replace("!link ", "").toUpperCase();
+        String token = event.getMessageContent().replace(command + " ", "").toUpperCase();
         LinkResult result = LinkResult.UNKNOWN_ERROR;
 
         try {

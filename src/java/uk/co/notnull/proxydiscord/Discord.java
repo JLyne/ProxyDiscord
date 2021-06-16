@@ -1,11 +1,6 @@
 package uk.co.notnull.proxydiscord;
 
-import com.velocitypowered.api.proxy.ProxyServer;
 import org.javacord.api.entity.intent.Intent;
-import uk.co.notnull.proxydiscord.bot.commands.Link;
-import uk.co.notnull.proxydiscord.bot.commands.MainCommand;
-import uk.co.notnull.proxydiscord.bot.commands.ServerInfo;
-import uk.co.notnull.proxydiscord.bot.commands.sub.BotInfo;
 import org.javacord.api.DiscordApiBuilder;
 import org.javacord.api.entity.message.embed.EmbedBuilder;
 
@@ -22,17 +17,14 @@ public class Discord {
 
 	private boolean connected = false;
 
-	private final ProxyServer proxy;
-    private final Logger logger;
+	private final Logger logger;
 
 	/**
 	 * Class
 	 * @param token bot token
 	 */
 	public Discord(String token) {
-		this.proxy = ProxyDiscord.inst().getProxy();
-        this.logger = ProxyDiscord.inst().getLogger();
-		// Bot token
+		this.logger = ProxyDiscord.inst().getLogger();
 
 		// Create an Instance of the DiscordApi
 		try {
@@ -75,22 +67,6 @@ public class Discord {
 			logger.info(("Resumed connection to Discord."));
 			api.updateActivity(Constants.activity);
 		});
-
-        registerCommands();
-        registerSubCommands();
-	}
-
-	private void registerCommands() {
-		logger.info("Registering commands...");
-
-		// Register Main Command Class
-		api.addMessageCreateListener(new MainCommand());
-		api.addMessageCreateListener(new Link(0, "!link", "Allows players to link their discord account"));
-	}
-
-	private void registerSubCommands() {
-		api.addMessageCreateListener(new BotInfo(0, "!pd botinfo", "Show bot information."));
-		api.addMessageCreateListener(new ServerInfo(1, "!pd serverinfo", "Show server information."));
 	}
 
 	// Sets the footer, done here to keep it standardised.
