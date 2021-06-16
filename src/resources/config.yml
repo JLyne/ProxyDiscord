@@ -1,25 +1,22 @@
-# ProxyDiscord Config File
-# Make sure there is always a space after any :
-
 # Bot token
 token: bot-token-here
 
 linking-secret: ')2z#*MR^BrGVygg7'
 
-# Channel to accept !link requests from
+# Discord channel for the bot to listen for and respond to link attempts
 linking-channel-id: '123456789'
 
 # Discord roles that make a user "verified" and allowed to join the server
 verified-role-ids:
  - '123456789'
 
-# Permission to grant users who have verified
+# Permission to grant users who are verified
 verified-permission: 'group.verified'
 
-# Permission to allow bypassing the verification requirements
+# Permission to allow bypassing the linking and role checks
 bypass-permission: 'discord.bypass'
 
-# Server to send players to when unlinked/unverified, if they try to join a server requiring verification
+# Server to send players to, if they try to join a non-public server without meeting the requirements
 linking-server: 'linking'
 
 # Server unverified players are allowed on without linking/verifying
@@ -41,8 +38,5 @@ announcement-channels:
     servers:
       - 'stresstest'
 
-# Enable debug logging? Only useful if you are developing this plugin.
-debug-enabled: false
-
-# Time in seconds to wait before kicking unverified players
-unverified-kick-time: 3600
+# Whether to debug logging
+debug-enabled: true
