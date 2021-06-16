@@ -14,7 +14,6 @@ import uk.co.notnull.proxydiscord.*;
 
 public class JoinLeave {
 	private static VerificationManager verificationManager = null;
-	private static KickManager kickManager = null;
 	private static LoggingManager loggingManager = null;
 
 	private final ProxyServer proxy;
@@ -25,7 +24,6 @@ public class JoinLeave {
         this.logger = ProxyDiscord.inst().getLogger();
 
         verificationManager = ProxyDiscord.inst().getVerificationManager();
-		kickManager = ProxyDiscord.inst().getKickManager();
 		loggingManager = ProxyDiscord.inst().getLoggingManager();
     }
 
@@ -43,14 +41,10 @@ public class JoinLeave {
 		switch(result) {
 			case NOT_LINKED:
 				logger.info("Unlinked player " + player.getUsername() + " joined");
-
-				kickManager.addPlayer(player);
 				break;
 
 			case LINKED_NOT_VERIFIED:
 				logger.info("Linked and unverified player " + player.getUsername() + " joined");
-
-				kickManager.addPlayer(player);
 				break;
 
 			case VERIFIED:
@@ -69,7 +63,6 @@ public class JoinLeave {
 		Player player = event.getPlayer();
 
 		loggingManager.logLeave(player);
-		kickManager.removePlayer(player);
 		verificationManager.clearPlayerStatus(player);
 	}
 }

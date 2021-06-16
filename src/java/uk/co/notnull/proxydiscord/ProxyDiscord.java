@@ -48,7 +48,6 @@ public class ProxyDiscord {
 
 	private static LinkingManager linkingManager;
 	private static VerificationManager verificationManager;
-	private static KickManager kickManager;
 	private static AnnouncementManager announcementManager;
 	private static RedirectManager redirectManager;
 	private static LoggingManager loggingManager;
@@ -86,10 +85,6 @@ public class ProxyDiscord {
 
 	public VerificationManager getVerificationManager() {
 		return verificationManager;
-	}
-
-	public KickManager getKickManager() {
-		return kickManager;
 	}
 
 	public AnnouncementManager getAnnouncementManager() {
@@ -140,7 +135,6 @@ public class ProxyDiscord {
 		debugLogger = new DebugLogger();
 
 		discord = new Discord(getConfig().getNode("token").getString());
-		kickManager = new KickManager(getConfig().getNode("unverified-kick-time").getInt(120));
 
 		new ChatMessages(messagesConfiguration);
 
