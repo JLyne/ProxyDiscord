@@ -2,11 +2,12 @@ package uk.co.notnull.proxydiscord.bot.commands;
 
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.LuckPermsProvider;
+import org.javacord.api.entity.channel.TextChannel;
 import org.javacord.api.entity.message.MessageAuthor;
-import org.javacord.api.entity.message.MessageBuilder;
 import org.javacord.api.entity.message.embed.EmbedBuilder;
 import org.javacord.api.event.message.MessageCreateEvent;
 import org.javacord.api.listener.message.MessageCreateListener;
+import org.javacord.api.util.event.ListenerManager;
 import uk.co.notnull.proxydiscord.ChatMessages;
 import uk.co.notnull.proxydiscord.LinkResult;
 import uk.co.notnull.proxydiscord.LinkingManager;
@@ -18,25 +19,19 @@ import java.util.concurrent.CompletableFuture;
 
 public class Link implements MessageCreateListener, BaseCommand {
 	private final base base;
+	private final LinkingManager linkingManager;
+    private ListenerManager<MessageCreateListener> messageListener;
 
-    public Link(int priority, String command, String helpText) {
-	    base = easyBaseSetup(priority, command, helpText);
+    public Link(LinkingManager linkingManager, TextChannel linkingChannel) {
+	    base = easyBaseSetup(0, "!link",
+                                                   "Allows players to link their discord account");
+
+	    this.linkingManager = linkingManager;
+	    setLinkingChannel(linkingChannel);
 	}
-	
+
     @Override
     public void onMessageCreate(MessageCreateEvent event) {
-        LinkingManager linkingManager = ProxyDiscord.inst().getLinkingManager();
-
-        //Fail fast if linking manager isn't ready yet
-        if(linkingManager == null) {
-            return;
-        }
-
-        //Ignore messages from other channels
-        if(!linkingManager.isLinkingChannel(event.getChannel())) {
-            return;
-        }
-
         //Ignore random messages
         if(!event.getMessage().getContent().startsWith(base.command)) {
             return;
@@ -86,7 +81,7 @@ public class Link implements MessageCreateListener, BaseCommand {
                     String username = luckPermsApi.getUserManager().lookupUsername(linked).join();
                     Map<String, String> replacements = Map.of(
                             "[discord]", "<@!" + event.getMessageAuthor().getId() + ">",
-                            "[minecraft]", (username != null) ? username : "Unknown account (" + linked.toString() + ")");
+                            "[minecraft]", (username != null) ? username : "Unknown account (" + linked + ")");
 
                     return ChatMessages.getEmbed("embed-link-already-linked", replacements);
                 });
@@ -98,7 +93,7 @@ public class Link implements MessageCreateListener, BaseCommand {
                     String username = luckPermsApi.getUserManager().lookupUsername(linked).join();
                     Map<String, String> replacements = Map.of(
                             "[discord]", "<@!" + event.getMessageAuthor().getId() + ">",
-                            "[minecraft]", (username != null) ? username : "Unknown account (" + linked.toString() + ")");
+                            "[minecraft]", (username != null) ? username : "Unknown account (" + linked + ")");
 
                     return ChatMessages.getEmbed("embed-link-success-not-verified", replacements);
                 });
@@ -109,7 +104,7 @@ public class Link implements MessageCreateListener, BaseCommand {
                     String username = luckPermsApi.getUserManager().lookupUsername(linked).join();
                     Map<String, String> replacements = Map.of(
                             "[discord]", "<@!" + event.getMessageAuthor().getId() + ">",
-                            "[minecraft]", (username != null) ? username : "Unknown account (" + linked.toString() + ")");
+                            "[minecraft]", (username != null) ? username : "Unknown account (" + linked + ")");
 
                     return ChatMessages.getEmbed("embed-link-success", replacements);
                 });
@@ -154,6 +149,20 @@ public class Link implements MessageCreateListener, BaseCommand {
         if(message != null) {
             ProxyDiscord.inst().getDebugLogger().info(message);
             event.getMessage().reply(message.replace("[user]", "<@!" + event.getMessageAuthor().getId() + ">"));
+        }
+    }
+
+    public void setLinkingChannel(TextChannel linkingChannel) {
+        if(messageListener != null) {
+            messageListener.remove();
+        }
+
+        messageListener = linkingChannel.addMessageCreateListener(this);
+    }
+
+    public void remove() {
+        if(messageListener != null) {
+            messageListener.remove();
         }
     }
 }

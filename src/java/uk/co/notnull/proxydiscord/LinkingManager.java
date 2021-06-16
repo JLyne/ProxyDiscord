@@ -3,26 +3,29 @@ package uk.co.notnull.proxydiscord;
 import com.google.common.collect.HashBiMap;
 import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.proxy.Player;
+import org.javacord.api.DiscordApi;
 import org.javacord.api.entity.channel.TextChannel;
 import org.javacord.api.entity.user.User;
 import org.slf4j.Logger;
+import uk.co.notnull.proxydiscord.bot.commands.Link;
 
 import java.io.*;
 import java.security.SecureRandom;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
+@SuppressWarnings("unused")
 public class LinkingManager {
     private HashBiMap<UUID, Long> links;
     private HashBiMap<String, UUID> pendingLinks;
     private final String linkingSecret;
     private final String linkingChannelId;
 
-    private final ProxyServer proxy;
     private final Logger logger;
+    private Link linkCommand;
 
     public LinkingManager(String linkingChannelId, String linkingSecret) {
-        this.proxy = ProxyDiscord.inst().getProxy();
+        ProxyServer proxy = ProxyDiscord.inst().getProxy();
         this.logger = ProxyDiscord.inst().getLogger();
 
         this.linkingSecret = linkingSecret;
@@ -85,6 +88,7 @@ public class LinkingManager {
         return getLinkingToken(player.getUniqueId());
     }
 
+    @SuppressWarnings("SpellCheckingInspection")
     public String getLinkingToken(UUID uuid) {
         if(this.pendingLinks.containsValue(uuid)) {
             return this.pendingLinks.inverse().get(uuid);
@@ -207,6 +211,7 @@ public class LinkingManager {
         }
     }
 
+    @SuppressWarnings("unchecked")
     private void loadLinks() {
         try {
             File folder = ProxyDiscord.inst().getDataDirectory().toFile();
@@ -262,10 +267,20 @@ public class LinkingManager {
     }
 
     private void findChannel() {
-        Optional <TextChannel> linkingChannel = ProxyDiscord.inst().getDiscord().getApi().getTextChannelById(linkingChannelId);
+        DiscordApi api = ProxyDiscord.inst().getDiscord().getApi();
+        Optional <TextChannel> linkingChannel = api.getTextChannelById(linkingChannelId);
 
         if(linkingChannel.isEmpty()) {
             logger.warn("Unable to find linking channel. Did you put a valid channel ID in the config?");
+
+            if(linkCommand != null) {
+                linkCommand.remove();
+                linkCommand = null;
+            }
+        } else if(linkCommand == null) {
+            linkCommand = new Link(this, linkingChannel.get());
+        } else {
+            linkCommand.setLinkingChannel(linkingChannel.get());
         }
     }
 
