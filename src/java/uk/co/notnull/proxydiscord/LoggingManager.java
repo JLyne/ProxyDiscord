@@ -7,8 +7,6 @@ import com.velocitypowered.api.event.player.PlayerChatEvent;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.proxy.ServerConnection;
-//import de.themoep.minedown.adventure.MineDown;
-//import de.themoep.minedown.adventure.MineDownParser;
 import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
@@ -156,7 +154,7 @@ public class LoggingManager {
         String serverName = server.isPresent() ? server.get().getServerInfo().getName() : "";
 
         if(discordId != null) {
-            return "[" + serverName + "][" + player.getUsername() + "](<@!" + discordId.toString() + ">)";
+            return "[" + serverName + "][" + player.getUsername() + "](<@!" + discordId + ">)";
         } else {
             return "[" + serverName + "][" + player.getUsername() + "](Unlinked)";
         }
@@ -166,7 +164,7 @@ public class LoggingManager {
          Long discordId = ProxyDiscord.inst().getLinkingManager().getLinked(user.getUniqueId());
 
         if(discordId != null) {
-            return "[" + user.getFriendlyName() + "](<@!" + discordId.toString() + ">)";
+            return "[" + user.getFriendlyName() + "](<@!" + discordId + ">)";
         } else {
             return "[" + user.getFriendlyName() + "](Unlinked)";
         }
@@ -199,9 +197,6 @@ public class LoggingManager {
             component.append(LegacyComponentSerializer.legacyAmpersand()
                                      .deserialize("&r" + prefix + user.getFriendlyName() + suffix + "&r: "));
 
-//            component.append(new MineDown(message)
-//                .disable(MineDownParser.Option.ADVANCED_FORMATTING).toComponent());
-
             component.append(Component.text(message));
 
             proxy.getAllPlayers().forEach(player -> player.sendMessage(Identity.nil(), component.build()));
@@ -228,9 +223,8 @@ public class LoggingManager {
 
                 if(loggingChannel.isPresent()) {
                     queuedToSend.incrementAndGet();
-                    currentMessage.send(loggingChannel.get()).thenAcceptAsync(result -> {
-                        queuedToSend.decrementAndGet();
-                    }).exceptionally(error -> {
+                    currentMessage.send(loggingChannel.get())
+                            .thenAcceptAsync(result -> queuedToSend.decrementAndGet()).exceptionally(error -> {
                         logger.warn("Failed to send log message");
                         queuedToSend.decrementAndGet();
                         return null;

@@ -6,7 +6,8 @@ linking-secret: ')2z#*MR^BrGVygg7'
 # Discord channel for the bot to listen for and respond to link attempts
 linking-channel-id: '123456789'
 
-# Discord roles that make a user "verified" and allowed to join the server
+# Discord roles that should be checked to determine if a player can join (is "verified")
+# If no roles are defined, all players are considered verified
 verified-role-ids:
  - '123456789'
 

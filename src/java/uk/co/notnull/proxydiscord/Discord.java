@@ -69,11 +69,6 @@ public class Discord {
 		});
 	}
 
-	// Sets the footer, done here to keep it standardised.
-	public static void setFooter(EmbedBuilder embed) {
-		embed.setFooter("Proxy Discord | !pd", Constants.footerIconURL);
-	}
-
 	public DiscordApi getApi() {
 		return api;
 	}

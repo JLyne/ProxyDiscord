@@ -11,7 +11,6 @@ import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
-import org.slf4j.Logger;
 import uk.co.notnull.proxydiscord.events.PlayerVerifyStateChangeEvent;
 
 import java.util.*;
@@ -20,12 +19,8 @@ public class RedirectManager {
     private final VerificationManager verificationManager;
     private final HashMap<UUID, RegisteredServer> destinations;
 
-    private final ProxyServer proxy;
-    private final Logger logger;
-
     public RedirectManager() {
-        this.proxy = ProxyDiscord.inst().getProxy();
-        this.logger = ProxyDiscord.inst().getLogger();
+        ProxyServer proxy = ProxyDiscord.inst().getProxy();
         this.verificationManager = ProxyDiscord.inst().getVerificationManager();
 
         destinations = new HashMap<>();

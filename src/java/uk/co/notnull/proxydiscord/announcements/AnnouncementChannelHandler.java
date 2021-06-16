@@ -161,13 +161,7 @@ public class AnnouncementChannelHandler {
         announcement.append(serializer.deserialize(text).color(NamedTextColor.GOLD)
 				.decoration(TextDecoration.BOLD, false));
 
-//        Component component = new MineDown(text)
-//                .disable(MineDownParser.Option.ADVANCED_FORMATTING)
-//                .disable(MineDownParser.Option.LEGACY_COLORS).toComponent()
-//                .color(NamedTextColor.GOLD).decoration(TextDecoration.BOLD, false);
-//        announcement.append(component);
-
-        if(content.length() > 250) {
+		if(content.length() > 250) {
             TextComponent readMore = Component.text("\n" + ChatMessages.getMessage("announcement-read-more"))
                     .color(NamedTextColor.LIGHT_PURPLE)
                     .decoration(TextDecoration.BOLD, false);

@@ -5,7 +5,6 @@ import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.connection.DisconnectEvent;
 import com.velocitypowered.api.event.player.PlayerChooseInitialServerEvent;
 import com.velocitypowered.api.proxy.Player;
-import com.velocitypowered.api.proxy.ProxyServer;
 import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -16,11 +15,9 @@ public class JoinLeave {
 	private static VerificationManager verificationManager = null;
 	private static LoggingManager loggingManager = null;
 
-	private final ProxyServer proxy;
-    private final Logger logger;
+	private final Logger logger;
 
     public JoinLeave() {
-        this.proxy = ProxyDiscord.inst().getProxy();
         this.logger = ProxyDiscord.inst().getLogger();
 
         verificationManager = ProxyDiscord.inst().getVerificationManager();
