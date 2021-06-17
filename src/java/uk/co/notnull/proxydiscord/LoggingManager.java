@@ -13,8 +13,6 @@ import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
-import net.luckperms.api.LuckPerms;
-import net.luckperms.api.LuckPermsProvider;
 import net.luckperms.api.cacheddata.CachedMetaData;
 import net.luckperms.api.model.user.User;
 import net.luckperms.api.model.user.UserManager;
@@ -199,9 +197,7 @@ public class LoggingManager {
 
     private void sendDiscordMessage(UUID uuid, String message) {
         try {
-            LuckPerms luckPermsApi = LuckPermsProvider.get();
-
-            UserManager userManager = luckPermsApi.getUserManager();
+            UserManager userManager = ProxyDiscord.inst().getLuckpermsManager().getUserManager();
             User user = userManager.loadUser(uuid).join();
 
             if(user == null || message.isEmpty() || discordChatFormat == null) {

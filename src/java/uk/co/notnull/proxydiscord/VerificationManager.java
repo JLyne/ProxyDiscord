@@ -3,11 +3,7 @@ package uk.co.notnull.proxydiscord;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
-import net.luckperms.api.LuckPerms;
-import net.luckperms.api.LuckPermsProvider;
-import net.luckperms.api.node.Node;
 import ninja.leaping.configurate.ConfigurationNode;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.javacord.api.entity.permission.Role;
 import org.javacord.api.entity.user.User;
 import org.slf4j.Logger;
@@ -19,12 +15,12 @@ import java.util.stream.Collectors;
 
 public class VerificationManager {
     private final LinkingManager linkingManager;
+    private final LuckPermsManager luckpermsManager;
 
     private final Set<RegisteredServer> publicServers;
     private RegisteredServer defaultVerifiedServer;
     private RegisteredServer linkingServer;
 
-    private String verifiedPermission;
     private String bypassPermission;
     private Set<String> verifiedRoleIds;
 
@@ -40,6 +36,7 @@ public class VerificationManager {
 
         verifiedRoleUsers = ConcurrentHashMap.newKeySet();
         linkingManager = ProxyDiscord.inst().getLinkingManager();
+        luckpermsManager = ProxyDiscord.inst().getLuckpermsManager();
         lastKnownStatuses = new ConcurrentHashMap<>();
         publicServers = new HashSet<>();
 
@@ -67,7 +64,6 @@ public class VerificationManager {
             }
         }
 
-        verifiedPermission = config.getNode("verified-permission").getString();
         bypassPermission = config.getNode("bypass-permission").getString();
         String linkingServerName = config.getNode("linking-server").getString();
         linkingServer = proxy.getServer(linkingServerName).orElse(null);
@@ -128,12 +124,12 @@ public class VerificationManager {
 
         if(verifiedRoleIds.isEmpty()) {
             ProxyDiscord.inst().getDebugLogger().info("No verified role defined. Considering " + player.getUsername() + " verified.");
-            addVerifiedPermission(player);
+            luckpermsManager.addVerifiedPermission(player);
 
             status = VerificationResult.VERIFIED;
         } else if(player.hasPermission(bypassPermission)) {
             ProxyDiscord.inst().getDebugLogger().info("Player " + player.getUsername() + " has bypass permission.");
-            addVerifiedPermission(player);
+            luckpermsManager.addVerifiedPermission(player);
 
             status = VerificationResult.VERIFIED;
         } else {
@@ -142,18 +138,18 @@ public class VerificationManager {
             if (linkedId != null) {
                 if(hasVerifiedRole(linkedId)) {
                     ProxyDiscord.inst().getDebugLogger().info("Player " + player.getUsername() + " has linked discord and has verified role.");
-                    addVerifiedPermission(player);
+                    luckpermsManager.addVerifiedPermission(player);
 
                     status = VerificationResult.VERIFIED;
                 } else {
                     ProxyDiscord.inst().getDebugLogger().info("Player " + player.getUsername() + " has linked discord, but doesn't have the verified role.");
-                    removeVerifiedPermission(player, RemovalReason.VERIFIED_ROLE_LOST);
+                    luckpermsManager.removeVerifiedPermission(player, RemovalReason.VERIFIED_ROLE_LOST);
 
                     status = VerificationResult.LINKED_NOT_VERIFIED;
                 }
             } else {
                 ProxyDiscord.inst().getDebugLogger().info("Player " + player.getUsername() + " hasn't linked discord.");
-                removeVerifiedPermission(player, RemovalReason.UNLINKED);
+                luckpermsManager.removeVerifiedPermission(player, RemovalReason.UNLINKED);
 
                 status = VerificationResult.NOT_LINKED;
             }
@@ -192,7 +188,7 @@ public class VerificationManager {
 
             if(player.isPresent() && player.get().hasPermission(bypassPermission)) {
                 ProxyDiscord.inst().getDebugLogger().info("Player " + player.get().getUsername() + " has bypass permission.");
-                addVerifiedPermission(player.get());
+                luckpermsManager.addVerifiedPermission(player.get());
 
                 status = VerificationResult.VERIFIED;
             } else if(hasVerifiedRole(discordId)) {
@@ -200,7 +196,7 @@ public class VerificationManager {
 
                 if(player.isPresent()) {
                     ProxyDiscord.inst().getDebugLogger().info("Linked account is currently on the server. Adding permission");
-                    addVerifiedPermission(player.get());
+                    luckpermsManager.addVerifiedPermission(player.get());
                 }
 
                 status = VerificationResult.VERIFIED;
@@ -209,7 +205,7 @@ public class VerificationManager {
 
                 if(player.isPresent()) {
                     ProxyDiscord.inst().getDebugLogger().info("Linked account is currently on the server. Removing permission");
-                    removeVerifiedPermission(player.get(), RemovalReason.VERIFIED_ROLE_LOST);
+                    luckpermsManager.removeVerifiedPermission(player.get(), RemovalReason.VERIFIED_ROLE_LOST);
                 }
 
                 status = VerificationResult.LINKED_NOT_VERIFIED;
@@ -230,50 +226,6 @@ public class VerificationManager {
         }));
 
         return status;
-    }
-
-    private void addVerifiedPermission(Player player) {
-        if(player.hasPermission(verifiedPermission)) {
-            return;
-        }
-
-        ProxyDiscord.inst().getDebugLogger().info("Adding verified permission to " + player.getUsername());
-
-        try {
-            LuckPerms luckPermsApi = LuckPermsProvider.get();
-            net.luckperms.api.model.user.@Nullable User user = luckPermsApi.getUserManager().getUser(player.getUniqueId());
-
-            if(user == null) {
-                return;
-            }
-
-            Node node = Node.builder(verifiedPermission).build();
-            user.transientData().add(node);
-        } catch(IllegalStateException e) {
-             logger.warn("Failed to update permissions: " + e.getMessage());
-        }
-    }
-
-    private void removeVerifiedPermission(Player player, RemovalReason reason) {
-        if(!player.hasPermission(verifiedPermission)) {
-            return;
-        }
-
-        ProxyDiscord.inst().getDebugLogger().info("Removing verified permission from " + player.getUsername());
-
-        try {
-            LuckPerms luckPermsApi = LuckPermsProvider.get();
-            net.luckperms.api.model.user.@Nullable User user = luckPermsApi.getUserManager().getUser(player.getUniqueId());
-
-            if(user == null) {
-                return;
-            }
-
-            Node node = Node.builder(verifiedPermission).build();
-            user.transientData().remove(node);
-        } catch (IllegalStateException e) {
-            logger.warn("Failed to update permissions: " + e.getMessage());
-        }
     }
 
     public void populateUsers() {

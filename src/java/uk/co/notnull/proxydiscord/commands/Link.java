@@ -5,14 +5,13 @@ import co.aikar.commands.annotation.*;
 import com.velocitypowered.api.proxy.Player;
 import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
+import net.luckperms.api.model.user.UserManager;
 import uk.co.notnull.proxydiscord.ChatMessages;
 import uk.co.notnull.proxydiscord.LinkResult;
 import uk.co.notnull.proxydiscord.LinkingManager;
 import uk.co.notnull.proxydiscord.ProxyDiscord;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
-import net.luckperms.api.LuckPerms;
-import net.luckperms.api.LuckPermsProvider;
 import org.javacord.api.entity.user.User;
 
 import java.util.UUID;
@@ -20,9 +19,11 @@ import java.util.UUID;
 @CommandAlias("discord")
 public class Link extends BaseCommand {
     private static LinkingManager linkingManager = null;
+    private static UserManager userManager = null;
 
     public Link() {
         Link.linkingManager = ProxyDiscord.inst().getLinkingManager();
+        Link.userManager = ProxyDiscord.inst().getLuckpermsManager().getUserManager();
     }
 
     @Subcommand("link")
@@ -49,9 +50,7 @@ public class Link extends BaseCommand {
             return;
         }
 
-        LuckPerms luckPermsApi = LuckPermsProvider.get();
-
-        luckPermsApi.getUserManager().lookupUniqueId(target).thenAccept((UUID uuid) -> {
+        userManager.lookupUniqueId(target).thenAccept((UUID uuid) -> {
             if (uuid == null) {
                 TextComponent.Builder playerMessage = Component.text()
                         .content(ChatMessages.getMessage("link-not-found")
@@ -101,7 +100,7 @@ public class Link extends BaseCommand {
                 ProxyDiscord.inst().getDiscord().getApi().getUserById(discordId)
                         .thenComposeAsync(result -> {
                             discordUser[0] = result;
-                            return luckPermsApi.getUserManager().lookupUsername(linkedMinecraft);
+                            return userManager.lookupUsername(linkedMinecraft);
                         })
                         .thenAcceptAsync(minecraftUsername -> {
                             String discordUsername = discordUser[0] != null ? discordUser[0].getDiscriminatedName() : discordId;

@@ -1,7 +1,6 @@
 package uk.co.notnull.proxydiscord.bot.commands;
 
-import net.luckperms.api.LuckPerms;
-import net.luckperms.api.LuckPermsProvider;
+import net.luckperms.api.model.user.UserManager;
 import org.javacord.api.entity.channel.TextChannel;
 import org.javacord.api.entity.message.MessageAuthor;
 import org.javacord.api.entity.message.embed.EmbedBuilder;
@@ -19,10 +18,12 @@ import java.util.concurrent.CompletableFuture;
 
 public class Link implements MessageCreateListener {
     private final LinkingManager linkingManager;
+    private final UserManager userManager;
     private ListenerManager<MessageCreateListener> messageListener;
 
     public Link(LinkingManager linkingManager, TextChannel linkingChannel) {
 	    this.linkingManager = linkingManager;
+	    this.userManager = ProxyDiscord.inst().getLuckpermsManager().getUserManager();
 	    setLinkingChannel(linkingChannel);
 	}
 
@@ -50,8 +51,6 @@ public class Link implements MessageCreateListener {
     }
 
     private void sendResponse(LinkResult result, MessageCreateEvent event) {
-        LuckPerms luckPermsApi = LuckPermsProvider.get();
-
         CompletableFuture<EmbedBuilder> embed = null;
         UUID linked = linkingManager.getLinked(event.getMessageAuthor().getId());
 
@@ -71,7 +70,7 @@ public class Link implements MessageCreateListener {
             //FIXME: Reduce duplication here
             case ALREADY_LINKED:
                 embed = CompletableFuture.supplyAsync(() -> {
-                    String username = luckPermsApi.getUserManager().lookupUsername(linked).join();
+                    String username = userManager.lookupUsername(linked).join();
                     Map<String, String> replacements = Map.of(
                             "[discord]", "<@!" + event.getMessageAuthor().getId() + ">",
                             "[minecraft]", (username != null) ? username : "Unknown account (" + linked + ")");
@@ -83,7 +82,7 @@ public class Link implements MessageCreateListener {
             case NOT_VERIFIED:
             case ALREADY_LINKED_NOT_VERIFIED:
                 embed = CompletableFuture.supplyAsync(() -> {
-                    String username = luckPermsApi.getUserManager().lookupUsername(linked).join();
+                    String username = userManager.lookupUsername(linked).join();
                     Map<String, String> replacements = Map.of(
                             "[discord]", "<@!" + event.getMessageAuthor().getId() + ">",
                             "[minecraft]", (username != null) ? username : "Unknown account (" + linked + ")");
@@ -94,7 +93,7 @@ public class Link implements MessageCreateListener {
 
             case SUCCESS:
                 embed = CompletableFuture.supplyAsync(() -> {
-                    String username = luckPermsApi.getUserManager().lookupUsername(linked).join();
+                    String username = userManager.lookupUsername(linked).join();
                     Map<String, String> replacements = Map.of(
                             "[discord]", "<@!" + event.getMessageAuthor().getId() + ">",
                             "[minecraft]", (username != null) ? username : "Unknown account (" + linked + ")");

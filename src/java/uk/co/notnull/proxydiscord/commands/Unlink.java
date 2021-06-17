@@ -5,25 +5,26 @@ import co.aikar.commands.annotation.*;
 import com.velocitypowered.api.proxy.Player;
 import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
+import net.luckperms.api.model.user.UserManager;
 import uk.co.notnull.proxydiscord.LinkingManager;
 import uk.co.notnull.proxydiscord.ProxyDiscord;
 import uk.co.notnull.proxydiscord.ChatMessages;
 import uk.co.notnull.proxydiscord.VerificationManager;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
-import net.luckperms.api.LuckPerms;
-import net.luckperms.api.LuckPermsProvider;
 
 import java.util.UUID;
 
 @CommandAlias("discord")
 public class Unlink extends BaseCommand {
+    private static UserManager userManager = null;
     private static VerificationManager verificationManager = null;
     private static LinkingManager linkingManager = null;
 
     public Unlink() {
         Unlink.linkingManager = ProxyDiscord.inst().getLinkingManager();
         Unlink.verificationManager = ProxyDiscord.inst().getVerificationManager();
+        Unlink.userManager = ProxyDiscord.inst().getLuckpermsManager().getUserManager();
     }
 
     @Subcommand("unlink")
@@ -79,9 +80,7 @@ public class Unlink extends BaseCommand {
                 return;
             }
 
-            LuckPerms luckPermsApi = LuckPermsProvider.get();
-
-            luckPermsApi.getUserManager().lookupUniqueId(target).thenAccept((UUID uuid) -> {
+            userManager.lookupUniqueId(target).thenAccept((UUID uuid) -> {
                 if(uuid == null) {
                     TextComponent.Builder playerMessage = Component.text()
                            .content(ChatMessages.getMessage("unlink-other-not-found")

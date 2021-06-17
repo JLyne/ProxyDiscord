@@ -50,6 +50,7 @@ public class ProxyDiscord {
 	private static AnnouncementManager announcementManager;
 	private static RedirectManager redirectManager;
 	private static LoggingManager loggingManager;
+	private static LuckPermsManager luckPermsManager;
 
 	private boolean platformDetectionEnabled = false;
 	private Object platformDetection;
@@ -97,7 +98,7 @@ public class ProxyDiscord {
 
 		new ChatMessages(messagesConfiguration);
 
-		initActivityLogging();
+		luckPermsManager = new LuckPermsManager(getConfig());
 		initLinking();
 		initVerification();
 		loggingManager = new LoggingManager(getConfig());
@@ -218,6 +219,10 @@ public class ProxyDiscord {
 
 	public LoggingManager getLoggingManager() {
 		return loggingManager;
+	}
+
+	public LuckPermsManager getLuckpermsManager() {
+		return luckPermsManager;
 	}
 
 	public Logger getLogger() {
