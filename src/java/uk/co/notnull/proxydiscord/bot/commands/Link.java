@@ -50,7 +50,6 @@ public class Link implements MessageCreateListener {
     }
 
     private void sendResponse(LinkResult result, MessageCreateEvent event) {
-        LinkingManager linkingManager = ProxyDiscord.inst().getLinkingManager();
         LuckPerms luckPermsApi = LuckPermsProvider.get();
 
         CompletableFuture<EmbedBuilder> embed = null;

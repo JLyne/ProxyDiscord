@@ -31,7 +31,7 @@ import javax.inject.Inject;
 import ninja.leaping.configurate.yaml.YAMLConfigurationLoader;
 
 @Plugin(id = "proxydiscord", name = "ProxyDiscord", version = "1.0-SNAPSHOT",
-        description = "Discord account linking", authors = {"Jim (NotKatuen)"}, dependencies = {
+        description = "Discord integrations", authors = {"Jim (NotKatuen)"}, dependencies = {
 		@Dependency(id = "luckperms"),
 		@Dependency(id = "proxyqueues", optional = true),
 		@Dependency(id = "platform-detection", optional = true)
@@ -57,48 +57,6 @@ public class ProxyDiscord {
 	@Inject
     @DataDirectory
     private Path dataDirectory;
-
-	public static ProxyDiscord inst() {
-    	  return instance;
-    }
-
-	public static MinecraftChannelIdentifier getStatusIdentifier() {
-		return statusIdentifier;
-	}
-
-	ConfigurationNode getConfig() {
-    	return configuration;
-    }
-
-    public DebugLogger getDebugLogger() {
-    	return debugLogger;
-    }
-
-	public Discord getDiscord() {
-		return discord;
-	}
-
-	public LinkingManager getLinkingManager() {
-		return linkingManager;
-	}
-
-	public VerificationManager getVerificationManager() {
-		return verificationManager;
-	}
-
-	@SuppressWarnings("unused")
-	public AnnouncementManager getAnnouncementManager() {
-		return announcementManager;
-	}
-
-	@SuppressWarnings("unused")
-	public RedirectManager getRedirectManager() {
-		return redirectManager;
-	}
-
-	public LoggingManager getLoggingManager() {
-		return loggingManager;
-	}
 
 	private final ProxyServer proxy;
     private final Logger logger;
@@ -142,7 +100,8 @@ public class ProxyDiscord {
 		initActivityLogging();
 		initLinking();
 		initVerification();
-		initAnnouncements();
+		loggingManager = new LoggingManager(getConfig());
+		announcementManager = new AnnouncementManager(getConfig().getNode("announcement-channels"));
 		redirectManager = new RedirectManager();
 
 		proxy.getEventManager().register(this, new JoinLeave());
@@ -187,16 +146,6 @@ public class ProxyDiscord {
 		discord.getApi().addReconnectListener(new Reconnect());
 	}
 
-	private void initActivityLogging() {
-		loggingManager = new LoggingManager(getConfig());
-	}
-
-	private void initAnnouncements() {
-		ConfigurationNode announcementChannels = getConfig().getNode("announcement-channels");
-
-		announcementManager = new AnnouncementManager(announcementChannels);
-	}
-
 	private void loadResource(String resource) {
     	File folder = dataDirectory.toFile();
 
@@ -227,6 +176,48 @@ public class ProxyDiscord {
 		if(discord.getApi() != null) {
 			discord.getApi().disconnect();
 		}
+	}
+
+	public static ProxyDiscord inst() {
+    	  return instance;
+    }
+
+	public static MinecraftChannelIdentifier getStatusIdentifier() {
+		return statusIdentifier;
+	}
+
+	ConfigurationNode getConfig() {
+    	return configuration;
+    }
+
+    public DebugLogger getDebugLogger() {
+    	return debugLogger;
+    }
+
+	public Discord getDiscord() {
+		return discord;
+	}
+
+	public LinkingManager getLinkingManager() {
+		return linkingManager;
+	}
+
+	public VerificationManager getVerificationManager() {
+		return verificationManager;
+	}
+
+	@SuppressWarnings("unused")
+	public AnnouncementManager getAnnouncementManager() {
+		return announcementManager;
+	}
+
+	@SuppressWarnings("unused")
+	public RedirectManager getRedirectManager() {
+		return redirectManager;
+	}
+
+	public LoggingManager getLoggingManager() {
+		return loggingManager;
 	}
 
 	public Logger getLogger() {

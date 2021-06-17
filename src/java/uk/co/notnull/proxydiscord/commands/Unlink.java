@@ -19,10 +19,10 @@ import java.util.UUID;
 @CommandAlias("discord")
 public class Unlink extends BaseCommand {
     private static VerificationManager verificationManager = null;
-    private static LinkingManager linker = null;
+    private static LinkingManager linkingManager = null;
 
     public Unlink() {
-        Unlink.linker = ProxyDiscord.inst().getLinkingManager();
+        Unlink.linkingManager = ProxyDiscord.inst().getLinkingManager();
         Unlink.verificationManager = ProxyDiscord.inst().getVerificationManager();
     }
 
@@ -45,11 +45,11 @@ public class Unlink extends BaseCommand {
             }
 
             if(discordId != null) {
-                UUID uuid = linker.getLinked(discordId);
+                UUID uuid = linkingManager.getLinked(discordId);
 
                 if(uuid != null) {
                     Player onlinePlayer = ProxyDiscord.inst().getProxy().getPlayer(uuid).orElse(null);
-                    linker.unlink(discordId);
+                    linkingManager.unlink(discordId);
 
                     TextComponent.Builder playerMessage = Component.text()
                            .content(ChatMessages.getMessage("unlink-other-discord-success")
@@ -95,8 +95,8 @@ public class Unlink extends BaseCommand {
 
                 Player onlinePlayer = ProxyDiscord.inst().getProxy().getPlayer(uuid).orElse(null);
 
-                if(linker.isLinked(uuid)) {
-                    linker.unlink(uuid);
+                if(linkingManager.isLinked(uuid)) {
+                    linkingManager.unlink(uuid);
 
                     TextComponent.Builder playerMessage = Component.text()
                            .content(ChatMessages.getMessage("unlink-other-success")
@@ -123,8 +123,8 @@ public class Unlink extends BaseCommand {
                     player.sendMessage(Identity.nil(), playerMessage.build());
                 }
             });
-        } else if(linker.isLinked(player)) {
-            linker.unlink(player);
+        } else if(linkingManager.isLinked(player)) {
+            linkingManager.unlink(player);
             verificationManager.checkVerificationStatus(player);
         } else {
             player.sendMessage(Identity.nil(), Component.text(ChatMessages.getMessage("unlink-not-linked")).color(NamedTextColor.RED));
