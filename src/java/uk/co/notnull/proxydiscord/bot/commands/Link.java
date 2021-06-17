@@ -107,7 +107,6 @@ public class Link implements MessageCreateListener {
 
         embed.thenAccept((EmbedBuilder e) -> {
             event.getMessage().reply(e);
-            ProxyDiscord.inst().getDebugLogger().info(e.toString());
         });
     }
 

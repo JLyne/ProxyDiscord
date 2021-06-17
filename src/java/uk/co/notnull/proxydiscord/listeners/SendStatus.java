@@ -31,13 +31,11 @@ public class SendStatus {
 
 	@Subscribe(order = PostOrder.FIRST)
     public void onServerPostConnect(ServerPostConnectEvent e) {
-		ProxyDiscord.inst().getDebugLogger().info("ServerPostConnectEvent");
 		sendStatusPacket(e.getPlayer(), verificationManager.checkVerificationStatus(e.getPlayer()));
     }
 
     @Subscribe(order = PostOrder.LAST)
     public void onPlayerVerifyStatusChange(PlayerVerifyStateChangeEvent e) {
-		ProxyDiscord.inst().getDebugLogger().info("PlayerVerifyStateChangeEvent");
 		if(e.getState() == VerificationResult.VERIFIED) {
 			e.getPlayer().sendMessage(Identity.nil(), Component.text(ChatMessages.getMessage("link-success"))
 											 .color(NamedTextColor.GREEN));
@@ -47,9 +45,7 @@ public class SendStatus {
 	}
 
     private void sendStatusPacket(Player player, VerificationResult status) {
-		ProxyDiscord.inst().getDebugLogger().info("sendStatusPacket");
-
-        player.getCurrentServer().ifPresent(connection -> {
+		player.getCurrentServer().ifPresent(connection -> {
         	ProxyDiscord.inst().getDebugLogger().info(connection.getServer().getServerInfo().getName());
 
         	if(!verificationManager.isLinkingServer(connection.getServer())) {
@@ -80,8 +76,7 @@ public class SendStatus {
                         "token", token);
 
                 Gson gson = new GsonBuilder().create();
-                ProxyDiscord.inst().getLogger().info("Sending status packet");
-                connection.sendPluginMessage(ProxyDiscord.getStatusIdentifier(), gson.toJson(payload).getBytes());
+		   		connection.sendPluginMessage(ProxyDiscord.getStatusIdentifier(), gson.toJson(payload).getBytes());
             } catch(NoSuchAlgorithmException | InvalidKeyException e) {
                 ProxyDiscord.inst().getLogger().error("Failed to generate status packet for " + player.getUsername());
                 e.printStackTrace();
