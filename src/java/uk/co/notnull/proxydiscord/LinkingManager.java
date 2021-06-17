@@ -9,9 +9,15 @@ import org.javacord.api.entity.user.User;
 import org.slf4j.Logger;
 import uk.co.notnull.proxydiscord.bot.commands.Link;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.security.SecureRandom;
-import java.util.*;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 @SuppressWarnings("unused")

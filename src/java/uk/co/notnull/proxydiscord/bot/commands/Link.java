@@ -12,6 +12,7 @@ import uk.co.notnull.proxydiscord.LinkResult;
 import uk.co.notnull.proxydiscord.LinkingManager;
 import uk.co.notnull.proxydiscord.ProxyDiscord;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;

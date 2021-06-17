@@ -6,9 +6,12 @@ import com.velocitypowered.api.event.player.ServerPreConnectEvent;
 import com.velocitypowered.api.proxy.ServerConnection;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import net.kyori.adventure.text.Component;
-import uk.co.notnull.proxydiscord.*;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
+import uk.co.notnull.proxydiscord.ChatMessages;
+import uk.co.notnull.proxydiscord.ProxyDiscord;
+import uk.co.notnull.proxydiscord.VerificationManager;
+import uk.co.notnull.proxydiscord.VerificationResult;
 
 public class ServerConnect {
     private static VerificationManager verificationManager = null;

@@ -24,7 +24,12 @@ import org.slf4j.Logger;
 import uk.co.notnull.proxydiscord.ChatMessages;
 import uk.co.notnull.proxydiscord.ProxyDiscord;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 

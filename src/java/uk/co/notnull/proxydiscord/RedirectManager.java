@@ -13,7 +13,9 @@ import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import uk.co.notnull.proxydiscord.events.PlayerVerifyStateChangeEvent;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Optional;
+import java.util.UUID;
 
 public class RedirectManager {
     private final VerificationManager verificationManager;

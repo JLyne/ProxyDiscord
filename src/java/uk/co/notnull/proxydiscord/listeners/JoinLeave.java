@@ -9,7 +9,11 @@ import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.slf4j.Logger;
-import uk.co.notnull.proxydiscord.*;
+import uk.co.notnull.proxydiscord.ChatMessages;
+import uk.co.notnull.proxydiscord.LoggingManager;
+import uk.co.notnull.proxydiscord.ProxyDiscord;
+import uk.co.notnull.proxydiscord.VerificationManager;
+import uk.co.notnull.proxydiscord.VerificationResult;
 
 public class JoinLeave {
 	private static VerificationManager verificationManager = null;

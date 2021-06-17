@@ -4,7 +4,8 @@ import ninja.leaping.configurate.ConfigurationNode;
 import org.slf4j.Logger;
 import uk.co.notnull.proxydiscord.announcements.AnnouncementChannelHandler;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class AnnouncementManager {
     private final ConfigurationNode config;

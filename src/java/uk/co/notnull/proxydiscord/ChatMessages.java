@@ -5,7 +5,7 @@ import org.javacord.api.entity.Nameable;
 import org.javacord.api.entity.message.embed.EmbedBuilder;
 import org.javacord.api.entity.permission.Role;
 
-import java.awt.*;
+import java.awt.Color;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
