@@ -9,23 +9,27 @@ import com.velocitypowered.api.proxy.Player;
 import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
 import net.luckperms.api.model.user.UserManager;
+import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.format.NamedTextColor;
+import org.javacord.api.entity.user.User;
 import uk.co.notnull.proxydiscord.ChatMessages;
 import uk.co.notnull.proxydiscord.LinkResult;
 import uk.co.notnull.proxydiscord.LinkingManager;
 import uk.co.notnull.proxydiscord.ProxyDiscord;
-import net.kyori.adventure.text.TextComponent;
-import net.kyori.adventure.text.format.NamedTextColor;
-import org.javacord.api.entity.user.User;
+import uk.co.notnull.proxydiscord.VerificationManager;
+import uk.co.notnull.proxydiscord.VerificationResult;
 
 import java.util.UUID;
 
 @CommandAlias("discord")
 public class Link extends BaseCommand {
     private static LinkingManager linkingManager = null;
+    private static VerificationManager verificationManager = null;
     private static UserManager userManager = null;
 
     public Link() {
         Link.linkingManager = ProxyDiscord.inst().getLinkingManager();
+        Link.verificationManager = ProxyDiscord.inst().getVerificationManager();
         Link.userManager = ProxyDiscord.inst().getLuckpermsManager().getUserManager();
     }
 
@@ -134,17 +138,21 @@ public class Link extends BaseCommand {
                 ProxyDiscord.inst().getLogger().debug(result.toString());
 
                 if (result == LinkResult.SUCCESS) {
-                    String message = ChatMessages.getMessage("link-other-success")
-                            .replace("[discord]", user.getDiscriminatedName())
-                            .replace("[player]", target);
+                    VerificationResult verificationResult = verificationManager.checkVerificationStatus(player);
 
-                    player.sendMessage(Identity.nil(), Component.text(message).color(NamedTextColor.GREEN));
-                } else if (result == LinkResult.NOT_VERIFIED) {
-                    String message = ChatMessages.getMessage("link-other-not-verified")
-                            .replace("[discord]", user.getDiscriminatedName())
-                            .replace("[player]", target);
+                    if (verificationResult == VerificationResult.VERIFIED) {
+                        String message = ChatMessages.getMessage("link-other-success")
+                                .replace("[discord]", user.getDiscriminatedName())
+                                .replace("[player]", target);
 
-                    player.sendMessage(Identity.nil(), Component.text(message).color(NamedTextColor.YELLOW));
+                        player.sendMessage(Identity.nil(), Component.text(message).color(NamedTextColor.GREEN));
+                    } else {
+                        String message = ChatMessages.getMessage("link-other-not-verified")
+                                .replace("[discord]", user.getDiscriminatedName())
+                                .replace("[player]", target);
+
+                        player.sendMessage(Identity.nil(), Component.text(message).color(NamedTextColor.YELLOW));
+                    }
                 }
             }).exceptionally(error -> {
                 player.sendMessage(Identity.nil(), Component.text(error.toString()).color(NamedTextColor.RED));

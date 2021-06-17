@@ -127,11 +127,6 @@ public class LinkingManager {
     public LinkResult completeLink(String token, Long discordId) {
         //Account already linked
         if(this.links.containsValue(discordId)) {
-            //Said account doesn't have verified role
-            if(!ProxyDiscord.inst().getVerificationManager().hasVerifiedRole(discordId)) {
-                return LinkResult.ALREADY_LINKED_NOT_VERIFIED;
-            }
-
             return LinkResult.ALREADY_LINKED;
         }
 
@@ -153,37 +148,23 @@ public class LinkingManager {
         this.links.put(player, discordId);
         this.pendingLinks.remove(token);
 
-        VerificationResult result = ProxyDiscord.inst().getVerificationManager().checkVerificationStatus(discordId);
-
-        return result == VerificationResult.VERIFIED ? LinkResult.SUCCESS : LinkResult.NOT_VERIFIED;
+        return LinkResult.SUCCESS;
     }
 
     public LinkResult manualLink(UUID uuid, Long discordId) {
         //Minecraft account already linked
         if(this.links.containsValue(discordId)) {
-            //Said account doesn't have verified role
-            if(!ProxyDiscord.inst().getVerificationManager().hasVerifiedRole(discordId)) {
-                return LinkResult.ALREADY_LINKED_NOT_VERIFIED;
-            }
-
             return LinkResult.ALREADY_LINKED;
         }
 
         //Discord account already linked
         if(this.links.containsKey(uuid)) {
-            //Said account doesn't have verified role
-            if(!ProxyDiscord.inst().getVerificationManager().hasVerifiedRole(this.links.get(uuid))) {
-                return LinkResult.ALREADY_LINKED_NOT_VERIFIED;
-            }
-
             return LinkResult.ALREADY_LINKED;
         }
 
         this.links.put(uuid, discordId);
 
-        VerificationResult result = ProxyDiscord.inst().getVerificationManager().checkVerificationStatus(discordId);
-
-        return result == VerificationResult.VERIFIED ? LinkResult.SUCCESS : LinkResult.NOT_VERIFIED;
+        return LinkResult.SUCCESS;
     }
 
     public void unlink(Player player) {

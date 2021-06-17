@@ -177,7 +177,7 @@ public class VerificationManager {
         return status;
     }
 
-    VerificationResult checkVerificationStatus(Long discordId) {
+    public VerificationResult checkVerificationStatus(Long discordId) {
         VerificationResult status;
 
         UUID linked = linkingManager.getLinked(discordId);

@@ -11,6 +11,8 @@ import uk.co.notnull.proxydiscord.ChatMessages;
 import uk.co.notnull.proxydiscord.LinkResult;
 import uk.co.notnull.proxydiscord.LinkingManager;
 import uk.co.notnull.proxydiscord.ProxyDiscord;
+import uk.co.notnull.proxydiscord.VerificationManager;
+import uk.co.notnull.proxydiscord.VerificationResult;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -19,11 +21,13 @@ import java.util.concurrent.CompletableFuture;
 
 public class Link implements MessageCreateListener {
     private final LinkingManager linkingManager;
+    private final VerificationManager verificationManager;
     private final UserManager userManager;
     private ListenerManager<MessageCreateListener> messageListener;
 
     public Link(LinkingManager linkingManager, TextChannel linkingChannel) {
 	    this.linkingManager = linkingManager;
+	    this.verificationManager = ProxyDiscord.inst().getVerificationManager();
 	    this.userManager = ProxyDiscord.inst().getLuckpermsManager().getUserManager();
 	    setLinkingChannel(linkingChannel);
 	}
@@ -55,6 +59,9 @@ public class Link implements MessageCreateListener {
         CompletableFuture<EmbedBuilder> embed = null;
         UUID linked = linkingManager.getLinked(event.getMessageAuthor().getId());
 
+        Map<String, String> replacements = new HashMap<>(
+                Map.of("[discord]", "<@!" + event.getMessageAuthor().getId() + ">"));
+
         switch(result) {
             case UNKNOWN_ERROR:
                 embed = CompletableFuture.completedFuture(ChatMessages.getEmbed("embed-link-error"));
@@ -68,38 +75,28 @@ public class Link implements MessageCreateListener {
                 embed = CompletableFuture.completedFuture(ChatMessages.getEmbed("embed-link-invalid-token"));
                 break;
 
-            //FIXME: Reduce duplication here
             case ALREADY_LINKED:
                 embed = CompletableFuture.supplyAsync(() -> {
                     String username = userManager.lookupUsername(linked).join();
-                    Map<String, String> replacements = Map.of(
-                            "[discord]", "<@!" + event.getMessageAuthor().getId() + ">",
-                            "[minecraft]", (username != null) ? username : "Unknown account (" + linked + ")");
+                    replacements.put("[minecraft]", (username != null) ? username : "Unknown account (" + linked + ")");
 
                     return ChatMessages.getEmbed("embed-link-already-linked", replacements);
-                });
-                break;
-
-            case NOT_VERIFIED:
-            case ALREADY_LINKED_NOT_VERIFIED:
-                embed = CompletableFuture.supplyAsync(() -> {
-                    String username = userManager.lookupUsername(linked).join();
-                    Map<String, String> replacements = Map.of(
-                            "[discord]", "<@!" + event.getMessageAuthor().getId() + ">",
-                            "[minecraft]", (username != null) ? username : "Unknown account (" + linked + ")");
-
-                    return ChatMessages.getEmbed("embed-link-success-not-verified", replacements);
                 });
                 break;
 
             case SUCCESS:
                 embed = CompletableFuture.supplyAsync(() -> {
                     String username = userManager.lookupUsername(linked).join();
-                    Map<String, String> replacements = Map.of(
-                            "[discord]", "<@!" + event.getMessageAuthor().getId() + ">",
-                            "[minecraft]", (username != null) ? username : "Unknown account (" + linked + ")");
+                    replacements.put("[minecraft]", (username != null) ? username : "Unknown account (" + linked + ")");
 
-                    return ChatMessages.getEmbed("embed-link-success", replacements);
+                    VerificationResult verificationResult = verificationManager.checkVerificationStatus(
+                            event.getMessageAuthor().getId());
+
+                    if(verificationResult == VerificationResult.VERIFIED) {
+                        return ChatMessages.getEmbed("embed-link-success", replacements);
+                    } else {
+                        return ChatMessages.getEmbed("embed-link-success-not-verified", replacements);
+                    }
                 });
                 break;
         }
