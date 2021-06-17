@@ -186,9 +186,7 @@ public class ProxyDiscord {
 	}
 
 	private void initActivityLogging() {
-    	String loggingChannelId = getConfig().getNode("logging-channel-id").getString();
-
-		loggingManager = new LoggingManager(loggingChannelId);
+		loggingManager = new LoggingManager(getConfig());
 	}
 
 	private void initAnnouncements() {

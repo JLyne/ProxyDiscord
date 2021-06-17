@@ -27,7 +27,36 @@ public-servers: []
 default-verified-server: 'waiting'
 
 # Channel to log joins/leaves/chats etc in
-log-channel-id: '123456789'
+logging-channel-id: '123456789'
+
+# Formats for logging various events
+# Remove or empty to disable
+logging-formats:
+  date: '<dd-MM-yy HH:mm:ss>' # Used for [date] in other formats
+  # In-game chat
+  chat: |-
+    ```md
+    [date] [[server]][[player]]([discord_id]) [message]```
+  # Messages sent in the discord logging channel. Useful for keeping the appearance of messages consistent
+  discord-chat: |-
+    ```md
+    [DISCORD] [date] [[server]][[player]]([discord_id]) [message]```
+  # Players joining the server
+  join: |-
+    ```md
+    [date] [[server]][[player]]([discord_id]) has joined the network```
+  # Players leaving the server
+  leave: |-
+    ```md
+    [date] [[server]][[player]]([discord_id]) has left the network```
+  # Commands run by players
+  command: |-
+    ```md
+    [COMMAND] [date] [[server]][[player]]([discord_id]) [command]```
+
+# Whether to delete messages sent in the discord logging channel
+# Prevents duplicage messages if logging of messages sent from the discord side is enabled
+logging-delete-sent-messages: true
 
 # Channel for annoucements, messages sent here will be shown in chat
 announcement-channels:

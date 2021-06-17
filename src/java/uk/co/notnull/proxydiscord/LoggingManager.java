@@ -19,9 +19,11 @@ import net.luckperms.api.cacheddata.CachedMetaData;
 import net.luckperms.api.model.user.User;
 import net.luckperms.api.model.user.UserManager;
 import net.luckperms.api.query.QueryOptions;
+import ninja.leaping.configurate.ConfigurationNode;
 import org.javacord.api.entity.channel.TextChannel;
 import org.javacord.api.entity.message.MessageBuilder;
-import org.javacord.api.entity.message.MessageDecoration;
+import org.javacord.api.entity.message.mention.AllowedMentions;
+import org.javacord.api.entity.message.mention.AllowedMentionsBuilder;
 import org.javacord.api.listener.message.MessageCreateListener;
 import org.javacord.api.util.event.ListenerManager;
 import org.slf4j.Logger;
@@ -34,30 +36,33 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class LoggingManager {
-    private final String loggingChannelId;
+    private String loggingChannelId = null;
     private final Integer lockDummy = 0;
 
     private final AtomicInteger logsPerMessage = new AtomicInteger(1); //Number of logs to combine together into one message, to avoid rate limits and falling behind
     private final AtomicInteger unsentLogs = new AtomicInteger(0); //Number of unsent logs in current message
     private final AtomicInteger queuedToSend = new AtomicInteger(0); //Number of messages waiting to be sent by javacord
 
+    private boolean deleteSentMessages;
+    private SimpleDateFormat dateFormat;
+    private String chatFormat;
+    private String discordChatFormat;
+    private String joinFormat;
+    private String leaveFormat;
+    private String commandFormat;
+
+    private AllowedMentions allowedMentions;
     private MessageBuilder currentMessage; //Current unsent message
     private ListenerManager<MessageCreateListener> logListener = null;
 
     private final ProxyServer proxy;
     private final Logger logger;
 
-    public LoggingManager(String loggingChannelId) {
+    public LoggingManager(ConfigurationNode config) {
         this.proxy = ProxyDiscord.inst().getProxy();
         this.logger = ProxyDiscord.inst().getLogger();
 
-        this.loggingChannelId = loggingChannelId;
         currentMessage = new MessageBuilder();
-
-        if(loggingChannelId != null) {
-            findChannel();
-        }
-
         proxy.getEventManager().register(ProxyDiscord.inst(), this);
 
         ProxyDiscord.inst().getDiscord().getApi().addReconnectListener(event -> {
@@ -66,6 +71,10 @@ public class LoggingManager {
             }
         });
 
+        AllowedMentionsBuilder allowedMentionsBuilder = new AllowedMentionsBuilder();
+        allowedMentionsBuilder.setMentionRoles(false).setMentionUsers(false).setMentionEveryoneAndHere(false);
+        allowedMentions = allowedMentionsBuilder.build();
+
         //Decrease logs per message if a low number of messages are unsent
         proxy.getScheduler().buildTask(ProxyDiscord.inst(), () -> {
             if(queuedToSend.get() <= 2 && logsPerMessage.get() > 1) {
@@ -73,31 +82,69 @@ public class LoggingManager {
                 logsPerMessage.set(Math.max(logsPerMessage.get() / 2, 1));
             }
         }).repeat( 5, TimeUnit.SECONDS).delay( 5, TimeUnit.SECONDS).schedule();
+
+        parseConfig(config);
+    }
+
+    public void parseConfig(ConfigurationNode config) {
+        loggingChannelId = config.getNode("logging-channel-id").getString();
+        deleteSentMessages = config.getNode("logging-delete-sent-messages").getBoolean(false);
+
+        ConfigurationNode logFormats = config.getNode("logging-formats");
+
+        if(logFormats.isMap()) {
+            ConfigurationNode dateFormat = logFormats.getNode("date");
+            ConfigurationNode chatFormat = logFormats.getNode("chat");
+            ConfigurationNode discordChatFormat = logFormats.getNode("discord-chat");
+            ConfigurationNode joinFormat = logFormats.getNode("join");
+            ConfigurationNode leaveFormat = logFormats.getNode("leave");
+            ConfigurationNode commandFormat = logFormats.getNode("command");
+
+            try {
+                this.dateFormat = !dateFormat.isEmpty() ? new SimpleDateFormat(dateFormat.getString("")) : null;
+            } catch(IllegalArgumentException e) {
+                logger.warn("Invalid logging date format: " + e.getMessage());
+            }
+
+            this.chatFormat = !chatFormat.isEmpty() ? chatFormat.getString(null) : null;
+            this.discordChatFormat = !discordChatFormat.isEmpty() ? discordChatFormat.getString(null) : null;
+            this.joinFormat = !joinFormat.isEmpty() ? joinFormat.getString(null) : null;
+            this.leaveFormat = !leaveFormat.isEmpty() ? leaveFormat.getString(null) : null;
+            this.commandFormat = !commandFormat.isEmpty() ? commandFormat.getString(null) : null;
+        }
+
+        if(loggingChannelId != null) {
+            findChannel();
+        }
     }
 
     public void logJoin(Player player) {
-        sendLogMessage(getPlayerLogName(player) + " has joined the network.");
+        if(joinFormat != null) {
+            sendLogMessage(player, joinFormat);
+        }
     }
 
     public void logLeave(Player player) {
-        sendLogMessage(getPlayerLogName(player) + " has left the network.");
+        if(leaveFormat != null) {
+            sendLogMessage(player, leaveFormat);
+        }
     }
 
     @Subscribe(order = PostOrder.LATE)
     public void onPlayerChat(PlayerChatEvent e) {
-        if(!e.getResult().isAllowed()) {
+        if(!e.getResult().isAllowed() || chatFormat == null) {
             return;
         }
 
         Player sender = e.getPlayer();
         String message = e.getMessage().replace("```", "");
 
-        sendLogMessage("[CHAT] " + getPlayerLogName(sender) + "\n" + message);
+        sendLogMessage(sender, chatFormat.replaceAll("\\[message]", message));
     }
 
     @Subscribe(order = PostOrder.LATE)
     public void onPlayerCommand(CommandExecuteEvent e) {
-        if(!e.getResult().isAllowed()) {
+        if(!e.getResult().isAllowed() || commandFormat == null) {
             return;
         }
 
@@ -106,9 +153,9 @@ public class LoggingManager {
         }
 
         Player sender = (Player) e.getCommandSource();
-        String message = e.getCommand().replace("```", "");
+        String command = e.getCommand().replace("```", "");
 
-        sendLogMessage("[COMMAND] " + getPlayerLogName(sender) + "\n/" + message);
+        sendLogMessage(sender, commandFormat.replaceAll("\\[command]", command));
     }
 
     private void findChannel() {
@@ -137,7 +184,9 @@ public class LoggingManager {
                 Long discordId = event.getMessage().getAuthor().getId();
                 UUID linked = ProxyDiscord.inst().getLinkingManager().getLinked(discordId);
 
-                event.deleteMessage();
+                if(deleteSentMessages) {
+                    event.deleteMessage();
+                }
 
                 if(linked != null) {
                     sendDiscordMessage(linked, message);
@@ -148,28 +197,6 @@ public class LoggingManager {
         logger.info("Activity logging enabled for channel: #" + loggingChannel.toString().replaceAll(".*\\[|].*", "") + " (id: " + loggingChannelId + ")");
     }
 
-    private String getPlayerLogName(Player player) {
-        Long discordId = ProxyDiscord.inst().getLinkingManager().getLinked(player);
-        Optional<ServerConnection> server = player.getCurrentServer();
-        String serverName = server.isPresent() ? server.get().getServerInfo().getName() : "";
-
-        if(discordId != null) {
-            return "[" + serverName + "][" + player.getUsername() + "](<@!" + discordId + ">)";
-        } else {
-            return "[" + serverName + "][" + player.getUsername() + "](Unlinked)";
-        }
-    }
-
-    private String getPlayerLogName(User user) {
-         Long discordId = ProxyDiscord.inst().getLinkingManager().getLinked(user.getUniqueId());
-
-        if(discordId != null) {
-            return "[" + user.getFriendlyName() + "](<@!" + discordId + ">)";
-        } else {
-            return "[" + user.getFriendlyName() + "](Unlinked)";
-        }
-    }
-
     private void sendDiscordMessage(UUID uuid, String message) {
         try {
             LuckPerms luckPermsApi = LuckPermsProvider.get();
@@ -177,11 +204,7 @@ public class LoggingManager {
             UserManager userManager = luckPermsApi.getUserManager();
             User user = userManager.loadUser(uuid).join();
 
-            if(user == null) {
-                return;
-            }
-
-            if(message.isEmpty()) {
+            if(user == null || message.isEmpty() || discordChatFormat == null) {
                 return;
             }
 
@@ -200,10 +223,32 @@ public class LoggingManager {
             component.append(Component.text(message));
 
             proxy.getAllPlayers().forEach(player -> player.sendMessage(Identity.nil(), component.build()));
-            sendLogMessage("[DISCORD] []" + getPlayerLogName(user) + "\n" + message);
+            sendLogMessage(user, discordChatFormat.replaceAll("\\[message]", message));
         } catch (IllegalStateException e) {
             logger.warn("Failed to send Discord message: " + e.getMessage());
         }
+    }
+
+    private void sendLogMessage(Player player, String message) {
+        Long discordId = ProxyDiscord.inst().getLinkingManager().getLinked(player);
+        Optional<ServerConnection> server = player.getCurrentServer();
+        String serverName = server.isPresent() ? server.get().getServerInfo().getName() : "";
+
+        message = message.replaceAll("\\[server]", serverName);
+        message = message.replaceAll("\\[player]", player.getUsername());
+        message = message.replaceAll("\\[discord_id]", discordId != null ? String.valueOf(discordId) : "Unlinked");
+
+        sendLogMessage(message);
+    }
+
+    private void sendLogMessage(User user, String message) {
+        Long discordId = ProxyDiscord.inst().getLinkingManager().getLinked(user.getUniqueId());
+
+        message = message.replaceAll("\\[server]", "");
+        message = message.replaceAll("\\[player]", user.getFriendlyName());
+        message = message.replaceAll("\\[discord_id]", discordId != null ? String.valueOf(discordId) : "Unlinked");
+
+        sendLogMessage(message);
     }
 
     private void sendLogMessage(String message) {
@@ -211,18 +256,16 @@ public class LoggingManager {
             return;
         }
 
-        String dateFormat = "<dd-MM-yy HH:mm:ss> ";
-        SimpleDateFormat format = new SimpleDateFormat(dateFormat);
-        String date = format.format(new Date());
-        Optional <TextChannel> loggingChannel = ProxyDiscord.inst().getDiscord().getApi().getTextChannelById(loggingChannelId);
+        message = message.replaceAll("\\[date]", dateFormat != null ? dateFormat.format(new Date()) : "");
 
-        message = date + message;
+        Optional <TextChannel> loggingChannel = ProxyDiscord.inst().getDiscord().getApi().getTextChannelById(loggingChannelId);
 
         synchronized (lockDummy) {
             if(currentMessage.getStringBuilder().length() + message.length() > 1950) {
 
                 if(loggingChannel.isPresent()) {
                     queuedToSend.incrementAndGet();
+                    currentMessage.setAllowedMentions(allowedMentions);
                     currentMessage.send(loggingChannel.get())
                             .thenAcceptAsync(result -> queuedToSend.decrementAndGet()).exceptionally(error -> {
                         logger.warn("Failed to send log message");
@@ -235,16 +278,15 @@ public class LoggingManager {
                 unsentLogs.set(0);
             }
 
-            currentMessage.append(MessageDecoration.CODE_LONG.getPrefix())
-                    .append("md").append("\n").append(message).append(MessageDecoration.CODE_LONG.getSuffix());
+            currentMessage.append(message);
 
             if(unsentLogs.incrementAndGet() >= logsPerMessage.get()) {
 
                 if(loggingChannel.isPresent()) {
                     queuedToSend.incrementAndGet();
-                    currentMessage.send(loggingChannel.get()).thenAcceptAsync(result -> {
-                        queuedToSend.decrementAndGet();
-                    }).exceptionally(error -> {
+                    currentMessage.setAllowedMentions(allowedMentions);
+                    currentMessage.send(loggingChannel.get())
+                            .thenAcceptAsync(result -> queuedToSend.decrementAndGet()).exceptionally(error -> {
                         logger.warn("Failed to send log message");
                         queuedToSend.decrementAndGet();
                         return null;
