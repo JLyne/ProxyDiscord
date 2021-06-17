@@ -54,14 +54,6 @@ public class LinkingManager {
         });
     }
 
-    public boolean isLinkingChannel(TextChannel channel) {
-        if(linkingChannelId == null) {
-            return true;
-        }
-
-        return channel.getIdAsString().equals(linkingChannelId);
-    }
-
     public boolean isLinked(Player player) {
         return this.links.containsKey(player.getUniqueId());
     }

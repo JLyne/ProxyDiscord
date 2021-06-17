@@ -1,7 +1,6 @@
 package uk.co.notnull.proxydiscord;
 
 import com.velocitypowered.api.proxy.Player;
-import com.velocitypowered.api.proxy.ProxyServer;
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.LuckPermsProvider;
 import net.luckperms.api.model.user.UserManager;
@@ -13,16 +12,13 @@ import org.slf4j.Logger;
 public class LuckPermsManager {
     private final String verifiedPermission;
 
-    private final ProxyServer proxy;
     private final Logger logger;
-    private final LuckPerms luckPermsApi;
     private final UserManager userManager;
 
     public LuckPermsManager(ConfigurationNode config) {
-        this.proxy = ProxyDiscord.inst().getProxy();
         this.logger = ProxyDiscord.inst().getLogger();
 
-        luckPermsApi = LuckPermsProvider.get();
+        LuckPerms luckPermsApi = LuckPermsProvider.get();
         userManager = luckPermsApi.getUserManager();
 
         verifiedPermission = config.getNode("verified-permission").getString();

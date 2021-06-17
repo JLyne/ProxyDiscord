@@ -51,7 +51,7 @@ public class VerificationManager {
         parseConfig(config);
     }
 
-    public void parseConfig(ConfigurationNode config) {
+    private void parseConfig(ConfigurationNode config) {
         ConfigurationNode roleIds = config.getNode("verified-role-ids");
         verifiedRoleIds = new HashSet<>();
 
@@ -122,7 +122,7 @@ public class VerificationManager {
         checkVerificationStatus(user.getId());
     }
 
-    public boolean hasVerifiedRole(Long id) {
+    private boolean hasVerifiedRole(Long id) {
         return verifiedRoleUsers.contains(id);
     }
 
@@ -130,7 +130,7 @@ public class VerificationManager {
         VerificationResult status;
 
         if(verifiedRoleIds.isEmpty()) {
-            ProxyDiscord.inst().getDebugLogger().info("No verified role defined. Considering " + player.getUsername() + " verified.");
+            ProxyDiscord.inst().getDebugLogger().info("No verified roles defined. Considering " + player.getUsername() + " verified.");
             luckpermsManager.addVerifiedPermission(player);
 
             status = VerificationResult.VERIFIED;
@@ -144,35 +144,24 @@ public class VerificationManager {
 
             if (linkedId != null) {
                 if(hasVerifiedRole(linkedId)) {
-                    ProxyDiscord.inst().getDebugLogger().info("Player " + player.getUsername() + " has linked discord and has verified role.");
                     luckpermsManager.addVerifiedPermission(player);
 
                     status = VerificationResult.VERIFIED;
                 } else {
-                    ProxyDiscord.inst().getDebugLogger().info("Player " + player.getUsername() + " has linked discord, but doesn't have the verified role.");
                     luckpermsManager.removeVerifiedPermission(player, RemovalReason.VERIFIED_ROLE_LOST);
 
                     status = VerificationResult.LINKED_NOT_VERIFIED;
                 }
             } else {
-                ProxyDiscord.inst().getDebugLogger().info("Player " + player.getUsername() + " hasn't linked discord.");
                 luckpermsManager.removeVerifiedPermission(player, RemovalReason.UNLINKED);
 
                 status = VerificationResult.NOT_LINKED;
             }
         }
 
-        VerificationResult finalStatus = status;
-        lastKnownStatuses.compute(player, (key, value) -> {
-            ProxyDiscord.inst().getDebugLogger().info("Updating status cache for " + player.getUsername());
+        ProxyDiscord.inst().getDebugLogger().info("Status for player " + player.getUsername() + ": " + status);
 
-            if(value != null && value != finalStatus) {
-                ProxyDiscord.inst().getDebugLogger().info("PlayerVerifyStateChangeEvent " + finalStatus + " from " + value);
-                proxy.getEventManager().fireAndForget(new PlayerVerifyStateChangeEvent(player, finalStatus, value));
-            }
-
-            return finalStatus;
-        });
+        updatePlayerStatus(player, status);
 
         return status;
     }
@@ -184,11 +173,10 @@ public class VerificationManager {
         Optional<Player> player = Optional.empty();
 
         if(verifiedRoleIds.isEmpty()) {
-            ProxyDiscord.inst().getDebugLogger().info("No verified role defined. Considering " + discordId.toString() + " verified.");
+            ProxyDiscord.inst().getDebugLogger().info("No verified roles defined. Considering " + discordId.toString() + " verified.");
 
             status = VerificationResult.VERIFIED;
         } else if(linked == null) {
-            ProxyDiscord.inst().getDebugLogger().info("Discord id " + discordId.toString() + " has not been linked to a player.");
             status = VerificationResult.NOT_LINKED;
         } else {
             player = proxy.getPlayer(linked);
@@ -199,7 +187,6 @@ public class VerificationManager {
 
                 status = VerificationResult.VERIFIED;
             } else if(hasVerifiedRole(discordId)) {
-                ProxyDiscord.inst().getDebugLogger().info("Discord id " + discordId.toString() + " is linked and has verified role.");
 
                 if(player.isPresent()) {
                     ProxyDiscord.inst().getDebugLogger().info("Linked account is currently on the server. Adding permission");
@@ -208,8 +195,6 @@ public class VerificationManager {
 
                 status = VerificationResult.VERIFIED;
             } else {
-                ProxyDiscord.inst().getDebugLogger().info("Discord id " + discordId.toString() + " is linked, but doesn't have the verified role.");
-
                 if(player.isPresent()) {
                     ProxyDiscord.inst().getDebugLogger().info("Linked account is currently on the server. Removing permission");
                     luckpermsManager.removeVerifiedPermission(player.get(), RemovalReason.VERIFIED_ROLE_LOST);
@@ -219,18 +204,9 @@ public class VerificationManager {
             }
         }
 
-        VerificationResult finalStatus = status;
+        ProxyDiscord.inst().getDebugLogger().info("Status for Discord id " + discordId.toString() + ": " + status);
 
-        player.ifPresent(p -> lastKnownStatuses.compute(p, (key, value) -> {
-            ProxyDiscord.inst().getDebugLogger().info("Updating status cache for " + p.getUsername());
-
-            if(value != null && value != finalStatus) {
-                ProxyDiscord.inst().getDebugLogger().info("PlayerVerifyStateChangeEvent " + finalStatus + " from " + value);
-                proxy.getEventManager().fireAndForget(new PlayerVerifyStateChangeEvent(p, finalStatus, value));
-            }
-
-            return finalStatus;
-        }));
+        player.ifPresent(p -> updatePlayerStatus(p, status));
 
         return status;
     }
@@ -257,6 +233,17 @@ public class VerificationManager {
         });
 
         proxy.getAllPlayers().forEach(this::checkVerificationStatus);
+    }
+
+    private void updatePlayerStatus(Player player, VerificationResult status) {
+        lastKnownStatuses.compute(player, (key, value) -> {
+            if(value != null && value != status) {
+                ProxyDiscord.inst().getDebugLogger().info("PlayerVerifyStateChangeEvent " + status + " from " + value);
+                proxy.getEventManager().fireAndForget(new PlayerVerifyStateChangeEvent(player, status, value));
+            }
+
+            return status;
+        });
     }
 
     public void clearPlayerStatus(Player player) {
