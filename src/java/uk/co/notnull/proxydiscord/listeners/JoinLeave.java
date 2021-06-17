@@ -9,7 +9,7 @@ import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.slf4j.Logger;
-import uk.co.notnull.proxydiscord.ChatMessages;
+import uk.co.notnull.proxydiscord.Messages;
 import uk.co.notnull.proxydiscord.manager.LoggingManager;
 import uk.co.notnull.proxydiscord.ProxyDiscord;
 import uk.co.notnull.proxydiscord.manager.VerificationManager;
@@ -36,7 +36,7 @@ public class JoinLeave {
 
 		VerificationResult result = verificationManager.checkVerificationStatus(player);
 
-		player.sendMessage(Identity.nil(), Component.text(ChatMessages.getMessage("join-welcome"))
+		player.sendMessage(Identity.nil(), Component.text(Messages.getMessage("join-welcome"))
 				.color(NamedTextColor.GREEN));
 
 		switch(result) {
@@ -55,7 +55,8 @@ public class JoinLeave {
 		}
 
 		if(!ProxyDiscord.inst().getDiscord().isConnected()) {
-			player.sendMessage(Identity.nil(), Component.text(ChatMessages.getMessage("discord-issues")).color(NamedTextColor.RED));
+			player.sendMessage(Identity.nil(), Component.text(
+					Messages.getMessage("discord-issues")).color(NamedTextColor.RED));
 		}
 	}
 	

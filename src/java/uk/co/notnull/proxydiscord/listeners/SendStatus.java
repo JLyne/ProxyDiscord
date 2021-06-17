@@ -10,7 +10,7 @@ import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import uk.co.notnull.platformdetection.PlatformDetectionVelocity;
-import uk.co.notnull.proxydiscord.ChatMessages;
+import uk.co.notnull.proxydiscord.Messages;
 import uk.co.notnull.proxydiscord.manager.LinkingManager;
 import uk.co.notnull.proxydiscord.ProxyDiscord;
 import uk.co.notnull.proxydiscord.manager.VerificationManager;
@@ -41,7 +41,7 @@ public class SendStatus {
     @Subscribe(order = PostOrder.LAST)
     public void onPlayerVerifyStatusChange(PlayerVerifyStateChangeEvent e) {
 		if(e.getState() == VerificationResult.VERIFIED) {
-			e.getPlayer().sendMessage(Identity.nil(), Component.text(ChatMessages.getMessage("link-success"))
+			e.getPlayer().sendMessage(Identity.nil(), Component.text(Messages.getMessage("link-success"))
 											 .color(NamedTextColor.GREEN));
 		} else {
 			sendStatusPacket(e.getPlayer(), e.getState());

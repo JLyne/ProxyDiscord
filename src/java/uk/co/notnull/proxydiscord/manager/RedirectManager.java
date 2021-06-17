@@ -11,7 +11,7 @@ import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
-import uk.co.notnull.proxydiscord.ChatMessages;
+import uk.co.notnull.proxydiscord.Messages;
 import uk.co.notnull.proxydiscord.ProxyDiscord;
 import uk.co.notnull.proxydiscord.VerificationResult;
 import uk.co.notnull.proxydiscord.events.PlayerVerifyStateChangeEvent;
@@ -56,13 +56,13 @@ public class RedirectManager {
 
             case LINKED_NOT_VERIFIED:
                 if(event.getPreviousState() == VerificationResult.VERIFIED) {
-                    sendToLinkingServer(player, ChatMessages.getMessage("verification-lost-role"));
+                    sendToLinkingServer(player, Messages.getMessage("verification-lost-role"));
                 }
 
                 break;
             case NOT_LINKED:
                 if(event.getPreviousState() == VerificationResult.VERIFIED) {
-                    sendToLinkingServer(player, ChatMessages.getMessage("verification-lost-unlinked"));
+                    sendToLinkingServer(player, Messages.getMessage("verification-lost-unlinked"));
                 }
         }
     }
@@ -87,7 +87,7 @@ public class RedirectManager {
 
             player.createConnectionRequest(linkingServer).connect().thenAccept(result -> {
                 if(result.isSuccessful()) {
-                    String text = ChatMessages.getMessage("verification-lost-moved");
+                    String text = Messages.getMessage("verification-lost-moved");
                     TextComponent extra = Component.text(" " + text.replace("[server]", linkingServer.getServerInfo().getName()));
                     component.append(extra);
 

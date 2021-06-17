@@ -7,7 +7,7 @@ import org.javacord.api.entity.message.embed.EmbedBuilder;
 import org.javacord.api.event.message.MessageCreateEvent;
 import org.javacord.api.listener.message.MessageCreateListener;
 import org.javacord.api.util.event.ListenerManager;
-import uk.co.notnull.proxydiscord.ChatMessages;
+import uk.co.notnull.proxydiscord.Messages;
 import uk.co.notnull.proxydiscord.LinkResult;
 import uk.co.notnull.proxydiscord.manager.LinkingManager;
 import uk.co.notnull.proxydiscord.ProxyDiscord;
@@ -64,15 +64,15 @@ public class Link implements MessageCreateListener {
 
         switch(result) {
             case UNKNOWN_ERROR:
-                embed = CompletableFuture.completedFuture(ChatMessages.getEmbed("embed-link-error"));
+                embed = CompletableFuture.completedFuture(Messages.getEmbed("embed-link-error"));
                 break;
 
             case NO_TOKEN:
-                embed = CompletableFuture.completedFuture(ChatMessages.getEmbed("embed-link-no-token"));
+                embed = CompletableFuture.completedFuture(Messages.getEmbed("embed-link-no-token"));
                 break;
 
             case INVALID_TOKEN:
-                embed = CompletableFuture.completedFuture(ChatMessages.getEmbed("embed-link-invalid-token"));
+                embed = CompletableFuture.completedFuture(Messages.getEmbed("embed-link-invalid-token"));
                 break;
 
             case ALREADY_LINKED:
@@ -80,7 +80,7 @@ public class Link implements MessageCreateListener {
                     String username = userManager.lookupUsername(linked).join();
                     replacements.put("[minecraft]", (username != null) ? username : "Unknown account (" + linked + ")");
 
-                    return ChatMessages.getEmbed("embed-link-already-linked", replacements);
+                    return Messages.getEmbed("embed-link-already-linked", replacements);
                 });
                 break;
 
@@ -93,9 +93,9 @@ public class Link implements MessageCreateListener {
                             event.getMessageAuthor().getId());
 
                     if(verificationResult == VerificationResult.VERIFIED) {
-                        return ChatMessages.getEmbed("embed-link-success", replacements);
+                        return Messages.getEmbed("embed-link-success", replacements);
                     } else {
-                        return ChatMessages.getEmbed("embed-link-success-not-verified", replacements);
+                        return Messages.getEmbed("embed-link-success-not-verified", replacements);
                     }
                 });
                 break;

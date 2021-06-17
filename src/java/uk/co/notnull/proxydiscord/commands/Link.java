@@ -12,7 +12,7 @@ import net.luckperms.api.model.user.UserManager;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.javacord.api.entity.user.User;
-import uk.co.notnull.proxydiscord.ChatMessages;
+import uk.co.notnull.proxydiscord.Messages;
 import uk.co.notnull.proxydiscord.LinkResult;
 import uk.co.notnull.proxydiscord.manager.LinkingManager;
 import uk.co.notnull.proxydiscord.ProxyDiscord;
@@ -60,7 +60,7 @@ public class Link extends BaseCommand {
         userManager.lookupUniqueId(target).thenAccept((UUID uuid) -> {
             if (uuid == null) {
                 TextComponent.Builder playerMessage = Component.text()
-                        .content(ChatMessages.getMessage("link-not-found")
+                        .content(Messages.getMessage("link-not-found")
                                          .replace("[player]", target))
                         .color(NamedTextColor.GREEN);
 
@@ -76,19 +76,19 @@ public class Link extends BaseCommand {
             if (linkedDiscord != null) {
                 //Player has linked the same account
                 if (linkedDiscord.toString().equals(discordId)) {
-                    String message = ChatMessages.getMessage("link-other-already-linked-same")
+                    String message = Messages.getMessage("link-other-already-linked-same")
                             .replace("[player]", target);
                     player.sendMessage(Identity.nil(), Component.text(message).color(NamedTextColor.RED));
                 } else {
                     //Attempt to get username of linked discord account
                     ProxyDiscord.inst().getDiscord().getApi().getUserById(linkedDiscord).thenAcceptAsync(user -> {
-                        String message = ChatMessages.getMessage("link-other-already-linked-known")
+                        String message = Messages.getMessage("link-other-already-linked-known")
                                 .replace("[player]", target)
                                 .replace("[discord]", user.getDiscriminatedName());
 
                         player.sendMessage(Identity.nil(), Component.text(message).color(NamedTextColor.RED));
                     }).exceptionally(error -> {
-                        String message = ChatMessages.getMessage("link-other-already-linked-unknown")
+                        String message = Messages.getMessage("link-other-already-linked-unknown")
                                 .replace("[player]", target);
 
                         player.sendMessage(Identity.nil(), Component.text(message).color(NamedTextColor.RED));
@@ -114,10 +114,10 @@ public class Link extends BaseCommand {
                             String message;
 
                             if (minecraftUsername != null) {
-                                message = ChatMessages.getMessage("link-other-discord-already-linked-known")
+                                message = Messages.getMessage("link-other-discord-already-linked-known")
                                         .replace("[player]", minecraftUsername);
                             } else {
-                                message = ChatMessages.getMessage("link-other-discord-already-linked-unknown");
+                                message = Messages.getMessage("link-other-discord-already-linked-unknown");
                             }
 
                             message = message.replace("[discord]", discordUsername);
@@ -141,13 +141,13 @@ public class Link extends BaseCommand {
                     VerificationResult verificationResult = verificationManager.checkVerificationStatus(player);
 
                     if (verificationResult == VerificationResult.VERIFIED) {
-                        String message = ChatMessages.getMessage("link-other-success")
+                        String message = Messages.getMessage("link-other-success")
                                 .replace("[discord]", user.getDiscriminatedName())
                                 .replace("[player]", target);
 
                         player.sendMessage(Identity.nil(), Component.text(message).color(NamedTextColor.GREEN));
                     } else {
-                        String message = ChatMessages.getMessage("link-other-not-verified")
+                        String message = Messages.getMessage("link-other-not-verified")
                                 .replace("[discord]", user.getDiscriminatedName())
                                 .replace("[player]", target);
 

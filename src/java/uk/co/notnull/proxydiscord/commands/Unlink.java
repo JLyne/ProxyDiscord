@@ -12,7 +12,7 @@ import net.kyori.adventure.text.Component;
 import net.luckperms.api.model.user.UserManager;
 import uk.co.notnull.proxydiscord.manager.LinkingManager;
 import uk.co.notnull.proxydiscord.ProxyDiscord;
-import uk.co.notnull.proxydiscord.ChatMessages;
+import uk.co.notnull.proxydiscord.Messages;
 import uk.co.notnull.proxydiscord.manager.VerificationManager;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -57,7 +57,7 @@ public class Unlink extends BaseCommand {
                     linkingManager.unlink(discordId);
 
                     TextComponent.Builder playerMessage = Component.text()
-                           .content(ChatMessages.getMessage("unlink-other-discord-success")
+                           .content(Messages.getMessage("unlink-other-discord-success")
                                             .replace("[player]", target))
                            .color(NamedTextColor.GREEN);
 
@@ -65,7 +65,7 @@ public class Unlink extends BaseCommand {
 
                     if(onlinePlayer != null) {
                         TextComponent.Builder targetMessage = Component.text()
-                           .content(ChatMessages.getMessage("unlink-by-other-success")
+                           .content(Messages.getMessage("unlink-by-other-success")
                                             .replace("[player]", player.getUsername()))
                            .color(NamedTextColor.YELLOW);
 
@@ -74,7 +74,7 @@ public class Unlink extends BaseCommand {
                     }
                 } else {
                     TextComponent.Builder playerMessage = Component.text()
-                           .content(ChatMessages.getMessage("unlink-other-discord-not-linked")
+                           .content(Messages.getMessage("unlink-other-discord-not-linked")
                                             .replace("[player]", target))
                            .color(NamedTextColor.RED);
 
@@ -87,7 +87,7 @@ public class Unlink extends BaseCommand {
             userManager.lookupUniqueId(target).thenAccept((UUID uuid) -> {
                 if(uuid == null) {
                     TextComponent.Builder playerMessage = Component.text()
-                           .content(ChatMessages.getMessage("unlink-other-not-found")
+                           .content(Messages.getMessage("unlink-other-not-found")
                                             .replace("[player]", target))
                            .color(NamedTextColor.GREEN);
 
@@ -102,7 +102,7 @@ public class Unlink extends BaseCommand {
                     linkingManager.unlink(uuid);
 
                     TextComponent.Builder playerMessage = Component.text()
-                           .content(ChatMessages.getMessage("unlink-other-success")
+                           .content(Messages.getMessage("unlink-other-success")
                                             .replace("[player]", target))
                            .color(NamedTextColor.GREEN);
 
@@ -110,7 +110,7 @@ public class Unlink extends BaseCommand {
 
                     if(onlinePlayer != null) {
                         TextComponent.Builder targetMessage = Component.text()
-                           .content(ChatMessages.getMessage("unlink-by-other-success")
+                           .content(Messages.getMessage("unlink-by-other-success")
                                             .replace("[player]", player.getUsername()))
                            .color(NamedTextColor.YELLOW);
 
@@ -119,7 +119,7 @@ public class Unlink extends BaseCommand {
                     }
                 } else {
                     TextComponent.Builder playerMessage = Component.text()
-                           .content(ChatMessages.getMessage("unlink-other-not-linked")
+                           .content(Messages.getMessage("unlink-other-not-linked")
                                             .replace("[player]", target))
                            .color(NamedTextColor.RED);
 
@@ -130,7 +130,8 @@ public class Unlink extends BaseCommand {
             linkingManager.unlink(player);
             verificationManager.checkVerificationStatus(player);
         } else {
-            player.sendMessage(Identity.nil(), Component.text(ChatMessages.getMessage("unlink-not-linked")).color(NamedTextColor.RED));
+            player.sendMessage(Identity.nil(), Component.text(
+                    Messages.getMessage("unlink-not-linked")).color(NamedTextColor.RED));
         }
     }
 }

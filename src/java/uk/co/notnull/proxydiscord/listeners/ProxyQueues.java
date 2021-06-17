@@ -4,7 +4,7 @@ import com.velocitypowered.api.event.PostOrder;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.proxy.ServerConnection;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
-import uk.co.notnull.proxydiscord.ChatMessages;
+import uk.co.notnull.proxydiscord.Messages;
 import uk.co.notnull.proxydiscord.ProxyDiscord;
 import uk.co.notnull.proxydiscord.manager.VerificationManager;
 import uk.co.notnull.proxydiscord.VerificationResult;
@@ -58,10 +58,10 @@ public class ProxyQueues {
 
         switch(result) {
             case NOT_LINKED:
-                event.setReason(ChatMessages.getMessage("server-change-not-linked"));
+                event.setReason(Messages.getMessage("server-change-not-linked"));
                 break;
             case LINKED_NOT_VERIFIED:
-                event.setReason(ChatMessages.getMessage("server-change-linked-not-verified"));
+                event.setReason(Messages.getMessage("server-change-linked-not-verified"));
                 break;
             default:
                 event.setReason("An error has occurred.");

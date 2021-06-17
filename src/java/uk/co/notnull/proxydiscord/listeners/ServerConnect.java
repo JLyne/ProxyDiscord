@@ -8,7 +8,7 @@ import com.velocitypowered.api.proxy.server.RegisteredServer;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
-import uk.co.notnull.proxydiscord.ChatMessages;
+import uk.co.notnull.proxydiscord.Messages;
 import uk.co.notnull.proxydiscord.ProxyDiscord;
 import uk.co.notnull.proxydiscord.manager.VerificationManager;
 import uk.co.notnull.proxydiscord.VerificationResult;
@@ -39,10 +39,10 @@ public class ServerConnect {
 
         switch(result) {
             case NOT_LINKED:
-                message = Component.text().content(ChatMessages.getMessage("server-change-not-linked"));
+                message = Component.text().content(Messages.getMessage("server-change-not-linked"));
                 break;
             case LINKED_NOT_VERIFIED:
-                message = Component.text().content(ChatMessages.getMessage("server-change-linked-not-verified"));
+                message = Component.text().content(Messages.getMessage("server-change-linked-not-verified"));
                 break;
             default:
                 message = Component.text().content("An error has occurred.");

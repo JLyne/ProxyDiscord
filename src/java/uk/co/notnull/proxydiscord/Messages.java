@@ -12,11 +12,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class ChatMessages {
+public class Messages {
     private static ConfigurationNode messages;
 
-    ChatMessages(ConfigurationNode messages) {
-        ChatMessages.messages = messages;
+    Messages(ConfigurationNode messages) {
+        Messages.messages = messages;
     }
 
     public static String getMessage(String id) {
