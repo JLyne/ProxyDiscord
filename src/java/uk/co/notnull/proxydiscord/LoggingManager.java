@@ -51,7 +51,7 @@ public class LoggingManager {
     private String leaveFormat;
     private String commandFormat;
 
-    private AllowedMentions allowedMentions;
+    private final AllowedMentions allowedMentions;
     private MessageBuilder currentMessage; //Current unsent message
     private ListenerManager<MessageCreateListener> logListener = null;
 

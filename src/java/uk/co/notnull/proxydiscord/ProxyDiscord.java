@@ -86,10 +86,12 @@ public class ProxyDiscord {
 		return verificationManager;
 	}
 
+	@SuppressWarnings("unused")
 	public AnnouncementManager getAnnouncementManager() {
 		return announcementManager;
 	}
 
+	@SuppressWarnings("unused")
 	public RedirectManager getRedirectManager() {
 		return redirectManager;
 	}

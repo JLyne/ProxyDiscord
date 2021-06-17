@@ -2,7 +2,6 @@ package uk.co.notnull.proxydiscord;
 
 import org.javacord.api.entity.intent.Intent;
 import org.javacord.api.DiscordApiBuilder;
-import org.javacord.api.entity.message.embed.EmbedBuilder;
 
 import java.util.concurrent.CompletionException;
 

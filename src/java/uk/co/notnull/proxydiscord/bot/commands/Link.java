@@ -105,9 +105,7 @@ public class Link implements MessageCreateListener {
                 break;
         }
 
-        embed.thenAccept((EmbedBuilder e) -> {
-            event.getMessage().reply(e);
-        });
+        embed.thenAccept((EmbedBuilder e) -> event.getMessage().reply(e));
     }
 
     public void setLinkingChannel(TextChannel linkingChannel) {
