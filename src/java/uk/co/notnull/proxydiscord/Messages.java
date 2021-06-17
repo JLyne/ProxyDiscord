@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 public class Messages {
     private static ConfigurationNode messages;
 
-    Messages(ConfigurationNode messages) {
+    public static void setMessages(ConfigurationNode messages) {
         Messages.messages = messages;
     }
 
@@ -25,6 +25,11 @@ public class Messages {
 
     public static String getMessage(String id, Map<String, String> replacements) {
         Set<Role> verifiedRoles = ProxyDiscord.inst().getVerificationManager().getVerifiedRoles();
+
+        if(messages == null) {
+            return "";
+        }
+
         String message = messages.getNode(id).getString("Message " + id + " does not exist");
         String roleNames;
 
@@ -58,7 +63,7 @@ public class Messages {
             roleLink = !verifiedRoles.isEmpty() ? "<@&" + verifiedRoles.iterator().next().getIdAsString() + ">" : "Unknown Role";
         }
 
-        if(!id.startsWith("embed")) {
+        if(messages == null || !id.startsWith("embed")) {
             return null;
         }
 

@@ -106,7 +106,7 @@ public class ProxyDiscord {
 
 		discord = new Discord(getConfig().getNode("token").getString());
 
-		new Messages(messagesConfiguration);
+		Messages.setMessages(messagesConfiguration);
 
 		luckPermsManager = new LuckPermsManager(getConfig());
 		initLinking();
