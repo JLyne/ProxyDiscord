@@ -1,4 +1,4 @@
-package uk.co.notnull.proxydiscord;
+package uk.co.notnull.proxydiscord.manager;
 
 import com.velocitypowered.api.proxy.Player;
 import net.luckperms.api.LuckPerms;
@@ -8,6 +8,8 @@ import net.luckperms.api.node.Node;
 import ninja.leaping.configurate.ConfigurationNode;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
+import uk.co.notnull.proxydiscord.ProxyDiscord;
+import uk.co.notnull.proxydiscord.RemovalReason;
 
 public class LuckPermsManager {
     private final String verifiedPermission;

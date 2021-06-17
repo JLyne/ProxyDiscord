@@ -38,6 +38,7 @@ import org.slf4j.Logger;
 
 import javax.inject.Inject;
 import ninja.leaping.configurate.yaml.YAMLConfigurationLoader;
+import uk.co.notnull.proxydiscord.manager.*;
 
 @Plugin(id = "proxydiscord", name = "ProxyDiscord", version = "1.0-SNAPSHOT",
         description = "Discord integrations", authors = {"Jim (NotKatuen)"}, dependencies = {

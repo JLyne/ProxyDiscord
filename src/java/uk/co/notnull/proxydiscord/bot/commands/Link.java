@@ -9,9 +9,9 @@ import org.javacord.api.listener.message.MessageCreateListener;
 import org.javacord.api.util.event.ListenerManager;
 import uk.co.notnull.proxydiscord.ChatMessages;
 import uk.co.notnull.proxydiscord.LinkResult;
-import uk.co.notnull.proxydiscord.LinkingManager;
+import uk.co.notnull.proxydiscord.manager.LinkingManager;
 import uk.co.notnull.proxydiscord.ProxyDiscord;
-import uk.co.notnull.proxydiscord.VerificationManager;
+import uk.co.notnull.proxydiscord.manager.VerificationManager;
 import uk.co.notnull.proxydiscord.VerificationResult;
 
 import java.util.HashMap;

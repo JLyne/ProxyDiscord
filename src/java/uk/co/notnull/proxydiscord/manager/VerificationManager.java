@@ -1,4 +1,4 @@
-package uk.co.notnull.proxydiscord;
+package uk.co.notnull.proxydiscord.manager;
 
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
@@ -7,6 +7,9 @@ import ninja.leaping.configurate.ConfigurationNode;
 import org.javacord.api.entity.permission.Role;
 import org.javacord.api.entity.user.User;
 import org.slf4j.Logger;
+import uk.co.notnull.proxydiscord.ProxyDiscord;
+import uk.co.notnull.proxydiscord.RemovalReason;
+import uk.co.notnull.proxydiscord.VerificationResult;
 import uk.co.notnull.proxydiscord.events.PlayerVerifyStateChangeEvent;
 
 import java.util.Collection;

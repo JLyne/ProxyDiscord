@@ -1,7 +1,8 @@
-package uk.co.notnull.proxydiscord;
+package uk.co.notnull.proxydiscord.manager;
 
 import ninja.leaping.configurate.ConfigurationNode;
 import org.slf4j.Logger;
+import uk.co.notnull.proxydiscord.ProxyDiscord;
 import uk.co.notnull.proxydiscord.announcements.AnnouncementChannelHandler;
 
 import java.util.ArrayList;

@@ -8,7 +8,7 @@ import com.velocitypowered.api.proxy.Player;
 import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
 import uk.co.notnull.proxydiscord.ChatMessages;
-import uk.co.notnull.proxydiscord.LinkingManager;
+import uk.co.notnull.proxydiscord.manager.LinkingManager;
 import uk.co.notnull.proxydiscord.ProxyDiscord;
 
 public class Save extends BaseCommand {

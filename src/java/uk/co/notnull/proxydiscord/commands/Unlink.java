@@ -10,10 +10,10 @@ import com.velocitypowered.api.proxy.Player;
 import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
 import net.luckperms.api.model.user.UserManager;
-import uk.co.notnull.proxydiscord.LinkingManager;
+import uk.co.notnull.proxydiscord.manager.LinkingManager;
 import uk.co.notnull.proxydiscord.ProxyDiscord;
 import uk.co.notnull.proxydiscord.ChatMessages;
-import uk.co.notnull.proxydiscord.VerificationManager;
+import uk.co.notnull.proxydiscord.manager.VerificationManager;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
 

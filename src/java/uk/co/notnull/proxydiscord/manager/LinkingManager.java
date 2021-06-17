@@ -1,4 +1,4 @@
-package uk.co.notnull.proxydiscord;
+package uk.co.notnull.proxydiscord.manager;
 
 import com.google.common.collect.HashBiMap;
 import com.velocitypowered.api.proxy.ProxyServer;
@@ -7,6 +7,8 @@ import org.javacord.api.DiscordApi;
 import org.javacord.api.entity.channel.TextChannel;
 import org.javacord.api.entity.user.User;
 import org.slf4j.Logger;
+import uk.co.notnull.proxydiscord.LinkResult;
+import uk.co.notnull.proxydiscord.ProxyDiscord;
 import uk.co.notnull.proxydiscord.bot.commands.Link;
 
 import java.io.File;

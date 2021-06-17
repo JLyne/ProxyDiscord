@@ -14,9 +14,9 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import org.javacord.api.entity.user.User;
 import uk.co.notnull.proxydiscord.ChatMessages;
 import uk.co.notnull.proxydiscord.LinkResult;
-import uk.co.notnull.proxydiscord.LinkingManager;
+import uk.co.notnull.proxydiscord.manager.LinkingManager;
 import uk.co.notnull.proxydiscord.ProxyDiscord;
-import uk.co.notnull.proxydiscord.VerificationManager;
+import uk.co.notnull.proxydiscord.manager.VerificationManager;
 import uk.co.notnull.proxydiscord.VerificationResult;
 
 import java.util.UUID;

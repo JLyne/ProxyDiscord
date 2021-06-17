@@ -1,4 +1,4 @@
-package uk.co.notnull.proxydiscord;
+package uk.co.notnull.proxydiscord.manager;
 
 import com.velocitypowered.api.event.PostOrder;
 import com.velocitypowered.api.event.Subscribe;
@@ -25,6 +25,7 @@ import org.javacord.api.entity.message.mention.AllowedMentionsBuilder;
 import org.javacord.api.listener.message.MessageCreateListener;
 import org.javacord.api.util.event.ListenerManager;
 import org.slf4j.Logger;
+import uk.co.notnull.proxydiscord.ProxyDiscord;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;

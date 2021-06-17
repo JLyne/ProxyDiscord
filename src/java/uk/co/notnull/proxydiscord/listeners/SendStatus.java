@@ -11,9 +11,9 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import uk.co.notnull.platformdetection.PlatformDetectionVelocity;
 import uk.co.notnull.proxydiscord.ChatMessages;
-import uk.co.notnull.proxydiscord.LinkingManager;
+import uk.co.notnull.proxydiscord.manager.LinkingManager;
 import uk.co.notnull.proxydiscord.ProxyDiscord;
-import uk.co.notnull.proxydiscord.VerificationManager;
+import uk.co.notnull.proxydiscord.manager.VerificationManager;
 import uk.co.notnull.proxydiscord.VerificationResult;
 import uk.co.notnull.proxydiscord.events.PlayerVerifyStateChangeEvent;
 
