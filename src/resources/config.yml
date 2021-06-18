@@ -10,6 +10,9 @@ linking-secret: ')2z#*MR^BrGVygg7'
 # Discord channel for the bot to listen for and respond to link attempts
 linking-channel-id: '123456789'
 
+# Server to send players to, if they try to join a non-public server without meeting the requirements
+linking-server: 'linking'
+
 # Discord roles that should be checked to determine if a player can join (is "verified")
 # If no roles are defined, all players are considered verified
 verified-role-ids:
@@ -18,17 +21,14 @@ verified-role-ids:
 # Permission to grant users who are verified
 verified-permission: 'group.verified'
 
+# Server to redirect newly verified players to, if their original destination is unknown
+verified-default-server: 'waiting'
+
 # Permission to allow bypassing the linking and role checks
 bypass-permission: 'discord.bypass'
 
-# Server to send players to, if they try to join a non-public server without meeting the requirements
-linking-server: 'linking'
-
 # Servers which players can join without linking or verifying
 public-servers: []
-
-# Server to redirect newly verified players to, if their original destination is unknown
-default-verified-server: 'waiting'
 
 # Channel to log joins/leaves/chats etc in
 logging-channel-id: '123456789'
