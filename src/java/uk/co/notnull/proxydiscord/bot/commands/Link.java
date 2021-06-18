@@ -21,13 +21,11 @@ import java.util.concurrent.CompletableFuture;
 
 public class Link implements MessageCreateListener {
     private final LinkingManager linkingManager;
-    private final VerificationManager verificationManager;
     private final UserManager userManager;
     private ListenerManager<MessageCreateListener> messageListener;
 
     public Link(LinkingManager linkingManager, TextChannel linkingChannel) {
 	    this.linkingManager = linkingManager;
-	    this.verificationManager = ProxyDiscord.inst().getVerificationManager();
 	    this.userManager = ProxyDiscord.inst().getLuckpermsManager().getUserManager();
 	    setLinkingChannel(linkingChannel);
 	}
@@ -50,12 +48,14 @@ public class Link implements MessageCreateListener {
             result = linkingManager.completeLink(token, id);
         } catch (Exception e) {
             e.printStackTrace();
+            sendResponse(LinkResult.UNKNOWN_ERROR, event);
         } finally {
             sendResponse(result, event);
         }
     }
 
     private void sendResponse(LinkResult result, MessageCreateEvent event) {
+        VerificationManager verificationManager = ProxyDiscord.inst().getVerificationManager();
         CompletableFuture<EmbedBuilder> embed = null;
         UUID linked = linkingManager.getLinked(event.getMessageAuthor().getId());
 
@@ -80,7 +80,14 @@ public class Link implements MessageCreateListener {
                     String username = userManager.lookupUsername(linked).join();
                     replacements.put("[minecraft]", (username != null) ? username : "Unknown account (" + linked + ")");
 
-                    return Messages.getEmbed("embed-link-already-linked", replacements);
+                    VerificationResult verificationResult = verificationManager.checkVerificationStatus(
+                            event.getMessageAuthor().getId());
+
+                    if(verificationResult == VerificationResult.VERIFIED) {
+                        return Messages.getEmbed("embed-link-already-linked", replacements);
+                    } else {
+                        return Messages.getEmbed("embed-link-success-not-verified", replacements);
+                    }
                 });
                 break;
 
@@ -101,7 +108,11 @@ public class Link implements MessageCreateListener {
                 break;
         }
 
-        embed.thenAccept((EmbedBuilder e) -> event.getMessage().reply(e));
+        embed.thenAccept((EmbedBuilder e) -> event.getMessage().reply(e)).exceptionally((e) -> {
+            e.printStackTrace();
+            event.getMessage().reply(Messages.getEmbed("embed-link-error"));
+            return null;
+        });
     }
 
     public void setLinkingChannel(TextChannel linkingChannel) {
