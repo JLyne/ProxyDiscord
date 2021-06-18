@@ -24,6 +24,8 @@ import java.util.concurrent.TimeUnit;
 
 @SuppressWarnings("unused")
 public class LinkingManager {
+    private final ProxyDiscord plugin;
+
     private HashBiMap<UUID, Long> links;
     private HashBiMap<String, UUID> pendingLinks;
     private final String linkingSecret;
@@ -32,16 +34,18 @@ public class LinkingManager {
     private final Logger logger;
     private Link linkCommand;
 
-    public LinkingManager(String linkingChannelId, String linkingSecret) {
-        ProxyServer proxy = ProxyDiscord.inst().getProxy();
-        this.logger = ProxyDiscord.inst().getLogger();
+    public LinkingManager(ProxyDiscord plugin, String linkingChannelId, String linkingSecret) {
+        ProxyServer proxy = plugin.getProxy();
+
+        this.plugin = plugin;
+        this.logger = plugin.getLogger();
 
         this.linkingSecret = linkingSecret;
         this.linkingChannelId = linkingChannelId;
         this.loadLinks();
 
-        proxy.getScheduler().buildTask(ProxyDiscord.inst(), () -> {
-            ProxyDiscord.inst().getDebugLogger().info("Saving linked accounts");
+        proxy.getScheduler().buildTask(plugin, () -> {
+            plugin.getDebugLogger().info("Saving linked accounts");
             saveLinks();
         }).repeat(300, TimeUnit.SECONDS).delay(300, TimeUnit.SECONDS).schedule();
 
@@ -49,7 +53,7 @@ public class LinkingManager {
             findChannel();
         }
 
-        ProxyDiscord.inst().getDiscord().getApi().addReconnectListener(event -> {
+        plugin.getDiscord().getApi().addReconnectListener(event -> {
             if(linkingChannelId != null) {
                 findChannel();
             }
@@ -175,7 +179,7 @@ public class LinkingManager {
 
     public void saveLinks() {
         try {
-            File folder = ProxyDiscord.inst().getDataDirectory().toFile();
+            File folder = plugin.getDataDirectory().toFile();
             File saveFile = new File(folder, "links.sav");
 
             if (!saveFile.exists() && !saveFile.createNewFile()) {
@@ -195,7 +199,7 @@ public class LinkingManager {
     @SuppressWarnings("unchecked")
     private void loadLinks() {
         try {
-            File folder = ProxyDiscord.inst().getDataDirectory().toFile();
+            File folder = plugin.getDataDirectory().toFile();
 
             File saveFile = new File(folder, "links.sav");
             File oldSaveFile = new File(folder, "links_old.sav");
@@ -248,7 +252,7 @@ public class LinkingManager {
     }
 
     private void findChannel() {
-        DiscordApi api = ProxyDiscord.inst().getDiscord().getApi();
+        DiscordApi api = plugin.getDiscord().getApi();
         Optional <TextChannel> linkingChannel = api.getTextChannelById(linkingChannelId);
 
         if(linkingChannel.isEmpty()) {

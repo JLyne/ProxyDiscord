@@ -12,17 +12,17 @@ import uk.co.notnull.proxydiscord.manager.LinkingManager;
 import uk.co.notnull.proxydiscord.ProxyDiscord;
 
 public class Save extends BaseCommand {
-    private static LinkingManager linker = null;
+    private final LinkingManager linkingManager;
 
-    public Save() {
-        Save.linker = ProxyDiscord.inst().getLinkingManager();
+    public Save(ProxyDiscord plugin) {
+        linkingManager = plugin.getLinkingManager();
     }
 
     @Subcommand("save")
     @CommandAlias("save")
     @CommandPermission("discord.save")
     public void onSave(Player player) {
-        linker.saveLinks();
+        linkingManager.saveLinks();
         player.sendMessage(Identity.nil(), Component.text(Messages.getMessage("save-success")));
     }
 }

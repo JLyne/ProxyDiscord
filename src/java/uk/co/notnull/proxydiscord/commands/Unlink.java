@@ -21,14 +21,16 @@ import java.util.UUID;
 
 @CommandAlias("discord")
 public class Unlink extends BaseCommand {
-    private static UserManager userManager = null;
-    private static VerificationManager verificationManager = null;
-    private static LinkingManager linkingManager = null;
+    private final ProxyDiscord plugin;
+    private final UserManager userManager;
+    private final VerificationManager verificationManager;
+    private final LinkingManager linkingManager;
 
-    public Unlink() {
-        Unlink.linkingManager = ProxyDiscord.inst().getLinkingManager();
-        Unlink.verificationManager = ProxyDiscord.inst().getVerificationManager();
-        Unlink.userManager = ProxyDiscord.inst().getLuckpermsManager().getUserManager();
+    public Unlink(ProxyDiscord plugin) {
+        this.plugin = plugin;
+        linkingManager = plugin.getLinkingManager();
+        verificationManager = plugin.getVerificationManager();
+        userManager = plugin.getLuckpermsManager().getUserManager();
     }
 
     @Subcommand("unlink")
@@ -53,7 +55,7 @@ public class Unlink extends BaseCommand {
                 UUID uuid = linkingManager.getLinked(discordId);
 
                 if(uuid != null) {
-                    Player onlinePlayer = ProxyDiscord.inst().getProxy().getPlayer(uuid).orElse(null);
+                    Player onlinePlayer = plugin.getProxy().getPlayer(uuid).orElse(null);
                     linkingManager.unlink(discordId);
 
                     TextComponent.Builder playerMessage = Component.text()
@@ -96,7 +98,7 @@ public class Unlink extends BaseCommand {
                     return;
                 }
 
-                Player onlinePlayer = ProxyDiscord.inst().getProxy().getPlayer(uuid).orElse(null);
+                Player onlinePlayer = plugin.getProxy().getPlayer(uuid).orElse(null);
 
                 if(linkingManager.isLinked(uuid)) {
                     linkingManager.unlink(uuid);

@@ -16,16 +16,18 @@ import uk.co.notnull.proxydiscord.manager.VerificationManager;
 import uk.co.notnull.proxydiscord.VerificationResult;
 
 public class JoinLeave {
-	private static VerificationManager verificationManager = null;
-	private static LoggingManager loggingManager = null;
-
+	private final ProxyDiscord plugin;
 	private final Logger logger;
 
-    public JoinLeave() {
-        this.logger = ProxyDiscord.inst().getLogger();
+	private static VerificationManager verificationManager;
+	private static LoggingManager loggingManager;
 
-        verificationManager = ProxyDiscord.inst().getVerificationManager();
-		loggingManager = ProxyDiscord.inst().getLoggingManager();
+	public JoinLeave(ProxyDiscord plugin) {
+    	this.plugin = plugin;
+        this.logger = plugin.getLogger();
+
+        verificationManager = plugin.getVerificationManager();
+		loggingManager = plugin.getLoggingManager();
     }
 
 	@Subscribe(order = PostOrder.FIRST)

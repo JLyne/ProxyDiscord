@@ -17,9 +17,9 @@ public class ProxyQueues {
 	private static VerificationManager verificationManager;
 	private final uk.co.notnull.proxyqueues.ProxyQueues proxyQueues;
 
-    public ProxyQueues(uk.co.notnull.proxyqueues.ProxyQueues plugin) {
-		verificationManager = ProxyDiscord.inst().getVerificationManager();
-		proxyQueues = plugin;
+    public ProxyQueues(ProxyDiscord plugin, uk.co.notnull.proxyqueues.ProxyQueues proxyQueues) {
+		verificationManager = plugin.getVerificationManager();
+		this.proxyQueues = proxyQueues;
 	}
 
 	@Subscribe

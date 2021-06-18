@@ -25,12 +25,14 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Map;
 
 public class SendStatus {
-	private static VerificationManager verificationManager;
-	private static LinkingManager linkingManager;
+	private final ProxyDiscord plugin;
+	private final VerificationManager verificationManager;
+	private final LinkingManager linkingManager;
 
-	public SendStatus(LinkingManager linkingManager, VerificationManager verificationManager) {
-        SendStatus.verificationManager = verificationManager;
-        SendStatus.linkingManager = linkingManager;
+	public SendStatus(ProxyDiscord plugin) {
+		this.plugin = plugin;
+        verificationManager = plugin.getVerificationManager();
+        linkingManager = plugin.getLinkingManager();
     }
 
 	@Subscribe(order = PostOrder.FIRST)
@@ -50,7 +52,7 @@ public class SendStatus {
 
     private void sendStatusPacket(Player player, VerificationResult status) {
 		player.getCurrentServer().ifPresent(connection -> {
-        	ProxyDiscord.inst().getDebugLogger().info(connection.getServer().getServerInfo().getName());
+        	plugin.getDebugLogger().info(connection.getServer().getServerInfo().getName());
 
         	if(!verificationManager.isLinkingServer(connection.getServer())) {
         		return;
@@ -63,8 +65,8 @@ public class SendStatus {
                 hmac.init(keySpec);
 
                 boolean bedrock = false;
-                if(ProxyDiscord.inst().isPlatformDetectionEnabled()) {
-					PlatformDetectionVelocity platformDetection = (PlatformDetectionVelocity) ProxyDiscord.inst().getPlatformDetection();
+                if(plugin.isPlatformDetectionEnabled()) {
+					PlatformDetectionVelocity platformDetection = (PlatformDetectionVelocity) plugin.getPlatformDetection();
 					bedrock = platformDetection.getPlatform(player).isBedrock();
 				}
 
@@ -82,7 +84,7 @@ public class SendStatus {
                 Gson gson = new GsonBuilder().create();
 		   		connection.sendPluginMessage(ProxyDiscord.getStatusIdentifier(), gson.toJson(payload).getBytes());
             } catch(NoSuchAlgorithmException | InvalidKeyException e) {
-                ProxyDiscord.inst().getLogger().error("Failed to generate status packet for " + player.getUsername());
+                plugin.getLogger().error("Failed to generate status packet for " + player.getUsername());
                 e.printStackTrace();
             }
         });

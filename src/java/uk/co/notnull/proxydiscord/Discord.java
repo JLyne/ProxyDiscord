@@ -24,8 +24,8 @@ public class Discord {
 	 * Class
 	 * @param config configuration
 	 */
-	public Discord(ConfigurationNode config) {
-		this.logger = ProxyDiscord.inst().getLogger();
+	public Discord(ProxyDiscord plugin, ConfigurationNode config) {
+		this.logger = plugin.getLogger();
 
 		String token = config.getNode("bot-token").getString(null);
 

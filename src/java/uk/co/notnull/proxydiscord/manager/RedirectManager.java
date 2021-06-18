@@ -21,15 +21,18 @@ import java.util.Optional;
 import java.util.UUID;
 
 public class RedirectManager {
+    private final ProxyDiscord plugin;
     private final VerificationManager verificationManager;
     private final HashMap<UUID, RegisteredServer> destinations;
 
-    public RedirectManager() {
-        ProxyServer proxy = ProxyDiscord.inst().getProxy();
-        this.verificationManager = ProxyDiscord.inst().getVerificationManager();
+    public RedirectManager(ProxyDiscord plugin) {
+        ProxyServer proxy = plugin.getProxy();
+
+        this.plugin = plugin;
+        this.verificationManager = plugin.getVerificationManager();
 
         destinations = new HashMap<>();
-        proxy.getEventManager().register(ProxyDiscord.inst(), this);
+        proxy.getEventManager().register(plugin, this);
     }
 
     @Subscribe(order = PostOrder.LAST)
@@ -73,7 +76,7 @@ public class RedirectManager {
         component.color(NamedTextColor.RED).content(message);
 
         if(verificationManager.getPublicServers().isEmpty()) {
-            ProxyDiscord.inst().getDebugLogger().info("No public servers defined. Kicking " + player.getUsername());
+            plugin.getDebugLogger().info("No public servers defined. Kicking " + player.getUsername());
             player.disconnect(component.build());
 
             return;
@@ -83,7 +86,7 @@ public class RedirectManager {
         RegisteredServer linkingServer = verificationManager.getLinkingServer();
 
         if(currentServer.isPresent() && linkingServer != null && !verificationManager.isPublicServer(currentServer.get().getServer())) {
-            ProxyDiscord.inst().getDebugLogger().info("Moving " + player.getUsername() + " to " + linkingServer.getServerInfo().getName());
+            plugin.getDebugLogger().info("Moving " + player.getUsername() + " to " + linkingServer.getServerInfo().getName());
 
             player.createConnectionRequest(linkingServer).connect().thenAccept(result -> {
                 if(result.isSuccessful()) {
@@ -93,7 +96,7 @@ public class RedirectManager {
 
                     player.sendMessage(Identity.nil(), component.build());
                 } else {
-                    ProxyDiscord.inst().getDebugLogger().info("Failed to move " + player.getUsername() + " to " + linkingServer.getServerInfo().getName() + ". Kicking.");
+                    plugin.getDebugLogger().info("Failed to move " + player.getUsername() + " to " + linkingServer.getServerInfo().getName() + ". Kicking.");
                     player.disconnect(component.build());
                 }
             });

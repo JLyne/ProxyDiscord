@@ -1,23 +1,24 @@
 package uk.co.notnull.proxydiscord;
 
+import org.slf4j.Logger;
+
 public class DebugLogger {
-	
+	private final Logger logger;
+
 	private boolean debugEnabled = false;
 	
 	public void info(String message) {
 		if(debugEnabled) {
-			ProxyDiscord.inst().getLogger().info("[ProxyDiscord.DEBUG] " + message);
+			logger.info("[ProxyDiscord.DEBUG] " + message);
 		}
 	}
 	
-	DebugLogger() {
-		try {
-			if(ProxyDiscord.inst().getConfig().getNode("debug-enabled").getBoolean(false)) {
-				debugEnabled = true;
-				ProxyDiscord.inst().getLogger().info("Enabled debug logging.");
-			}
-		} catch (NullPointerException e) {
-			// Coudn't find the boolean, just return for now.
+	DebugLogger(ProxyDiscord plugin) {
+		this.logger = plugin.getLogger();
+
+		if(plugin.getConfig().getNode("debug-enabled").getBoolean(false)) {
+			debugEnabled = true;
+			plugin.getLogger().info("Enabled debug logging.");
 		}
 	}
 }

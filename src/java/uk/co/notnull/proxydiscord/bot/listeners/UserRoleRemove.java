@@ -1,6 +1,7 @@
 package uk.co.notnull.proxydiscord.bot.listeners;
 
 import org.javacord.api.entity.permission.Role;
+import uk.co.notnull.proxydiscord.ProxyDiscord;
 import uk.co.notnull.proxydiscord.manager.VerificationManager;
 import org.javacord.api.entity.user.User;
 import org.javacord.api.event.server.role.UserRoleRemoveEvent;
@@ -12,8 +13,8 @@ import java.util.List;
 public class UserRoleRemove implements UserRoleRemoveListener {
     private final VerificationManager verificationManager;
 
-    public UserRoleRemove(VerificationManager verificationManager) {
-        this.verificationManager = verificationManager;
+    public UserRoleRemove(ProxyDiscord plugin) {
+        this.verificationManager = plugin.getVerificationManager();
     }
 
     @Override

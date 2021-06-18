@@ -13,14 +13,14 @@ public class AnnouncementManager {
     private final List<AnnouncementChannelHandler> handlers;
     private final Logger logger;
 
-    public AnnouncementManager(ConfigurationNode config) {
+    public AnnouncementManager(ProxyDiscord plugin, ConfigurationNode config) {
         this.config = config;
-        this.logger = ProxyDiscord.inst().getLogger();
+        this.logger = plugin.getLogger();
 
         handlers = new ArrayList<>();
         findChannels();
 
-        ProxyDiscord.inst().getDiscord().getApi().addReconnectListener(event -> findChannels());
+        plugin.getDiscord().getApi().addReconnectListener(event -> findChannels());
     }
 
     private void findChannels() {

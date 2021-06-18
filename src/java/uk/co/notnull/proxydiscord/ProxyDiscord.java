@@ -72,7 +72,7 @@ public class ProxyDiscord {
 	private final ProxyServer proxy;
     private final Logger logger;
 
-    @Inject
+	@Inject
     public ProxyDiscord(ProxyServer proxy, Logger logger) {
     	this.proxy = proxy;
     	this.logger = logger;
@@ -102,25 +102,25 @@ public class ProxyDiscord {
 		}
 
 		// Setup Debug Logging
-		debugLogger = new DebugLogger();
+		debugLogger = new DebugLogger(this);
 
-		discord = new Discord(getConfig());
+		discord = new Discord(this, getConfig());
 
 		Messages.setMessages(messagesConfiguration);
 
-		luckPermsManager = new LuckPermsManager(getConfig());
+		luckPermsManager = new LuckPermsManager(this, getConfig());
 		initLinking();
 		initVerification();
-		loggingManager = new LoggingManager(getConfig());
-		announcementManager = new AnnouncementManager(getConfig().getNode("announcement-channels"));
-		redirectManager = new RedirectManager();
+		loggingManager = new LoggingManager(this, getConfig());
+		announcementManager = new AnnouncementManager(this, getConfig().getNode("announcement-channels"));
+		redirectManager = new RedirectManager(this);
 
-		proxy.getEventManager().register(this, new JoinLeave());
+		proxy.getEventManager().register(this, new JoinLeave(this));
 
 		Optional<PluginContainer> proxyQueues = proxy.getPluginManager().getPlugin("proxyqueues");
         proxyQueues.flatMap(PluginContainer::getInstance).ifPresent(instance -> {
 			proxy.getEventManager().register(this,
-											 new ProxyQueues((uk.co.notnull.proxyqueues.ProxyQueues) instance));
+											 new ProxyQueues(this, (uk.co.notnull.proxyqueues.ProxyQueues) instance));
 		});
 
         Optional<PluginContainer> platformDetection = proxy.getPluginManager()
@@ -132,29 +132,29 @@ public class ProxyDiscord {
         }
 
 		VelocityCommandManager commandManager = new VelocityCommandManager(proxy, this);
-		commandManager.registerCommand(new Link());
-		commandManager.registerCommand(new Unlink());
-		commandManager.registerCommand(new Save());
+		commandManager.registerCommand(new Link(this));
+		commandManager.registerCommand(new Unlink(this));
+		commandManager.registerCommand(new Save(this));
 	}
 
 	private void initLinking() {
 		String linkingChannelId = getConfig().getNode("linking-channel-id").getString();
 		String linkingSecret = getConfig().getNode("linking-secret").getString();
 
-		linkingManager = new LinkingManager(linkingChannelId, linkingSecret);
+		linkingManager = new LinkingManager(this, linkingChannelId, linkingSecret);
 	}
 
 	private void initVerification() {
-		verificationManager = new VerificationManager(getConfig());
-		proxy.getEventManager().register(this, new ServerConnect(verificationManager));
-		proxy.getEventManager().register(this, new SendStatus(linkingManager, verificationManager));
+		verificationManager = new VerificationManager(this, getConfig());
+		proxy.getEventManager().register(this, new ServerConnect(this));
+		proxy.getEventManager().register(this, new SendStatus(this));
 
-		discord.getApi().addUserRoleAddListener(new UserRoleAdd(verificationManager));
-		discord.getApi().addUserRoleRemoveListener(new UserRoleRemove(verificationManager));
-		discord.getApi().addServerMemberBanListener(new ServerMemberBan(verificationManager));
-		discord.getApi().addServerMemberJoinListener(new ServerMemberJoin(verificationManager));
-		discord.getApi().addServerMemberLeaveListener(new ServerMemberLeave(verificationManager));
-		discord.getApi().addReconnectListener(new Reconnect(verificationManager));
+		discord.getApi().addUserRoleAddListener(new UserRoleAdd(this));
+		discord.getApi().addUserRoleRemoveListener(new UserRoleRemove(this));
+		discord.getApi().addServerMemberBanListener(new ServerMemberBan(this));
+		discord.getApi().addServerMemberJoinListener(new ServerMemberJoin(this));
+		discord.getApi().addServerMemberLeaveListener(new ServerMemberLeave(this));
+		discord.getApi().addReconnectListener(new Reconnect(this));
 	}
 
 	private void loadResource(String resource) {

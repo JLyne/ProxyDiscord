@@ -1,5 +1,6 @@
 package uk.co.notnull.proxydiscord.bot.listeners;
 
+import uk.co.notnull.proxydiscord.ProxyDiscord;
 import uk.co.notnull.proxydiscord.manager.VerificationManager;
 import org.javacord.api.event.connection.ReconnectEvent;
 import org.javacord.api.listener.connection.ReconnectListener;
@@ -7,8 +8,8 @@ import org.javacord.api.listener.connection.ReconnectListener;
 public class Reconnect implements ReconnectListener {
     private final VerificationManager verificationManager;
 
-    public Reconnect(VerificationManager verificationManager) {
-        this.verificationManager = verificationManager;
+    public Reconnect(ProxyDiscord plugin) {
+        this.verificationManager = plugin.getVerificationManager();
     }
 
     @Override

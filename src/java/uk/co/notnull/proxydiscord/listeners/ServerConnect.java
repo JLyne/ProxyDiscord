@@ -14,10 +14,12 @@ import uk.co.notnull.proxydiscord.manager.VerificationManager;
 import uk.co.notnull.proxydiscord.VerificationResult;
 
 public class ServerConnect {
-    private static VerificationManager verificationManager = null;
+    private final ProxyDiscord plugin;
+    private final VerificationManager verificationManager;
 
-    public ServerConnect(VerificationManager verificationManager) {
-        ServerConnect.verificationManager = verificationManager;
+    public ServerConnect(ProxyDiscord plugin) {
+        this.plugin = plugin;
+        verificationManager = plugin.getVerificationManager();
     }
 
     @Subscribe(order = PostOrder.FIRST)
@@ -51,7 +53,7 @@ public class ServerConnect {
         message.color(NamedTextColor.RED);
 
         if(!verificationManager.getPublicServers().isEmpty()) {
-            ProxyDiscord.inst().getDebugLogger().info("Blocking unverified player " + e.getPlayer().getUsername() + " from joining " + e.getOriginalServer().getServerInfo().getName());
+            plugin.getDebugLogger().info("Blocking unverified player " + e.getPlayer().getUsername() + " from joining " + e.getOriginalServer().getServerInfo().getName());
 
             RegisteredServer linkingServer = verificationManager.getLinkingServer();
             RegisteredServer currentServer = e.getPlayer().getCurrentServer().map(ServerConnection::getServer)
@@ -61,7 +63,7 @@ public class ServerConnect {
                 e.setResult(ServerPreConnectEvent.ServerResult.allowed(verificationManager.getLinkingServer()));
             }
         } else {
-            ProxyDiscord.inst().getDebugLogger().info("Disconnecting unverified player " + e.getPlayer().getUsername());
+            plugin.getDebugLogger().info("Disconnecting unverified player " + e.getPlayer().getUsername());
             e.getPlayer().disconnect(message.build());
         }
     }

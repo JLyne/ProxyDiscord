@@ -35,6 +35,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class LoggingManager {
+    private final ProxyDiscord plugin;
+    private final LinkingManager linkingManager;
     private String loggingChannelId = null;
     private final Integer lockDummy = 0;
 
@@ -57,14 +59,16 @@ public class LoggingManager {
     private final ProxyServer proxy;
     private final Logger logger;
 
-    public LoggingManager(ConfigurationNode config) {
-        this.proxy = ProxyDiscord.inst().getProxy();
-        this.logger = ProxyDiscord.inst().getLogger();
+    public LoggingManager(ProxyDiscord plugin, ConfigurationNode config) {
+        this.plugin = plugin;
+        this.proxy = plugin.getProxy();
+        this.logger = plugin.getLogger();
+        this.linkingManager = plugin.getLinkingManager();
 
         currentMessage = new MessageBuilder();
-        proxy.getEventManager().register(ProxyDiscord.inst(), this);
+        proxy.getEventManager().register(plugin, this);
 
-        ProxyDiscord.inst().getDiscord().getApi().addReconnectListener(event -> {
+        plugin.getDiscord().getApi().addReconnectListener(event -> {
             if(loggingChannelId != null) {
                 findChannel();
             }
@@ -75,7 +79,7 @@ public class LoggingManager {
         allowedMentions = allowedMentionsBuilder.build();
 
         //Decrease logs per message if a low number of messages are unsent
-        proxy.getScheduler().buildTask(ProxyDiscord.inst(), () -> {
+        proxy.getScheduler().buildTask(plugin, () -> {
             if(queuedToSend.get() <= 2 && logsPerMessage.get() > 1) {
                 logger.info("Decreasing logsPerMessage due to low activity (" + queuedToSend.get() + " queued messages)");
                 logsPerMessage.set(Math.max(logsPerMessage.get() / 2, 1));
@@ -162,7 +166,7 @@ public class LoggingManager {
             return;
         }
 
-        Optional <TextChannel> loggingChannel = ProxyDiscord.inst().getDiscord().getApi().getTextChannelById(loggingChannelId);
+        Optional <TextChannel> loggingChannel = plugin.getDiscord().getApi().getTextChannelById(loggingChannelId);
 
         if(loggingChannel.isEmpty()) {
             logger.warn("Unable to find logging channel. Did you put a valid channel ID in the config?");
@@ -178,10 +182,10 @@ public class LoggingManager {
                 return;
             }
 
-            proxy.getScheduler().buildTask(ProxyDiscord.inst(), () -> {
+            proxy.getScheduler().buildTask(plugin, () -> {
                 String message = event.getReadableMessageContent();
                 Long discordId = event.getMessage().getAuthor().getId();
-                UUID linked = ProxyDiscord.inst().getLinkingManager().getLinked(discordId);
+                UUID linked = linkingManager.getLinked(discordId);
 
                 if(deleteSentMessages) {
                     event.deleteMessage();
@@ -198,7 +202,7 @@ public class LoggingManager {
 
     private void sendDiscordMessage(UUID uuid, String message) {
         try {
-            UserManager userManager = ProxyDiscord.inst().getLuckpermsManager().getUserManager();
+            UserManager userManager = plugin.getLuckpermsManager().getUserManager();
             User user = userManager.loadUser(uuid).join();
 
             if(user == null || message.isEmpty() || discordChatFormat == null) {
@@ -227,7 +231,7 @@ public class LoggingManager {
     }
 
     private void sendLogMessage(Player player, String message) {
-        Long discordId = ProxyDiscord.inst().getLinkingManager().getLinked(player);
+        Long discordId = linkingManager.getLinked(player);
         Optional<ServerConnection> server = player.getCurrentServer();
         String serverName = server.isPresent() ? server.get().getServerInfo().getName() : "";
 
@@ -239,7 +243,7 @@ public class LoggingManager {
     }
 
     private void sendLogMessage(User user, String message) {
-        Long discordId = ProxyDiscord.inst().getLinkingManager().getLinked(user.getUniqueId());
+        Long discordId = linkingManager.getLinked(user.getUniqueId());
 
         message = message.replaceAll("\\[server]", "");
         message = message.replaceAll("\\[player]", user.getFriendlyName());
@@ -255,7 +259,7 @@ public class LoggingManager {
 
         message = message.replaceAll("\\[date]", dateFormat != null ? dateFormat.format(new Date()) : "");
 
-        Optional <TextChannel> loggingChannel = ProxyDiscord.inst().getDiscord().getApi().getTextChannelById(loggingChannelId);
+        Optional <TextChannel> loggingChannel = plugin.getDiscord().getApi().getTextChannelById(loggingChannelId);
 
         synchronized (lockDummy) {
             if(currentMessage.getStringBuilder().length() + message.length() > 1950) {

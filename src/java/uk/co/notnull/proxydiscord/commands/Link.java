@@ -23,14 +23,16 @@ import java.util.UUID;
 
 @CommandAlias("discord")
 public class Link extends BaseCommand {
-    private static LinkingManager linkingManager = null;
-    private static VerificationManager verificationManager = null;
-    private static UserManager userManager = null;
+    private final ProxyDiscord plugin;
+    private final LinkingManager linkingManager;
+    private final VerificationManager verificationManager;
+    private final UserManager userManager;
 
-    public Link() {
-        Link.linkingManager = ProxyDiscord.inst().getLinkingManager();
-        Link.verificationManager = ProxyDiscord.inst().getVerificationManager();
-        Link.userManager = ProxyDiscord.inst().getLuckpermsManager().getUserManager();
+    public Link(ProxyDiscord plugin) {
+        this.plugin = plugin;
+        linkingManager = plugin.getLinkingManager();
+        verificationManager = plugin.getVerificationManager();
+        userManager = plugin.getLuckpermsManager().getUserManager();
     }
 
     @Subcommand("link")
@@ -81,7 +83,7 @@ public class Link extends BaseCommand {
                     player.sendMessage(Identity.nil(), Component.text(message).color(NamedTextColor.RED));
                 } else {
                     //Attempt to get username of linked discord account
-                    ProxyDiscord.inst().getDiscord().getApi().getUserById(linkedDiscord).thenAcceptAsync(user -> {
+                    plugin.getDiscord().getApi().getUserById(linkedDiscord).thenAcceptAsync(user -> {
                         String message = Messages.getMessage("link-other-already-linked-known")
                                 .replace("[player]", target)
                                 .replace("[discord]", user.getDiscriminatedName());
@@ -104,7 +106,7 @@ public class Link extends BaseCommand {
             if (linkedMinecraft != null) {
                 final User[] discordUser = {null};
 
-                ProxyDiscord.inst().getDiscord().getApi().getUserById(discordId)
+                plugin.getDiscord().getApi().getUserById(discordId)
                         .thenComposeAsync(result -> {
                             discordUser[0] = result;
                             return userManager.lookupUsername(linkedMinecraft);
@@ -132,10 +134,10 @@ public class Link extends BaseCommand {
             }
 
             //Attempt to link player
-            ProxyDiscord.inst().getDiscord().getApi().getUserById(discordId).thenAcceptAsync(user -> {
+            plugin.getDiscord().getApi().getUserById(discordId).thenAcceptAsync(user -> {
                 LinkResult result = linkingManager.manualLink(uuid, user.getId());
 
-                ProxyDiscord.inst().getLogger().debug(result.toString());
+                plugin.getLogger().debug(result.toString());
 
                 if (result == LinkResult.SUCCESS) {
                     VerificationResult verificationResult = verificationManager.checkVerificationStatus(player);
