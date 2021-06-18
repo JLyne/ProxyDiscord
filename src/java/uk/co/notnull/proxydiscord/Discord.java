@@ -1,5 +1,7 @@
 package uk.co.notnull.proxydiscord;
 
+import ninja.leaping.configurate.ConfigurationNode;
+import org.javacord.api.entity.activity.ActivityType;
 import org.javacord.api.entity.intent.Intent;
 import org.javacord.api.DiscordApiBuilder;
 
@@ -20,10 +22,16 @@ public class Discord {
 
 	/**
 	 * Class
-	 * @param token bot token
+	 * @param config configuration
 	 */
-	public Discord(String token) {
+	public Discord(ConfigurationNode config) {
 		this.logger = ProxyDiscord.inst().getLogger();
+
+		String token = config.getNode("bot-token").getString(null);
+
+		if(token == null || token.isEmpty()) {
+			throw new IllegalArgumentException("No bot token provided, check the config");
+		}
 
 		// Create an Instance of the DiscordApi
 		try {
@@ -35,8 +43,9 @@ public class Discord {
 					.login().join();
 
 			connected = true;
-		} catch (CompletionException IllegalStateException) {
-			logger.warn("Connection Error. Did you put a valid token in the config?");
+		} catch (CompletionException e) {
+			logger.error("Failed to connect to Discord. Did you put a valid token in the config?");
+			e.printStackTrace();
 			return;
 		}
 
@@ -46,26 +55,54 @@ public class Discord {
 		//Dont cache anything by default
 		api.setMessageCacheSize(0, 0);
 
-		// Set Activity
-        api.updateActivity(Constants.activity);
+		updateActivity(config);
 
         api.addLostConnectionListener(event -> {
 			connected = false;
-			logger.info(("Lost connection to Discord."));
+			logger.warn("Lost connection to Discord");
 		});
         
         // Add Reconnect Listener to re-add status
         api.addReconnectListener(event -> {
 			connected = true;
-			logger.info(("Reconnected to Discord."));
-			api.updateActivity(Constants.activity);
+			logger.info("Reconnected to Discord");
+			updateActivity(config);
         });
 
 		api.addResumeListener(event -> {
 			connected = true;
-			logger.info(("Resumed connection to Discord."));
-			api.updateActivity(Constants.activity);
+			logger.info("Resumed connection to Discord");
+			updateActivity(config);
 		});
+	}
+
+	private void updateActivity(ConfigurationNode config) {
+		String activity = config.getNode("bot-activity").getString(null);
+		String activityType = config.getNode("bot-activity-type").getString("");
+		ActivityType type = ActivityType.PLAYING;
+
+		switch (activityType.toLowerCase()) {
+			case "streaming":
+				type = ActivityType.STREAMING;
+				break;
+
+			case "listening":
+				type = ActivityType.LISTENING;
+				break;
+
+			case "watching":
+				type = ActivityType.WATCHING;
+				break;
+
+			case "competing":
+				type = ActivityType.COMPETING;
+				break;
+		}
+
+		// Set Activity
+		if(activity != null && !activity.isEmpty()) {
+        	api.updateActivity(type, activity);
+		}
 	}
 
 	public DiscordApi getApi() {

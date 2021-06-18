@@ -1,5 +1,9 @@
-# Bot token
-token: bot-token-here
+bot-token: bot-token-here
+
+# Valid values: playing, streaming, listening, watching, competing
+bot-activity-type: 'playing'
+
+bot-activity: 'Minecraft'
 
 linking-secret: ')2z#*MR^BrGVygg7'
 

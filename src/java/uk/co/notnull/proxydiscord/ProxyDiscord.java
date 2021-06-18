@@ -104,7 +104,7 @@ public class ProxyDiscord {
 		// Setup Debug Logging
 		debugLogger = new DebugLogger();
 
-		discord = new Discord(getConfig().getNode("token").getString());
+		discord = new Discord(getConfig());
 
 		Messages.setMessages(messagesConfiguration);
 
