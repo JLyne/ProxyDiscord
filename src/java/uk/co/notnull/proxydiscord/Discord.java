@@ -37,7 +37,7 @@ public class Discord {
 		try {
 			logger.info("Connecting to Discord...");
 			api = new DiscordApiBuilder().setToken(token)
-					.setIntents(Intent.GUILDS, Intent.GUILD_MEMBERS, Intent.GUILD_MESSAGES, Intent.GUILD_PRESENCES)
+					.setIntents(Intent.GUILDS, Intent.GUILD_MEMBERS, Intent.GUILD_MESSAGES)
 					.setWaitForUsersOnStartup(true)
 					.setWaitForServersOnStartup(true)
 					.login().join();
