@@ -43,8 +43,8 @@ public class Discord {
 		// Print the invite url of the bot
         logger.info("Bot Invite Link: " + api.createBotInvite());
 
-		// Cache a maximum of 10 messages per channel for and remove messages older than 1 hour
-		api.setMessageCacheSize(10, 60*60);
+		//Dont cache anything by default
+		api.setMessageCacheSize(0, 0);
 
 		// Set Activity
         api.updateActivity(Constants.activity);
