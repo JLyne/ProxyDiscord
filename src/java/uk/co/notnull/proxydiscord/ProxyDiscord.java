@@ -104,7 +104,7 @@ public class ProxyDiscord {
 		// Setup Debug Logging
 		debugLogger = new DebugLogger();
 
-		discord = new Discord(getConfig().getNode("token").getString());
+		discord = new Discord(getConfig());
 
 		Messages.setMessages(messagesConfiguration);
 
@@ -146,15 +146,15 @@ public class ProxyDiscord {
 
 	private void initVerification() {
 		verificationManager = new VerificationManager(getConfig());
-		proxy.getEventManager().register(this, new ServerConnect());
-		proxy.getEventManager().register(this, new SendStatus());
+		proxy.getEventManager().register(this, new ServerConnect(verificationManager));
+		proxy.getEventManager().register(this, new SendStatus(linkingManager, verificationManager));
 
-		discord.getApi().addUserRoleAddListener(new UserRoleAdd());
-		discord.getApi().addUserRoleRemoveListener(new UserRoleRemove());
-		discord.getApi().addServerMemberBanListener(new ServerMemberBan());
-		discord.getApi().addServerMemberJoinListener(new ServerMemberJoin());
-		discord.getApi().addServerMemberLeaveListener(new ServerMemberLeave());
-		discord.getApi().addReconnectListener(new Reconnect());
+		discord.getApi().addUserRoleAddListener(new UserRoleAdd(verificationManager));
+		discord.getApi().addUserRoleRemoveListener(new UserRoleRemove(verificationManager));
+		discord.getApi().addServerMemberBanListener(new ServerMemberBan(verificationManager));
+		discord.getApi().addServerMemberJoinListener(new ServerMemberJoin(verificationManager));
+		discord.getApi().addServerMemberLeaveListener(new ServerMemberLeave(verificationManager));
+		discord.getApi().addReconnectListener(new Reconnect(verificationManager));
 	}
 
 	private void loadResource(String resource) {

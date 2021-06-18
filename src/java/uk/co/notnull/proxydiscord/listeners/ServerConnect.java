@@ -16,8 +16,8 @@ import uk.co.notnull.proxydiscord.VerificationResult;
 public class ServerConnect {
     private static VerificationManager verificationManager = null;
 
-    public ServerConnect() {
-        ServerConnect.verificationManager = ProxyDiscord.inst().getVerificationManager();
+    public ServerConnect(VerificationManager verificationManager) {
+        ServerConnect.verificationManager = verificationManager;
     }
 
     @Subscribe(order = PostOrder.FIRST)

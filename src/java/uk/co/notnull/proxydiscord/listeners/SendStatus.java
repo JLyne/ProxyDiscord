@@ -28,9 +28,9 @@ public class SendStatus {
 	private static VerificationManager verificationManager;
 	private static LinkingManager linkingManager;
 
-	public SendStatus() {
-        SendStatus.verificationManager = ProxyDiscord.inst().getVerificationManager();
-        SendStatus.linkingManager = ProxyDiscord.inst().getLinkingManager();
+	public SendStatus(LinkingManager linkingManager, VerificationManager verificationManager) {
+        SendStatus.verificationManager = verificationManager;
+        SendStatus.linkingManager = linkingManager;
     }
 
 	@Subscribe(order = PostOrder.FIRST)
