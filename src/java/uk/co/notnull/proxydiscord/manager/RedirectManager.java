@@ -54,17 +54,19 @@ public class RedirectManager {
 
         switch(event.getState()) {
             case VERIFIED:
+            case NOT_REQUIRED:
+            case BYPASSED:
                 sendToDestinationServer(player);
                 break;
 
             case LINKED_NOT_VERIFIED:
-                if(event.getPreviousState() == VerificationResult.VERIFIED) {
+                if(event.getPreviousState().isVerified()) {
                     sendToLinkingServer(player, Messages.getMessage("verification-lost-role"));
                 }
 
                 break;
             case NOT_LINKED:
-                if(event.getPreviousState() == VerificationResult.VERIFIED) {
+                if(event.getPreviousState().isVerified()) {
                     sendToLinkingServer(player, Messages.getMessage("verification-lost-unlinked"));
                 }
         }

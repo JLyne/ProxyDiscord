@@ -1,5 +1,7 @@
 package uk.co.notnull.proxydiscord.manager;
 
+import com.velocitypowered.api.event.PostOrder;
+import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.proxy.Player;
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.LuckPermsProvider;
@@ -11,7 +13,7 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 import uk.co.notnull.proxydiscord.ProxyDiscord;
-import uk.co.notnull.proxydiscord.RemovalReason;
+import uk.co.notnull.proxydiscord.events.PlayerVerifyStateChangeEvent;
 
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -31,9 +33,22 @@ public class LuckPermsManager {
         userManager = luckPermsApi.getUserManager();
 
         verifiedPermission = config.getNode("verified-permission").getString();
+
+        plugin.getProxy().getEventManager().register(plugin, this);
 	}
 
-	public void addVerifiedPermission(Player player) {
+	@Subscribe(order = PostOrder.NORMAL)
+    public void onPlayerVerifyStateChange(PlayerVerifyStateChangeEvent event) {
+        Player player = event.getPlayer();
+
+        if(event.getState().isVerified()) {
+            addVerifiedPermission(player);
+        } else {
+            removeVerifiedPermission(player);
+        }
+    }
+
+	private void addVerifiedPermission(Player player) {
         if(player.hasPermission(verifiedPermission)) {
             return;
         }
@@ -55,7 +70,7 @@ public class LuckPermsManager {
         }
     }
 
-    public void removeVerifiedPermission(Player player, RemovalReason reason) {
+    private void removeVerifiedPermission(Player player) {
         if(!player.hasPermission(verifiedPermission)) {
             return;
         }

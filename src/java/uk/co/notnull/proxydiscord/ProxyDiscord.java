@@ -110,12 +110,12 @@ public class ProxyDiscord {
 
 		luckPermsManager = new LuckPermsManager(this, getConfig());
 		initLinking();
-		initVerification();
+		verificationManager = new VerificationManager(this, getConfig());
 		loggingManager = new LoggingManager(this, getConfig());
 		announcementManager = new AnnouncementManager(this, getConfig().getNode("announcement-channels"));
 		redirectManager = new RedirectManager(this);
 
-		proxy.getEventManager().register(this, new JoinLeave(this));
+		initListeners();
 
 		Optional<PluginContainer> proxyQueues = proxy.getPluginManager().getPlugin("proxyqueues");
         proxyQueues.flatMap(PluginContainer::getInstance).ifPresent(instance -> {
@@ -144,10 +144,10 @@ public class ProxyDiscord {
 		linkingManager = new LinkingManager(this, linkingChannelId, linkingSecret);
 	}
 
-	private void initVerification() {
-		verificationManager = new VerificationManager(this, getConfig());
+	private void initListeners() {
 		proxy.getEventManager().register(this, new ServerConnect(this));
 		proxy.getEventManager().register(this, new SendStatus(this));
+		proxy.getEventManager().register(this, new JoinLeave(this));
 
 		discord.getApi().addUserRoleAddListener(new UserRoleAdd(this));
 		discord.getApi().addUserRoleRemoveListener(new UserRoleRemove(this));

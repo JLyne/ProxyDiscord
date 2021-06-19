@@ -14,7 +14,7 @@ public class ServerMemberLeave implements ServerMemberLeaveListener {
 
     @Override
     public void onServerMemberLeave(ServerMemberLeaveEvent serverMemberLeaveEvent) {
-		verificationManager.removeUser(serverMemberLeaveEvent.getUser());
+		verificationManager.handleServerMemberEvent(serverMemberLeaveEvent);
     }
 }
 

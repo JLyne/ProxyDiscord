@@ -19,17 +19,7 @@ public class UserRoleRemove implements UserRoleRemoveListener {
 
     @Override
     public void onUserRoleRemove(UserRoleRemoveEvent userRoleRemoveEvent) {
-
-        if(!verificationManager.getVerifiedRoleIds().contains(userRoleRemoveEvent.getRole().getIdAsString())) {
-            return;
-        }
-
-        User user = userRoleRemoveEvent.getUser();
-        List<Role> roles = user.getRoles(userRoleRemoveEvent.getServer());
-
-        if (Collections.disjoint(roles, verificationManager.getVerifiedRoles())) {
-            verificationManager.removeUser(user);
-        }
+        verificationManager.handleRoleEvent(userRoleRemoveEvent);
     }
 }
 

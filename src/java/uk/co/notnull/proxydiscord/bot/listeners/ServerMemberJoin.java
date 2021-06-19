@@ -20,19 +20,7 @@ public class ServerMemberJoin implements ServerMemberJoinListener {
 
     @Override
     public void onServerMemberJoin(ServerMemberJoinEvent serverMemberJoinEvent) {
-        User user = serverMemberJoinEvent.getUser();
-        Server server = serverMemberJoinEvent.getServer();
-        Set<Role> roles = verificationManager.getVerifiedRoles();
-
-        if(roles.isEmpty()) {
-        	return;
-		}
-
-        if(!Collections.disjoint(server.getRoles(user), roles)) {
-        	verificationManager.addUser(user);
-		} else {
-        	verificationManager.removeUser(user);
-		}
+        verificationManager.handleServerMemberEvent(serverMemberJoinEvent);
     }
 }
 

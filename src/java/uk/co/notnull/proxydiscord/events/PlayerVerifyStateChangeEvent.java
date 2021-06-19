@@ -14,6 +14,12 @@ public class PlayerVerifyStateChangeEvent {
 		this.previousState = previousState;
 	}
 
+	public PlayerVerifyStateChangeEvent(Player player, VerificationResult state) {
+		this.player = player;
+		this.state = state;
+		this.previousState = VerificationResult.UNKNOWN;
+	}
+
 	public Player getPlayer() {
 		return player;
 	}

@@ -14,9 +14,7 @@ public class Reconnect implements ReconnectListener {
 
     @Override
     public void onReconnect(ReconnectEvent reconnectEvent) {
-        if(!verificationManager.getVerifiedRoleIds().isEmpty()) {
-            verificationManager.populateUsers();
-        }
+        verificationManager.populateUsers();
     }
 }
 

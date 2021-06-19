@@ -142,7 +142,7 @@ public class Link extends BaseCommand {
                 if (result == LinkResult.SUCCESS) {
                     VerificationResult verificationResult = verificationManager.checkVerificationStatus(player);
 
-                    if (verificationResult == VerificationResult.VERIFIED) {
+                    if (verificationResult.isVerified()) {
                         String message = Messages.getMessage("link-other-success")
                                 .replace("[discord]", user.getDiscriminatedName())
                                 .replace("[player]", target);

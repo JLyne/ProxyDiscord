@@ -83,7 +83,7 @@ public class Link implements MessageCreateListener {
                     VerificationResult verificationResult = verificationManager.checkVerificationStatus(
                             event.getMessageAuthor().getId());
 
-                    if(verificationResult == VerificationResult.VERIFIED) {
+                    if(verificationResult.isVerified()) {
                         return Messages.getEmbed("embed-link-already-linked", replacements);
                     } else {
                         return Messages.getEmbed("embed-link-success-not-verified", replacements);
@@ -99,7 +99,7 @@ public class Link implements MessageCreateListener {
                     VerificationResult verificationResult = verificationManager.checkVerificationStatus(
                             event.getMessageAuthor().getId());
 
-                    if(verificationResult == VerificationResult.VERIFIED) {
+                    if(verificationResult.isVerified()) {
                         return Messages.getEmbed("embed-link-success", replacements);
                     } else {
                         return Messages.getEmbed("embed-link-success-not-verified", replacements);

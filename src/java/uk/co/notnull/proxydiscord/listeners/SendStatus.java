@@ -42,7 +42,7 @@ public class SendStatus {
 
     @Subscribe(order = PostOrder.LAST)
     public void onPlayerVerifyStatusChange(PlayerVerifyStateChangeEvent e) {
-		if(e.getState() == VerificationResult.VERIFIED) {
+		if(e.getState().isVerified()) {
 			e.getPlayer().sendMessage(Identity.nil(), Component.text(Messages.getMessage("link-success"))
 											 .color(NamedTextColor.GREEN));
 		} else {
@@ -52,8 +52,6 @@ public class SendStatus {
 
     private void sendStatusPacket(Player player, VerificationResult status) {
 		player.getCurrentServer().ifPresent(connection -> {
-        	plugin.getDebugLogger().info(connection.getServer().getServerInfo().getName());
-
         	if(!verificationManager.isLinkingServer(connection.getServer())) {
         		return;
 			}
@@ -77,7 +75,7 @@ public class SendStatus {
 
                 Map<String, Object> payload = Map.of(
                         "hmac", byteArrayToHex(macData),
-                        "status", status.ordinal(),
+                        "status", status.ordinal(), //FIXME: Don't use magic numbers
                         "bedrock", bedrock,
                         "token", token);
 

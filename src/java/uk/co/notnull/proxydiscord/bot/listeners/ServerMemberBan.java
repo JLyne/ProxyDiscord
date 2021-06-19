@@ -15,8 +15,7 @@ public class ServerMemberBan implements ServerMemberBanListener {
 
     @Override
     public void onServerMemberBan(ServerMemberBanEvent serverMemberBanEvent) {
-        User user = serverMemberBanEvent.getUser();
-        verificationManager.removeUser(user);
+        verificationManager.handleServerMemberEvent(serverMemberBanEvent);
     }
 }
 

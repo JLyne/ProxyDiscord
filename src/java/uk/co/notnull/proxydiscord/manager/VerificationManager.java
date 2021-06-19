@@ -6,9 +6,13 @@ import com.velocitypowered.api.proxy.server.RegisteredServer;
 import ninja.leaping.configurate.ConfigurationNode;
 import org.javacord.api.entity.permission.Role;
 import org.javacord.api.entity.user.User;
+import org.javacord.api.event.server.member.ServerMemberBanEvent;
+import org.javacord.api.event.server.member.ServerMemberEvent;
+import org.javacord.api.event.server.member.ServerMemberJoinEvent;
+import org.javacord.api.event.server.member.ServerMemberLeaveEvent;
+import org.javacord.api.event.server.role.UserRoleEvent;
 import org.slf4j.Logger;
 import uk.co.notnull.proxydiscord.ProxyDiscord;
-import uk.co.notnull.proxydiscord.RemovalReason;
 import uk.co.notnull.proxydiscord.VerificationResult;
 import uk.co.notnull.proxydiscord.events.PlayerVerifyStateChangeEvent;
 
@@ -26,14 +30,13 @@ import java.util.stream.Collectors;
 public class VerificationManager {
     private final ProxyDiscord plugin;
     private final LinkingManager linkingManager;
-    private final LuckPermsManager luckpermsManager;
 
     private final Set<RegisteredServer> publicServers;
     private RegisteredServer defaultVerifiedServer;
     private RegisteredServer linkingServer;
 
     private String bypassPermission;
-    private Set<String> verifiedRoleIds;
+    private Set<Long> verifiedRoleIds;
 
     private final Set<Long> verifiedRoleUsers;
 
@@ -48,7 +51,6 @@ public class VerificationManager {
 
         verifiedRoleUsers = ConcurrentHashMap.newKeySet();
         linkingManager = plugin.getLinkingManager();
-        luckpermsManager = plugin.getLuckpermsManager();
         lastKnownStatuses = new ConcurrentHashMap<>();
         publicServers = new HashSet<>();
 
@@ -67,12 +69,24 @@ public class VerificationManager {
 
                 children.forEach((ConfigurationNode child) -> {
                     if(!child.isEmpty() && !child.isMap() && !child.isList()) {
-                        verifiedRoleIds.add(child.getString());
+                        String roleId = child.getString(null);
+
+                        try {
+                            verifiedRoleIds.add(Long.parseLong(roleId));
+                        } catch(NumberFormatException e) {
+                            logger.warn("Ignoring verified role '" + roleId + "': Invalid role ID");
+                        }
                     }
                 });
-
             } else {
-                verifiedRoleIds = Collections.singleton(roleIds.getString());
+                String roleId = roleIds.getString(null);
+
+                try {
+                    verifiedRoleIds = Collections.singleton(Long.parseLong(roleId));
+                } catch(NumberFormatException e) {
+                    logger.warn("Ignoring verified role '" + roleId + "': Invalid role ID");
+                    verifiedRoleIds = Collections.emptySet();
+                }
             }
         }
 
@@ -113,58 +127,38 @@ public class VerificationManager {
         }
     }
 
-    public void addUser(User user) {
-        plugin.getDebugLogger().info("Adding verified status of " + user.getDiscriminatedName());
-
+    private void addUser(User user) {
         verifiedRoleUsers.add(user.getId());
         checkVerificationStatus(user.getId());
     }
 
-    public void removeUser(User user) {
-        plugin.getDebugLogger().info("Removing verified status of " + user.getDiscriminatedName());
-
+    private void removeUser(User user) {
         verifiedRoleUsers.remove(user.getId());
         checkVerificationStatus(user.getId());
-    }
-
-    private boolean hasVerifiedRole(Long id) {
-        return verifiedRoleUsers.contains(id);
     }
 
     public VerificationResult checkVerificationStatus(Player player) {
         VerificationResult status;
 
         if(verifiedRoleIds.isEmpty()) {
-            plugin.getDebugLogger().info("No verified roles defined. Considering " + player.getUsername() + " verified.");
-            luckpermsManager.addVerifiedPermission(player);
-
-            status = VerificationResult.VERIFIED;
+            status = VerificationResult.NOT_REQUIRED;
         } else if(player.hasPermission(bypassPermission)) {
-            plugin.getDebugLogger().info("Player " + player.getUsername() + " has bypass permission.");
-            luckpermsManager.addVerifiedPermission(player);
-
-            status = VerificationResult.VERIFIED;
+            status = VerificationResult.BYPASSED;
         } else {
             Long linkedId = linkingManager.getLinked(player);
 
             if (linkedId != null) {
-                if(hasVerifiedRole(linkedId)) {
-                    luckpermsManager.addVerifiedPermission(player);
-
+                if(verifiedRoleUsers.contains(linkedId)) {
                     status = VerificationResult.VERIFIED;
                 } else {
-                    luckpermsManager.removeVerifiedPermission(player, RemovalReason.VERIFIED_ROLE_LOST);
-
                     status = VerificationResult.LINKED_NOT_VERIFIED;
                 }
             } else {
-                luckpermsManager.removeVerifiedPermission(player, RemovalReason.UNLINKED);
-
                 status = VerificationResult.NOT_LINKED;
             }
         }
 
-        plugin.getDebugLogger().info("Status for player " + player.getUsername() + ": " + status);
+        plugin.getDebugLogger().info("Verification status for player " + player.getUsername() + ": " + status);
 
         updatePlayerStatus(player, status);
 
@@ -178,38 +172,22 @@ public class VerificationManager {
         Optional<Player> player = Optional.empty();
 
         if(verifiedRoleIds.isEmpty()) {
-            plugin.getDebugLogger().info("No verified roles defined. Considering " + discordId.toString() + " verified.");
-
-            status = VerificationResult.VERIFIED;
+            status = VerificationResult.NOT_REQUIRED;
         } else if(linked == null) {
             status = VerificationResult.NOT_LINKED;
         } else {
             player = proxy.getPlayer(linked);
 
             if(player.isPresent() && player.get().hasPermission(bypassPermission)) {
-                plugin.getDebugLogger().info("Player " + player.get().getUsername() + " has bypass permission.");
-                luckpermsManager.addVerifiedPermission(player.get());
-
-                status = VerificationResult.VERIFIED;
-            } else if(hasVerifiedRole(discordId)) {
-
-                if(player.isPresent()) {
-                    plugin.getDebugLogger().info("Linked account is currently on the server. Adding permission");
-                    luckpermsManager.addVerifiedPermission(player.get());
-                }
-
+                status = VerificationResult.BYPASSED;
+            } else if(verifiedRoleUsers.contains(discordId)) {
                 status = VerificationResult.VERIFIED;
             } else {
-                if(player.isPresent()) {
-                    plugin.getDebugLogger().info("Linked account is currently on the server. Removing permission");
-                    luckpermsManager.removeVerifiedPermission(player.get(), RemovalReason.VERIFIED_ROLE_LOST);
-                }
-
                 status = VerificationResult.LINKED_NOT_VERIFIED;
             }
         }
 
-        plugin.getDebugLogger().info("Status for Discord id " + discordId.toString() + ": " + status);
+        plugin.getDebugLogger().info("Verification status for Discord id " + discordId.toString() + ": " + status);
 
         player.ifPresent(p -> updatePlayerStatus(p, status));
 
@@ -219,7 +197,7 @@ public class VerificationManager {
     public void populateUsers() {
         verifiedRoleUsers.clear();
 
-        verifiedRoleIds.forEach((String roleId) -> {
+        verifiedRoleIds.forEach((Long roleId) -> {
             Optional<Role> verifiedRole = plugin.getDiscord().getApi().getRoleById(roleId);
 
             if(verifiedRole.isEmpty()) {
@@ -242,7 +220,9 @@ public class VerificationManager {
 
     private void updatePlayerStatus(Player player, VerificationResult status) {
         lastKnownStatuses.compute(player, (key, value) -> {
-            if(value != null && value != status) {
+            if(value == null) {
+                proxy.getEventManager().fireAndForget(new PlayerVerifyStateChangeEvent(player, status));
+            } else if(value != status) {
                 plugin.getDebugLogger().info("PlayerVerifyStateChangeEvent " + status + " from " + value);
                 proxy.getEventManager().fireAndForget(new PlayerVerifyStateChangeEvent(player, status, value));
             }
@@ -255,12 +235,47 @@ public class VerificationManager {
 		lastKnownStatuses.remove(player);
 	}
 
-    public Set<String> getVerifiedRoleIds() {
-        return verifiedRoleIds;
-    }
+	public void handleRoleEvent(UserRoleEvent userRoleEvent) {
+		Role role = userRoleEvent.getRole();
+		User user = userRoleEvent.getUser();
+
+		if (!isVerifiedRole(role)) {
+			return;
+		}
+
+		List<Role> roles = user.getRoles(userRoleEvent.getServer());
+
+        if (Collections.disjoint(roles, getVerifiedRoles())) {
+            removeUser(user);
+        } else {
+            addUser(user);
+        }
+	}
+
+	public void handleServerMemberEvent(ServerMemberEvent event) {
+		User user = event.getUser();
+
+		if(event instanceof ServerMemberLeaveEvent || event instanceof ServerMemberBanEvent) {
+			removeUser(user);
+		} else if(event instanceof ServerMemberJoinEvent) {
+		    List<Role> roles = user.getRoles(event.getServer());
+
+            if(getVerifiedRoles().isEmpty()) {
+                return;
+            }
+
+			if(!Collections.disjoint(roles, getVerifiedRoles())) {
+			    addUser(user);
+            }
+		}
+	}
+
+    public boolean isVerifiedRole(Role role) {
+        return verifiedRoleIds.contains(role.getId());
+	}
 
     public Set<Role> getVerifiedRoles() {
-        return verifiedRoleIds.stream().map((String roleId) -> {
+        return verifiedRoleIds.stream().map((Long roleId) -> {
             Optional<Role> role = plugin.getDiscord().getApi().getRoleById(roleId);
 
             return role.orElse(null);

@@ -33,7 +33,7 @@ public class ServerConnect {
 
         VerificationResult result = verificationManager.checkVerificationStatus(e.getPlayer());
 
-        if(result == VerificationResult.VERIFIED) {
+        if(result.isVerified()) {
             return;
         }
 

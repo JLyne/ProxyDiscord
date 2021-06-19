@@ -15,11 +15,7 @@ public class UserRoleAdd implements UserRoleAddListener {
 
     @Override
     public void onUserRoleAdd(UserRoleAddEvent userRoleAddEvent) {
-        if(verificationManager.getVerifiedRoleIds().contains(userRoleAddEvent.getRole().getIdAsString())) {
-            User user = userRoleAddEvent.getUser();
-
-            verificationManager.addUser(user);
-        }
+        verificationManager.handleRoleEvent(userRoleAddEvent);
     }
 }
 

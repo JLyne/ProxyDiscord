@@ -34,7 +34,7 @@ public class ProxyQueues {
 
         VerificationResult result = verificationManager.checkVerificationStatus(event.getPlayer());
 
-        if(result == VerificationResult.VERIFIED) {
+        if(result.isVerified()) {
             Optional<ServerConnection> currentServer = event.getPlayer().getCurrentServer();
 
             if(currentServer.isPresent() && verificationManager.isPublicServer(currentServer.get().getServer())) {
@@ -71,7 +71,7 @@ public class ProxyQueues {
 	@Subscribe(order = PostOrder.NORMAL)
 	public void onPlayerVerifyStateChange(PlayerVerifyStateChangeEvent e) {
     	//Remove player from any queue
-        if(e.getPreviousState() == VerificationResult.VERIFIED) {
+        if(!e.getState().isVerified()) {
         	proxyQueues.getQueueHandler().clearPlayer(e.getPlayer());
 		}
 	}

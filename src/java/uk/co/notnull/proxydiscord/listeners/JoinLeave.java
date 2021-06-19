@@ -36,30 +36,16 @@ public class JoinLeave {
 
 		loggingManager.logJoin(player);
 
-		VerificationResult result = verificationManager.checkVerificationStatus(player);
-
 		player.sendMessage(Identity.nil(), Component.text(Messages.getMessage("join-welcome"))
-				.color(NamedTextColor.GREEN));
+			.color(NamedTextColor.GREEN));
 
-		switch(result) {
-			case NOT_LINKED:
-				logger.info("Unlinked player " + player.getUsername() + " joined");
-				break;
-
-			case LINKED_NOT_VERIFIED:
-				logger.info("Linked and unverified player " + player.getUsername() + " joined");
-				break;
-
-			case VERIFIED:
-				logger.info("Verified player " + player.getUsername() + " joined");
-
-				break;
-		}
-
-		if(!ProxyDiscord.inst().getDiscord().isConnected()) {
+		if(!plugin.getDiscord().isConnected()) {
 			player.sendMessage(Identity.nil(), Component.text(
 					Messages.getMessage("discord-issues")).color(NamedTextColor.RED));
 		}
+
+		VerificationResult result = verificationManager.checkVerificationStatus(player);
+		logger.info("Player " + player.getUsername() + " joined with verification status " + result);
 	}
 	
 	@Subscribe(order = PostOrder.LAST)
