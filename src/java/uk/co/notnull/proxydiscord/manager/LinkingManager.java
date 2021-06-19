@@ -10,6 +10,8 @@ import org.slf4j.Logger;
 import uk.co.notnull.proxydiscord.LinkResult;
 import uk.co.notnull.proxydiscord.ProxyDiscord;
 import uk.co.notnull.proxydiscord.bot.commands.Link;
+import uk.co.notnull.proxydiscord.events.PlayerLinkEvent;
+import uk.co.notnull.proxydiscord.events.PlayerUnlinkEvent;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -25,6 +27,7 @@ import java.util.concurrent.TimeUnit;
 @SuppressWarnings("unused")
 public class LinkingManager {
     private final ProxyDiscord plugin;
+    private final ProxyServer proxy;
 
     private HashBiMap<UUID, Long> links;
     private HashBiMap<String, UUID> pendingLinks;
@@ -35,9 +38,8 @@ public class LinkingManager {
     private Link linkCommand;
 
     public LinkingManager(ProxyDiscord plugin, String linkingChannelId, String linkingSecret) {
-        ProxyServer proxy = plugin.getProxy();
-
         this.plugin = plugin;
+        this.proxy = plugin.getProxy();
         this.logger = plugin.getLogger();
 
         this.linkingSecret = linkingSecret;
@@ -137,14 +139,16 @@ public class LinkingManager {
             return LinkResult.INVALID_TOKEN;
         }
 
-        UUID player = this.pendingLinks.get(token);
+        UUID uuid = this.pendingLinks.get(token);
 
-        if(player == null) {
+        if(uuid == null) {
             return LinkResult.INVALID_TOKEN;
         }
 
-        this.links.put(player, discordId);
+        this.links.put(uuid, discordId);
         this.pendingLinks.remove(token);
+
+        proxy.getEventManager().fireAndForget(new PlayerLinkEvent(uuid, discordId));
 
         return LinkResult.SUCCESS;
     }
@@ -162,19 +166,33 @@ public class LinkingManager {
 
         this.links.put(uuid, discordId);
 
+        proxy.getEventManager().fireAndForget(new PlayerLinkEvent(uuid, discordId));
+
         return LinkResult.SUCCESS;
     }
 
     public void unlink(Player player) {
-        this.links.remove(player.getUniqueId());
+        Long previousLink = this.links.remove(player.getUniqueId());
+
+        if(previousLink != null) {
+            proxy.getEventManager().fireAndForget(new PlayerUnlinkEvent(player, previousLink));
+        }
     }
 
     public void unlink(UUID uuid) {
-        this.links.remove(uuid);
+        Long previousLink = this.links.remove(uuid);
+
+        if(previousLink != null) {
+            proxy.getEventManager().fireAndForget(new PlayerUnlinkEvent(uuid, previousLink));
+        }
     }
 
     public void unlink(long discordId) {
-        this.links.inverse().remove(discordId);
+        UUID uuid = this.links.inverse().remove(discordId);
+
+        if(uuid != null) {
+            proxy.getEventManager().fireAndForget(new PlayerUnlinkEvent(uuid, discordId));
+        }
     }
 
     public void saveLinks() {

@@ -13,7 +13,6 @@ import net.luckperms.api.model.user.UserManager;
 import uk.co.notnull.proxydiscord.manager.LinkingManager;
 import uk.co.notnull.proxydiscord.ProxyDiscord;
 import uk.co.notnull.proxydiscord.Messages;
-import uk.co.notnull.proxydiscord.manager.VerificationManager;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
 
@@ -23,13 +22,11 @@ import java.util.UUID;
 public class Unlink extends BaseCommand {
     private final ProxyDiscord plugin;
     private final UserManager userManager;
-    private final VerificationManager verificationManager;
     private final LinkingManager linkingManager;
 
     public Unlink(ProxyDiscord plugin) {
         this.plugin = plugin;
         linkingManager = plugin.getLinkingManager();
-        verificationManager = plugin.getVerificationManager();
         userManager = plugin.getLuckpermsManager().getUserManager();
     }
 
@@ -71,7 +68,6 @@ public class Unlink extends BaseCommand {
                                             .replace("[player]", player.getUsername()))
                            .color(NamedTextColor.YELLOW);
 
-                        verificationManager.checkVerificationStatus(onlinePlayer);
                         onlinePlayer.sendMessage(Identity.nil(), targetMessage.build());
                     }
                 } else {
@@ -116,7 +112,6 @@ public class Unlink extends BaseCommand {
                                             .replace("[player]", player.getUsername()))
                            .color(NamedTextColor.YELLOW);
 
-                        verificationManager.checkVerificationStatus(onlinePlayer);
                         onlinePlayer.sendMessage(Identity.nil(), targetMessage.build());
                     }
                 } else {
@@ -130,7 +125,6 @@ public class Unlink extends BaseCommand {
             });
         } else if(linkingManager.isLinked(player)) {
             linkingManager.unlink(player);
-            verificationManager.checkVerificationStatus(player);
         } else {
             player.sendMessage(Identity.nil(), Component.text(
                     Messages.getMessage("unlink-not-linked")).color(NamedTextColor.RED));

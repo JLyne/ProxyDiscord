@@ -1,5 +1,7 @@
 package uk.co.notnull.proxydiscord.manager;
 
+import com.velocitypowered.api.event.PostOrder;
+import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
@@ -14,6 +16,8 @@ import org.javacord.api.event.server.role.UserRoleEvent;
 import org.slf4j.Logger;
 import uk.co.notnull.proxydiscord.ProxyDiscord;
 import uk.co.notnull.proxydiscord.VerificationResult;
+import uk.co.notnull.proxydiscord.events.PlayerLinkEvent;
+import uk.co.notnull.proxydiscord.events.PlayerUnlinkEvent;
 import uk.co.notnull.proxydiscord.events.PlayerVerifyStateChangeEvent;
 
 import java.util.Collection;
@@ -125,6 +129,16 @@ public class VerificationManager {
         if(!verifiedRoleIds.isEmpty()) {
             populateUsers();
         }
+    }
+
+    @Subscribe(order = PostOrder.NORMAL)
+    public void onPlayerLink(PlayerLinkEvent event) {
+        event.getPlayer().ifPresent(this::checkVerificationStatus);
+    }
+
+    @Subscribe(order = PostOrder.NORMAL)
+    public void onPlayerUnlink(PlayerUnlinkEvent event) {
+        event.getPlayer().ifPresent(this::checkVerificationStatus);
     }
 
     private void addUser(User user) {
