@@ -10,6 +10,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.slf4j.Logger;
 import uk.co.notnull.proxydiscord.Messages;
+import uk.co.notnull.proxydiscord.manager.GroupSyncManager;
 import uk.co.notnull.proxydiscord.manager.LoggingManager;
 import uk.co.notnull.proxydiscord.ProxyDiscord;
 import uk.co.notnull.proxydiscord.manager.VerificationManager;
@@ -20,6 +21,7 @@ public class JoinLeave {
 	private final Logger logger;
 
 	private static VerificationManager verificationManager;
+	private static GroupSyncManager groupSyncManager;
 	private static LoggingManager loggingManager;
 
 	public JoinLeave(ProxyDiscord plugin) {
@@ -27,6 +29,7 @@ public class JoinLeave {
         this.logger = plugin.getLogger();
 
         verificationManager = plugin.getVerificationManager();
+        groupSyncManager = plugin.getGroupSyncManager();
 		loggingManager = plugin.getLoggingManager();
     }
 
@@ -44,8 +47,10 @@ public class JoinLeave {
 					Messages.getMessage("discord-issues")).color(NamedTextColor.RED));
 		}
 
-		VerificationResult result = verificationManager.checkVerificationStatus(player);
-		logger.info("Player " + player.getUsername() + " joined with verification status " + result);
+		groupSyncManager.syncPlayer(player).thenRun(() -> {
+			VerificationResult result = verificationManager.checkVerificationStatus(player);
+			logger.info("Player " + player.getUsername() + " joined with verification status " + result);
+		});
 	}
 	
 	@Subscribe(order = PostOrder.LAST)

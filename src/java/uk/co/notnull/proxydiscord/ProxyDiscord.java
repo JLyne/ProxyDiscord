@@ -61,6 +61,7 @@ public class ProxyDiscord {
 	private static RedirectManager redirectManager;
 	private static LoggingManager loggingManager;
 	private static LuckPermsManager luckPermsManager;
+	private GroupSyncManager groupSyncManager;
 
 	private boolean platformDetectionEnabled = false;
 	private Object platformDetection;
@@ -111,6 +112,7 @@ public class ProxyDiscord {
 		luckPermsManager = new LuckPermsManager(this, getConfig());
 		initLinking();
 		verificationManager = new VerificationManager(this, getConfig());
+		groupSyncManager = new GroupSyncManager(this, getConfig());
 		loggingManager = new LoggingManager(this, getConfig());
 		announcementManager = new AnnouncementManager(this, getConfig().getNode("announcement-channels"));
 		redirectManager = new RedirectManager(this);
@@ -233,6 +235,10 @@ public class ProxyDiscord {
 
 	public LuckPermsManager getLuckpermsManager() {
 		return luckPermsManager;
+	}
+
+	public GroupSyncManager getGroupSyncManager() {
+		return groupSyncManager;
 	}
 
 	public Logger getLogger() {

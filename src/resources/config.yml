@@ -30,6 +30,12 @@ bypass-permission: 'discord.bypass'
 # Servers which players can join without linking or verifying
 public-servers: []
 
+synced-roles:
+  # 'roleid1': 'group1'
+  # 'roleid2':
+  #   - 'group1'
+  #   - 'group2'
+
 # Channel to log joins/leaves/chats etc in
 logging-channel-id: '123456789'
 
