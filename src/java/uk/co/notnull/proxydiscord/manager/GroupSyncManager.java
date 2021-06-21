@@ -131,7 +131,7 @@ public class GroupSyncManager {
 			roleUsers.put(roleId, userSet);
 		});
 
-//        proxy.getAllPlayers().forEach(this::syncPlayer);
+        proxy.getAllPlayers().forEach(this::syncPlayer);
 	}
 
 	@Subscribe(order = PostOrder.NORMAL)
