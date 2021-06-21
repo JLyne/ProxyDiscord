@@ -41,10 +41,10 @@ public class ServerConnect {
 
         switch(result) {
             case NOT_LINKED:
-                message = Component.text().content(Messages.getMessage("server-change-not-linked"));
+                message = Component.text().content(Messages.get("server-change-not-linked"));
                 break;
             case LINKED_NOT_VERIFIED:
-                message = Component.text().content(Messages.getMessage("server-change-linked-not-verified"));
+                message = Component.text().content(Messages.get("server-change-linked-not-verified"));
                 break;
             default:
                 message = Component.text().content("An error has occurred.");

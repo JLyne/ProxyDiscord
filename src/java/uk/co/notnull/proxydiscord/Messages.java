@@ -1,5 +1,7 @@
 package uk.co.notnull.proxydiscord;
 
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import ninja.leaping.configurate.ConfigurationNode;
 import org.javacord.api.entity.Nameable;
 import org.javacord.api.entity.message.embed.EmbedBuilder;
@@ -14,23 +16,25 @@ import java.util.stream.Collectors;
 
 public class Messages {
     private static ConfigurationNode messages;
+    private static final LegacyComponentSerializer legacyComponentSerializer = LegacyComponentSerializer.legacyAmpersand();
 
-    public static void setMessages(ConfigurationNode messages) {
+    public static void set(ConfigurationNode messages) {
         Messages.messages = messages;
     }
 
-    public static String getMessage(String id) {
-        return getMessage(id, Collections.emptyMap());
+    public static String get(String id) {
+        return get(id, Collections.emptyMap());
     }
 
-    public static String getMessage(String id, Map<String, String> replacements) {
+    public static String get(String id, Map<String, String> replacements) {
         Set<Role> verifiedRoles = ProxyDiscord.inst().getVerificationManager().getVerifiedRoles();
 
         if(messages == null) {
             return "";
         }
 
-        String message = messages.getNode(id).getString("Message " + id + " does not exist");
+        String message = messages.getNode((Object[]) id.split("\\."))
+                .getString("Message " + id + " does not exist");
         String roleNames;
 
         if(verifiedRoles.size() > 1) {
@@ -46,6 +50,25 @@ public class Messages {
         }
 
         return message;
+    }
+
+    public static Component getComponent(String id) {
+        return getComponent(id, Collections.emptyMap());
+    }
+
+    public static Component getComponent(String id, Map<String, String> replacements) {
+        if(messages == null) {
+            return Component.empty();
+        }
+
+        String message = messages.getNode((Object[]) id.split("\\."))
+                .getString("Message " + id + " does not exist");
+
+        for (Map.Entry<String, String> entry : replacements.entrySet()) {
+            message = message.replace(entry.getKey(), entry.getValue());
+        }
+
+        return legacyComponentSerializer.deserialize(message);
     }
 
     public static EmbedBuilder getEmbed(String id) {

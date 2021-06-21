@@ -153,9 +153,9 @@ public class AnnouncementChannelHandler {
         String heading;
 
         if(isNew) {
-            heading = Messages.getMessage("announcement-new").replace("[channel]", channelName);
+            heading = Messages.get("announcement-new").replace("[channel]", channelName);
         } else {
-            heading = Messages.getMessage("announcement-latest").replace("[channel]", channelName);
+            heading = Messages.get("announcement-latest").replace("[channel]", channelName);
         }
 
         announcement = Component.text().content(heading)
@@ -167,7 +167,7 @@ public class AnnouncementChannelHandler {
 				.decoration(TextDecoration.BOLD, false));
 
 		if(content.length() > 250) {
-            TextComponent readMore = Component.text("\n" + Messages.getMessage("announcement-read-more"))
+            TextComponent readMore = Component.text("\n" + Messages.get("announcement-read-more"))
                     .color(NamedTextColor.LIGHT_PURPLE)
                     .decoration(TextDecoration.BOLD, false);
 

@@ -1,6 +1,15 @@
 package uk.co.notnull.proxydiscord;
 
-import co.aikar.commands.VelocityCommandManager;
+import cloud.commandframework.CommandManager;
+import cloud.commandframework.annotations.AnnotationParser;
+import cloud.commandframework.arguments.parser.StandardParameters;
+import cloud.commandframework.context.CommandContext;
+import cloud.commandframework.execution.CommandExecutionCoordinator;
+import cloud.commandframework.meta.SimpleCommandMeta;
+import cloud.commandframework.minecraft.extras.MinecraftExceptionHandler;
+import cloud.commandframework.minecraft.extras.MinecraftHelp;
+import cloud.commandframework.velocity.VelocityCommandManager;
+import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
 import com.velocitypowered.api.event.proxy.ProxyShutdownEvent;
@@ -8,17 +17,17 @@ import com.velocitypowered.api.plugin.Dependency;
 import com.velocitypowered.api.plugin.Plugin;
 import com.velocitypowered.api.plugin.PluginContainer;
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
+import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.proxy.messages.MinecraftChannelIdentifier;
+import io.leangen.geantyref.TypeToken;
 import uk.co.notnull.proxydiscord.bot.listeners.Reconnect;
 import uk.co.notnull.proxydiscord.bot.listeners.ServerMemberBan;
 import uk.co.notnull.proxydiscord.bot.listeners.ServerMemberJoin;
 import uk.co.notnull.proxydiscord.bot.listeners.ServerMemberLeave;
 import uk.co.notnull.proxydiscord.bot.listeners.UserRoleAdd;
 import uk.co.notnull.proxydiscord.bot.listeners.UserRoleRemove;
-import uk.co.notnull.proxydiscord.commands.Link;
-import uk.co.notnull.proxydiscord.commands.Save;
-import uk.co.notnull.proxydiscord.commands.Unlink;
+import uk.co.notnull.proxydiscord.cloud.LongParser;
 import uk.co.notnull.proxydiscord.listeners.ProxyQueues;
 import uk.co.notnull.proxydiscord.listeners.JoinLeave;
 import uk.co.notnull.proxydiscord.listeners.SendStatus;
@@ -31,6 +40,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Path;
 import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import com.google.common.io.ByteStreams;
 import ninja.leaping.configurate.ConfigurationNode;
@@ -107,7 +118,7 @@ public class ProxyDiscord {
 
 		discord = new Discord(this, getConfig());
 
-		Messages.setMessages(messagesConfiguration);
+		Messages.set(messagesConfiguration);
 
 		luckPermsManager = new LuckPermsManager(this, getConfig());
 		initLinking();
@@ -118,6 +129,7 @@ public class ProxyDiscord {
 		redirectManager = new RedirectManager(this);
 
 		initListeners();
+        initCommands();
 
 		Optional<PluginContainer> proxyQueues = proxy.getPluginManager().getPlugin("proxyqueues");
         proxyQueues.flatMap(PluginContainer::getInstance).ifPresent(instance -> {
@@ -132,12 +144,45 @@ public class ProxyDiscord {
         if(platformDetectionEnabled) {
             this.platformDetection = platformDetection.get().getInstance().orElse(null);
         }
-
-		VelocityCommandManager commandManager = new VelocityCommandManager(proxy, this);
-		commandManager.registerCommand(new Link(this));
-		commandManager.registerCommand(new Unlink(this));
-		commandManager.registerCommand(new Save(this));
 	}
+
+	public void initCommands() {
+        CommandManager<CommandSource> manager = new VelocityCommandManager<>(
+				proxy.getPluginManager().fromInstance(this).get(),
+				proxy,
+				CommandExecutionCoordinator.simpleCoordinator(),
+				Function.identity(),
+				Function.identity());
+
+        new MinecraftExceptionHandler<CommandSource>()
+            .withArgumentParsingHandler()
+            .withInvalidSenderHandler()
+            .withInvalidSyntaxHandler()
+            .withNoPermissionHandler()
+            .withCommandExecutionHandler()
+            .withDecorator(message -> message)
+            .apply(manager, p -> p);
+
+        manager.getParserRegistry().registerSuggestionProvider("players", (
+        		CommandContext<CommandSource> commandContext,
+                String input
+        ) -> commandContext.<ProxyServer>get("ProxyServer").getAllPlayers()
+				.stream().map(Player::getUsername).collect(Collectors.toList()));
+
+        manager.getParserRegistry().registerParserSupplier(TypeToken.get(Long.class), options ->
+                new LongParser<>(
+                        (long) options.get(StandardParameters.RANGE_MIN, Long.MIN_VALUE),
+                        (long) options.get(StandardParameters.RANGE_MAX, Long.MAX_VALUE)
+                ));
+
+        AnnotationParser<CommandSource> annotationParser = new AnnotationParser<>(
+                manager,
+                CommandSource.class,
+                parameters -> SimpleCommandMeta.empty()
+        );
+
+        annotationParser.parse(new Commands(this, manager));
+    }
 
 	private void initLinking() {
 		String linkingChannelId = getConfig().getNode("linking-channel-id").getString();

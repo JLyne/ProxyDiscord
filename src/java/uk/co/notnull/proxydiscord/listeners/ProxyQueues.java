@@ -58,10 +58,10 @@ public class ProxyQueues {
 
         switch(result) {
             case NOT_LINKED:
-                event.setReason(Messages.getMessage("server-change-not-linked"));
+                event.setReason(Messages.get("server-change-not-linked"));
                 break;
             case LINKED_NOT_VERIFIED:
-                event.setReason(Messages.getMessage("server-change-linked-not-verified"));
+                event.setReason(Messages.get("server-change-linked-not-verified"));
                 break;
             default:
                 event.setReason("An error has occurred.");

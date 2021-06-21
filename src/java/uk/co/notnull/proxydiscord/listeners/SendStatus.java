@@ -43,7 +43,7 @@ public class SendStatus {
     @Subscribe(order = PostOrder.LAST)
     public void onPlayerVerifyStatusChange(PlayerVerifyStateChangeEvent e) {
 		if(e.getState() == VerificationResult.VERIFIED && !e.getPreviousState().isVerified()) {
-			e.getPlayer().sendMessage(Identity.nil(), Component.text(Messages.getMessage("link-success"))
+			e.getPlayer().sendMessage(Identity.nil(), Component.text(Messages.get("link-success"))
 											 .color(NamedTextColor.GREEN));
 		} else if(!e.getState().isVerified()) {
 			sendStatusPacket(e.getPlayer(), e.getState());

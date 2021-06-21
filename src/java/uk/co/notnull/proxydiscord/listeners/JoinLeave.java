@@ -39,12 +39,12 @@ public class JoinLeave {
 
 		loggingManager.logJoin(player);
 
-		player.sendMessage(Identity.nil(), Component.text(Messages.getMessage("join-welcome"))
+		player.sendMessage(Identity.nil(), Component.text(Messages.get("join-welcome"))
 			.color(NamedTextColor.GREEN));
 
 		if(!plugin.getDiscord().isConnected()) {
 			player.sendMessage(Identity.nil(), Component.text(
-					Messages.getMessage("discord-issues")).color(NamedTextColor.RED));
+					Messages.get("discord-issues")).color(NamedTextColor.RED));
 		}
 
 		groupSyncManager.syncPlayer(player).thenRun(() -> {

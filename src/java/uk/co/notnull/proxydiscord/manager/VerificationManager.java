@@ -271,7 +271,7 @@ public class VerificationManager {
 
 		if(event instanceof ServerMemberLeaveEvent || event instanceof ServerMemberBanEvent) {
 			removeUser(user);
-		} else if(event instanceof ServerMemberJoinEvent) {
+		} else if(event instanceof ServerMemberJoinEvent) { //TODO: Double check
 		    List<Role> roles = user.getRoles(event.getServer());
 
             if(getVerifiedRoles().isEmpty()) {
