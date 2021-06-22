@@ -8,7 +8,7 @@ public enum VerificationResult {
     BYPASSED(true), // Player has the bypass permission
     NOT_REQUIRED(true); // No verified roles are configured
 
-    private boolean verified = false;
+    private final boolean verified;
 
     VerificationResult(boolean verified) {
         this.verified = verified;

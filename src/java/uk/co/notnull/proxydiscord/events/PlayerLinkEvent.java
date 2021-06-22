@@ -6,6 +6,7 @@ import uk.co.notnull.proxydiscord.ProxyDiscord;
 import java.util.Optional;
 import java.util.UUID;
 
+@SuppressWarnings("unused")
 public class PlayerLinkEvent {
 	private final UUID uuid;
 	private final Player player;
