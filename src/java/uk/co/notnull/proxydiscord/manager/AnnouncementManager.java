@@ -9,12 +9,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class AnnouncementManager {
-    private final ConfigurationNode config;
+    private ConfigurationNode config;
     private final List<AnnouncementChannelHandler> handlers;
     private final Logger logger;
 
     public AnnouncementManager(ProxyDiscord plugin, ConfigurationNode config) {
-        this.config = config;
+        this.config = config.getNode("announcement-channels");
         this.logger = plugin.getLogger();
 
         handlers = new ArrayList<>();
@@ -51,5 +51,10 @@ public class AnnouncementManager {
                 e.printStackTrace();
             }
         });
+    }
+
+    public void reload(ConfigurationNode config) {
+        this.config = config.getNode("announcement-channels");
+        findChannels();
     }
 }

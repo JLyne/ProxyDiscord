@@ -7,7 +7,6 @@ import cloud.commandframework.context.CommandContext;
 import cloud.commandframework.execution.CommandExecutionCoordinator;
 import cloud.commandframework.meta.SimpleCommandMeta;
 import cloud.commandframework.minecraft.extras.MinecraftExceptionHandler;
-import cloud.commandframework.minecraft.extras.MinecraftHelp;
 import cloud.commandframework.velocity.VelocityCommandManager;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.event.Subscribe;
@@ -62,7 +61,6 @@ public class ProxyDiscord {
 	private static ProxyDiscord instance;
 
 	private ConfigurationNode configuration;
-	private ConfigurationNode messagesConfiguration;
 	private DebugLogger debugLogger;
 	private Discord discord;
 
@@ -95,42 +93,26 @@ public class ProxyDiscord {
 
 	@Subscribe
 	public void onProxyInitialization(ProxyInitializeEvent event) {
-    	// Setup config
-		loadResource("config.yml");
-		try {
-			configuration = YAMLConfigurationLoader.builder().setFile(
-					new File(dataDirectory.toAbsolutePath().toString(), "config.yml")).build().load();
-		} catch (IOException e) {
-			logger.error("Error loading config.yml");
+    	if(!loadConfig()) {
+    		return;
 		}
 
-		//Message config
-		loadResource("messages.yml");
-		try {
-			messagesConfiguration = YAMLConfigurationLoader.builder().setFile(
-					new File(dataDirectory.toAbsolutePath().toString(), "messages.yml")).build().load();
-		} catch (IOException e) {
-			logger.error("Error loading messages.yml");
-		}
+		debugLogger = new DebugLogger(this, configuration);
 
-		// Setup Debug Logging
-		debugLogger = new DebugLogger(this);
+		discord = new Discord(this, configuration);
 
-		discord = new Discord(this, getConfig());
-
-		Messages.set(messagesConfiguration);
-
-		luckPermsManager = new LuckPermsManager(this, getConfig());
-		initLinking();
-		verificationManager = new VerificationManager(this, getConfig());
-		groupSyncManager = new GroupSyncManager(this, getConfig());
-		loggingManager = new LoggingManager(this, getConfig());
-		announcementManager = new AnnouncementManager(this, getConfig().getNode("announcement-channels"));
+		luckPermsManager = new LuckPermsManager(this, configuration);
+		linkingManager = new LinkingManager(this, configuration);
+		verificationManager = new VerificationManager(this, configuration);
+		groupSyncManager = new GroupSyncManager(this, configuration);
+		loggingManager = new LoggingManager(this, configuration);
+		announcementManager = new AnnouncementManager(this, configuration);
 		redirectManager = new RedirectManager(this);
 
 		initListeners();
         initCommands();
 
+        //FIXME: Move to separate classes
 		Optional<PluginContainer> proxyQueues = proxy.getPluginManager().getPlugin("proxyqueues");
         proxyQueues.flatMap(PluginContainer::getInstance).ifPresent(instance -> {
 			proxy.getEventManager().register(this,
@@ -144,6 +126,36 @@ public class ProxyDiscord {
         if(platformDetectionEnabled) {
             this.platformDetection = platformDetection.get().getInstance().orElse(null);
         }
+	}
+
+	public boolean loadConfig() {
+		// Setup config
+		loadResource("config.yml");
+		try {
+			configuration = YAMLConfigurationLoader.builder().setFile(
+					new File(dataDirectory.toAbsolutePath().toString(), "config.yml")).build().load();
+		} catch (IOException e) {
+			logger.error("Error loading config.yml");
+			e.printStackTrace();
+			return false;
+		}
+
+		//Message config
+		loadResource("messages.yml");
+		ConfigurationNode messagesConfiguration;
+
+		try {
+			messagesConfiguration = YAMLConfigurationLoader.builder().setFile(
+					new File(dataDirectory.toAbsolutePath().toString(), "messages.yml")).build().load();
+		} catch (IOException e) {
+			logger.error("Error loading messages.yml");
+			e.printStackTrace();
+			return false;
+		}
+
+		Messages.set(messagesConfiguration);
+
+		return true;
 	}
 
 	public void initCommands() {
@@ -183,13 +195,6 @@ public class ProxyDiscord {
 
         annotationParser.parse(new Commands(this, manager));
     }
-
-	private void initLinking() {
-		String linkingChannelId = getConfig().getNode("linking-channel-id").getString();
-		String linkingSecret = getConfig().getNode("linking-secret").getString();
-
-		linkingManager = new LinkingManager(this, linkingChannelId, linkingSecret);
-	}
 
 	private void initListeners() {
 		proxy.getEventManager().register(this, new ServerConnect(this));
@@ -243,10 +248,6 @@ public class ProxyDiscord {
 	public static MinecraftChannelIdentifier getStatusIdentifier() {
 		return statusIdentifier;
 	}
-
-	ConfigurationNode getConfig() {
-    	return configuration;
-    }
 
     public DebugLogger getDebugLogger() {
     	return debugLogger;
@@ -304,5 +305,17 @@ public class ProxyDiscord {
 
 	public Object getPlatformDetection() {
 		return platformDetection;
+	}
+
+	public void reload() {
+		if(loadConfig()) {
+			debugLogger.reload(configuration);
+			luckPermsManager.reload(configuration);
+			linkingManager.reload(configuration);
+			verificationManager.reload(configuration);
+			groupSyncManager.reload(configuration);
+			loggingManager.reload(configuration);
+			announcementManager.reload(configuration);
+		}
 	}
 }

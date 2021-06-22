@@ -64,7 +64,9 @@ public class VerificationManager {
 
     private void parseConfig(ConfigurationNode config) {
         ConfigurationNode roleIds = config.getNode("verified-role-ids");
+
         verifiedRoleIds = new HashSet<>();
+        lastKnownStatuses.clear();
 
         if(!roleIds.isEmpty()) {
             if(roleIds.isList()) {
@@ -126,9 +128,7 @@ public class VerificationManager {
             logger.warn("Default verified server (" + defaultVerifiedServerName + ") does not exist!");
         }
 
-        if(!verifiedRoleIds.isEmpty()) {
-            populateUsers();
-        }
+        populateUsers();
     }
 
     @Subscribe(order = PostOrder.NORMAL)
@@ -301,7 +301,7 @@ public class VerificationManager {
     }
 
     public boolean isPublicServer(RegisteredServer server) {
-        return publicServers.contains(server);
+        return server != null && publicServers.contains(server);
     }
 
     public RegisteredServer getDefaultVerifiedServer() {
@@ -314,5 +314,9 @@ public class VerificationManager {
 
     public boolean isLinkingServer(RegisteredServer server) {
         return server.equals(linkingServer);
+    }
+
+    public void reload(ConfigurationNode config) {
+        parseConfig(config);
     }
 }

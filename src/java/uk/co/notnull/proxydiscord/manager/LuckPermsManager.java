@@ -24,7 +24,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class LuckPermsManager {
-    private final String verifiedPermission;
+    private String verifiedPermission;
 
     private final ProxyDiscord plugin;
     private final Logger logger;
@@ -40,10 +40,14 @@ public class LuckPermsManager {
                 Set.of(Flag.INCLUDE_NODES_WITHOUT_SERVER_CONTEXT, Flag.INCLUDE_NODES_WITHOUT_WORLD_CONTEXT));
         userManager = luckPermsApi.getUserManager();
 
-        verifiedPermission = config.getNode("verified-permission").getString();
-
         plugin.getProxy().getEventManager().register(plugin, this);
+
+        parseConfig(config);
 	}
+
+	private void parseConfig(ConfigurationNode config) {
+        verifiedPermission = config.getNode("verified-permission").getString();
+    }
 
 	@Subscribe(order = PostOrder.NORMAL)
     public void onPlayerVerifyStateChange(PlayerVerifyStateChangeEvent event) {
@@ -145,5 +149,9 @@ public class LuckPermsManager {
 
     public UserManager getUserManager() {
         return userManager;
+    }
+
+    public void reload(ConfigurationNode config) {
+        parseConfig(config);
     }
 }

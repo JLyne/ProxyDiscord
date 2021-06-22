@@ -83,6 +83,9 @@ verification-lost-moved: 'You have been moved back to the [server] server.'
 save-success: |-
   Linked accounts have been saved.
 
+reload-success: |-
+  Configuration has been reloaded
+
 embed-link-success:
   title: 'Accounts linked successfully'
   description: |-

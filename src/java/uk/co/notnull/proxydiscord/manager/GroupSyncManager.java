@@ -100,9 +100,7 @@ public class GroupSyncManager {
 				syncSettings.put(roleId, groupNames);
 			});
 
-			if (!syncSettings.isEmpty()) {
-				populateUsers();
-			}
+			populateUsers();
 		}
 	}
 
@@ -239,4 +237,8 @@ public class GroupSyncManager {
 			syncPlayer(player.get());
 		}
 	}
+
+	public void reload(ConfigurationNode config) {
+        parseConfig(config);
+    }
 }

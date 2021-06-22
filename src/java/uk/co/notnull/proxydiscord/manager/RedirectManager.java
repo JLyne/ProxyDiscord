@@ -15,14 +15,14 @@ import uk.co.notnull.proxydiscord.Messages;
 import uk.co.notnull.proxydiscord.ProxyDiscord;
 import uk.co.notnull.proxydiscord.events.PlayerVerifyStateChangeEvent;
 
-import java.util.HashMap;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class RedirectManager {
     private final ProxyDiscord plugin;
     private final VerificationManager verificationManager;
-    private final HashMap<UUID, RegisteredServer> destinations;
+    private final ConcurrentHashMap<UUID, RegisteredServer> destinations;
 
     public RedirectManager(ProxyDiscord plugin) {
         ProxyServer proxy = plugin.getProxy();
@@ -30,7 +30,7 @@ public class RedirectManager {
         this.plugin = plugin;
         this.verificationManager = plugin.getVerificationManager();
 
-        destinations = new HashMap<>();
+        destinations = new ConcurrentHashMap<>();
         proxy.getEventManager().register(plugin, this);
     }
 
@@ -50,6 +50,7 @@ public class RedirectManager {
     @Subscribe(order = PostOrder.NORMAL)
     public void onPlayerVerifyStateChange(PlayerVerifyStateChangeEvent event) {
         Player player = event.getPlayer();
+        RegisteredServer currentServer = player.getCurrentServer().map(ServerConnection::getServer).orElse(null);
 
         switch(event.getState()) {
             case VERIFIED:
@@ -59,13 +60,21 @@ public class RedirectManager {
                 break;
 
             case LINKED_NOT_VERIFIED:
-                if(event.getPreviousState().isVerified()) {
+                if(event.getPreviousState().isVerified() || !verificationManager.isPublicServer(currentServer)) {
                     sendToLinkingServer(player, Messages.get("verification-lost-role"));
+                } else {
+                    destinations.computeIfPresent(player.getUniqueId(), (UUID uuid, RegisteredServer server) -> {
+                        if(verificationManager.isPublicServer(server)) {
+                            sendToDestinationServer(player);
+                        }
+
+                        return server;
+                    });
                 }
 
                 break;
             case NOT_LINKED:
-                if(event.getPreviousState().isVerified()) {
+                if(event.getPreviousState().isVerified() || !verificationManager.isPublicServer(currentServer)) {
                     sendToLinkingServer(player, Messages.get("verification-lost-unlinked"));
                 }
         }
@@ -88,6 +97,8 @@ public class RedirectManager {
 
         if(currentServer.isPresent() && linkingServer != null && !verificationManager.isPublicServer(currentServer.get().getServer())) {
             plugin.getDebugLogger().info("Moving " + player.getUsername() + " to " + linkingServer.getServerInfo().getName());
+
+            destinations.put(player.getUniqueId(), currentServer.get().getServer());
 
             player.createConnectionRequest(linkingServer).connect().thenAccept(result -> {
                 if(result.isSuccessful()) {
@@ -114,11 +125,15 @@ public class RedirectManager {
                 return;
             }
 
-            if(destinations.containsKey(player.getUniqueId())) {
-                player.createConnectionRequest(destinations.get(player.getUniqueId())).fireAndForget();
-            } else if(defaultVerifiedServer != null) {
-                player.createConnectionRequest(defaultVerifiedServer).fireAndForget();
-            }
+            destinations.compute(player.getUniqueId(), (UUID uuid, RegisteredServer server) -> {
+                if(server != null) {
+                    player.createConnectionRequest(destinations.get(player.getUniqueId())).fireAndForget();
+                } else if(defaultVerifiedServer != null) {
+                    player.createConnectionRequest(defaultVerifiedServer).fireAndForget();
+                }
+
+                return null;
+            });
         });
     }
 }

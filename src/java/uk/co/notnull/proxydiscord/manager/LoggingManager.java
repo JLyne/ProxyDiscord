@@ -305,4 +305,8 @@ public class LoggingManager {
             }
         }
     }
+
+    public void reload(ConfigurationNode config) {
+        parseConfig(config);
+    }
 }

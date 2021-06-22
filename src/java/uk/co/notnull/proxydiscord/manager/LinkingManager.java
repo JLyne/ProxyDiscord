@@ -3,6 +3,7 @@ package uk.co.notnull.proxydiscord.manager;
 import com.google.common.collect.HashBiMap;
 import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.proxy.Player;
+import ninja.leaping.configurate.ConfigurationNode;
 import org.javacord.api.DiscordApi;
 import org.javacord.api.entity.channel.TextChannel;
 import org.javacord.api.entity.user.User;
@@ -31,19 +32,17 @@ public class LinkingManager {
 
     private HashBiMap<UUID, Long> links;
     private HashBiMap<String, UUID> pendingLinks;
-    private final String linkingSecret;
-    private final String linkingChannelId;
+    private String linkingSecret;
+    private String linkingChannelId;
 
     private final Logger logger;
     private Link linkCommand;
 
-    public LinkingManager(ProxyDiscord plugin, String linkingChannelId, String linkingSecret) {
+    public LinkingManager(ProxyDiscord plugin, ConfigurationNode config) {
         this.plugin = plugin;
         this.proxy = plugin.getProxy();
         this.logger = plugin.getLogger();
 
-        this.linkingSecret = linkingSecret;
-        this.linkingChannelId = linkingChannelId;
         this.loadLinks();
 
         proxy.getScheduler().buildTask(plugin, () -> {
@@ -51,15 +50,31 @@ public class LinkingManager {
             saveLinks();
         }).repeat(300, TimeUnit.SECONDS).delay(300, TimeUnit.SECONDS).schedule();
 
-        if(linkingChannelId != null) {
-            findChannel();
-        }
-
         plugin.getDiscord().getApi().addReconnectListener(event -> {
             if(linkingChannelId != null) {
                 findChannel();
+            } else {
+                linkCommand.remove();
+                linkCommand = null;
             }
         });
+
+        parseConfig(config);
+    }
+
+    private void parseConfig(ConfigurationNode config) {
+        String linkingChannelId = config.getNode("linking-channel-id").getString();
+		String linkingSecret = config.getNode("linking-secret").getString(); //TODO: Validate
+
+		this.linkingSecret = linkingSecret;
+        this.linkingChannelId = linkingChannelId;
+
+        if(linkingChannelId != null) {
+            findChannel();
+        } else if(linkCommand != null) {
+            linkCommand.remove();
+            linkCommand = null;
+        }
     }
 
     public boolean isLinked(Player player) {
@@ -289,5 +304,9 @@ public class LinkingManager {
 
     public String getLinkingSecret() {
         return linkingSecret;
+    }
+
+    public void reload(ConfigurationNode config) {
+        parseConfig(config);
     }
 }

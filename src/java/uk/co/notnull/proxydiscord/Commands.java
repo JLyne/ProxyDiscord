@@ -262,4 +262,11 @@ public class Commands {
         linkingManager.saveLinks();
         sender.sendMessage(Identity.nil(), Component.text(Messages.get("save-success")));
     }
+
+    @CommandMethod("discord reload")
+    @CommandPermission("discord.reload")
+    public void reload(CommandSource sender) {
+        plugin.reload();
+        sender.sendMessage(Identity.nil(), Component.text(Messages.get("reload-success")));
+    }
 }

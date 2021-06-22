@@ -1,5 +1,6 @@
 package uk.co.notnull.proxydiscord;
 
+import ninja.leaping.configurate.ConfigurationNode;
 import org.slf4j.Logger;
 
 public class DebugLogger {
@@ -13,12 +14,21 @@ public class DebugLogger {
 		}
 	}
 	
-	DebugLogger(ProxyDiscord plugin) {
+	DebugLogger(ProxyDiscord plugin, ConfigurationNode config) {
 		this.logger = plugin.getLogger();
 
-		if(plugin.getConfig().getNode("debug-enabled").getBoolean(false)) {
-			debugEnabled = true;
-			plugin.getLogger().info("Enabled debug logging.");
+		parseConfig(config);
+	}
+
+	private void parseConfig(ConfigurationNode config) {
+		debugEnabled = config.getNode("debug-enabled").getBoolean(false);
+
+		if(debugEnabled) {
+			logger.info("Enabled debug logging.");
 		}
+	}
+
+	public void reload(ConfigurationNode config) {
+		parseConfig(config);
 	}
 }
