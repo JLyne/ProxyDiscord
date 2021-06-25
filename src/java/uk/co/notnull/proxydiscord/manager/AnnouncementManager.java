@@ -29,11 +29,11 @@ public class AnnouncementManager {
 
         config.getChildrenMap().forEach((Object id, ConfigurationNode settings) -> {
             String channelID = id.toString();
-            boolean serverList = settings.getNode("serverList").getBoolean(false);
+            boolean serverList = !settings.getNode("servers").isVirtual();
             List<? extends ConfigurationNode> servers = settings.getNode("servers").getChildrenList();
 
             if(serverList && servers.isEmpty()) {
-                logger.warn("Skipping announcement channel " + channelID + ". serverList enabled but no servers specified.");
+                logger.warn("Skipping announcement channel " + channelID + ". Server list defined but empty.");
                 return;
             }
 

@@ -73,14 +73,13 @@ logging-formats:
 # Prevents duplicage messages if logging of messages sent from the discord side is enabled
 logging-delete-sent-messages: true
 
-# Channel for annoucements, messages sent here will be shown in chat
+# Settings for announcements
 announcement-channels:
-  '610046112996261908':
-    serverList: false
-  '762327405758775317':
-    serverList: true
-    servers:
-      - 'stresstest'
+  # 'channelid' : {} # Messages sent in channel will be shown in all servers
+  # 'channelid2': # Messages sent in channel will be shown in server1/server 2 only
+  #   servers:
+  #    - 'server1'
+  #    - 'server2'
 
 # Whether to debug logging
 debug: true
