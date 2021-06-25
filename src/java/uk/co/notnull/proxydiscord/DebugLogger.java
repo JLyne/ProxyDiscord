@@ -21,7 +21,7 @@ public class DebugLogger {
 	}
 
 	private void parseConfig(ConfigurationNode config) {
-		debugEnabled = config.getNode("debug-enabled").getBoolean(false);
+		debugEnabled = config.getNode("debug").getBoolean(false);
 
 		if(debugEnabled) {
 			logger.info("Enabled debug logging.");

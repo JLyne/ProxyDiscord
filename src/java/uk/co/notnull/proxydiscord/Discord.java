@@ -27,7 +27,7 @@ public class Discord {
 	public Discord(ProxyDiscord plugin, ConfigurationNode config) {
 		this.logger = plugin.getLogger();
 
-		String token = config.getNode("bot-token").getString(null);
+		String token = config.getNode("bot", "token").getString(null);
 
 		if(token == null || token.isEmpty()) {
 			throw new IllegalArgumentException("No bot token provided, check the config");
@@ -77,8 +77,8 @@ public class Discord {
 	}
 
 	private void updateActivity(ConfigurationNode config) {
-		String activity = config.getNode("bot-activity").getString(null);
-		String activityType = config.getNode("bot-activity-type").getString("");
+		String activity = config.getNode("bot", "activity").getString(null);
+		String activityType = config.getNode("bot", "activity-type").getString("");
 		ActivityType type = ActivityType.PLAYING;
 
 		switch (activityType.toLowerCase()) {

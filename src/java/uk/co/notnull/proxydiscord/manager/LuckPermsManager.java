@@ -46,7 +46,7 @@ public class LuckPermsManager {
 	}
 
 	private void parseConfig(ConfigurationNode config) {
-        verifiedPermission = config.getNode("verified-permission").getString();
+        verifiedPermission = config.getNode("linking", "verified-permission").getString();
     }
 
 	@Subscribe(order = PostOrder.NORMAL)

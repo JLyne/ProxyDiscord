@@ -63,7 +63,7 @@ public class VerificationManager {
     }
 
     private void parseConfig(ConfigurationNode config) {
-        ConfigurationNode roleIds = config.getNode("verified-role-ids");
+        ConfigurationNode roleIds = config.getNode("linking", "verified-role-ids");
 
         verifiedRoleIds = new HashSet<>();
         lastKnownStatuses.clear();
@@ -96,8 +96,8 @@ public class VerificationManager {
             }
         }
 
-        bypassPermission = config.getNode("bypass-permission").getString();
-        String linkingServerName = config.getNode("linking-server").getString();
+        bypassPermission = config.getNode("linking", "bypass-permission").getString();
+        String linkingServerName = config.getNode("linking", "linking-server").getString();
         linkingServer = proxy.getServer(linkingServerName).orElse(null);
 
         publicServers.clear();
@@ -108,7 +108,7 @@ public class VerificationManager {
             publicServers.add(linkingServer);
         }
 
-        List<? extends ConfigurationNode> publicServerNames = config.getNode("public-servers").getChildrenList();
+        List<? extends ConfigurationNode> publicServerNames = config.getNode("linking", "public-servers").getChildrenList();
 
         for(ConfigurationNode serverName : publicServerNames) {
             String name = serverName.getString();
@@ -121,7 +121,7 @@ public class VerificationManager {
             }
         }
 
-        String defaultVerifiedServerName = config.getNode("default-verified-server").getString();
+        String defaultVerifiedServerName = config.getNode("linking", "default-destination-server").getString();
         defaultVerifiedServer = proxy.getServer(defaultVerifiedServerName).orElse(null);
 
         if(defaultVerifiedServer == null && defaultVerifiedServerName != null && !defaultVerifiedServerName.isEmpty()) {

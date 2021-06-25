@@ -63,8 +63,8 @@ public class LinkingManager {
     }
 
     private void parseConfig(ConfigurationNode config) {
-        String linkingChannelId = config.getNode("linking-channel-id").getString();
-		String linkingSecret = config.getNode("linking-secret").getString(); //TODO: Validate
+        String linkingChannelId = config.getNode("linking", "discord-channel-id").getString();
+		String linkingSecret = config.getNode("linking", "secret").getString(); //TODO: Validate
 
 		this.linkingSecret = linkingSecret;
         this.linkingChannelId = linkingChannelId;

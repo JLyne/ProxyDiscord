@@ -1,38 +1,43 @@
-bot-token: bot-token-here
+# Settings for the discord bot itself
+bot:
+  token: # Bot token here
 
-# Valid values: playing, streaming, listening, watching, competing
-bot-activity-type: 'playing'
+  # Activity to show in Discord
+  activity-type: 'playing' # Valid values: playing, streaming, listening, watching, competing
+  activity: 'Minecraft'
 
-bot-activity: 'Minecraft'
+# Settings for linking discord accounts and verification
+linking:
+  secret: ')2z#*MR^BrGVygg7'
 
-linking-secret: ')2z#*MR^BrGVygg7'
+  # Discord channel for the bot to listen for and respond to link attempts
+  discord-channel-id: '123456789'
 
-# Discord channel for the bot to listen for and respond to link attempts
-linking-channel-id: '123456789'
+  # Server to send players to for the linking and verification processes
+  linking-server: 'linking'
 
-# Server to send players to, if they try to join a non-public server without meeting the requirements
-linking-server: 'linking'
+  # Discord roles that should be checked to determine if a player can play on servers (is "verified")
+  # If no roles are defined, all players are considered verified
+  verified-role-ids:
+   - '123456789'
 
-# Discord roles that should be checked to determine if a player can join (is "verified")
-# If no roles are defined, all players are considered verified
-verified-role-ids:
- - '123456789'
+  # Permission to grant users who are verified
+  verified-permission: 'group.verified'
 
-# Permission to grant users who are verified
-verified-permission: 'group.verified'
+  # Permission to allow bypassing verification
+  bypass-permission: 'discord.bypass'
 
-# Server to redirect newly verified players to, if their original destination is unknown
-verified-default-server: 'waiting'
+  # Server to send newly verified players to, if their original destination is unknown
+  default-destination-server: 'hub'
 
-# Permission to allow bypassing the linking and role checks
-bypass-permission: 'discord.bypass'
+  # Servers which players can join without being linked or verified
+  public-servers: []
 
-# Servers which players can join without linking or verifying
-public-servers: []
-
+# Discord roles to sync to luckperms groups
+# Note that removing a group from this list will *not* remove it from players who have it. You will have to do this manually.
 synced-roles:
-  # 'roleid1': 'group1'
-  # 'roleid2':
+  # 'roleid1': 'group1' # Single group
+  # 'roleid2': # Multiple groups
   #   - 'group1'
   #   - 'group2'
 
@@ -78,4 +83,4 @@ announcement-channels:
       - 'stresstest'
 
 # Whether to debug logging
-debug-enabled: true
+debug: true
