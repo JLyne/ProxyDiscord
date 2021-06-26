@@ -1,7 +1,7 @@
-package uk.co.notnull.proxydiscord.events;
+package uk.co.notnull.proxydiscord.api.events;
 
 import com.velocitypowered.api.proxy.Player;
-import uk.co.notnull.proxydiscord.VerificationResult;
+import uk.co.notnull.proxydiscord.api.VerificationResult;
 
 public class PlayerVerifyStateChangeEvent {
 	private final Player player;

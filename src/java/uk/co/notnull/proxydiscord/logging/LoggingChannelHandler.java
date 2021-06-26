@@ -27,7 +27,8 @@ import org.javacord.api.util.event.ListenerManager;
 import org.slf4j.Logger;
 import uk.co.notnull.proxydiscord.ProxyDiscord;
 import uk.co.notnull.proxydiscord.Util;
-import uk.co.notnull.proxydiscord.events.DiscordChatEvent;
+import uk.co.notnull.proxydiscord.api.LogType;
+import uk.co.notnull.proxydiscord.api.events.DiscordChatEvent;
 import uk.co.notnull.proxydiscord.manager.LinkingManager;
 
 import java.text.SimpleDateFormat;

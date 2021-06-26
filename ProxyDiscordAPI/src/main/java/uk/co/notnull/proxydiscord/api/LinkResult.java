@@ -1,4 +1,4 @@
-package uk.co.notnull.proxydiscord;
+package uk.co.notnull.proxydiscord.api;
 
 public enum LinkResult {
     UNKNOWN_ERROR, //Exception occurred

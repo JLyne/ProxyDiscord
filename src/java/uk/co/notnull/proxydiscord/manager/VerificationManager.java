@@ -15,10 +15,10 @@ import org.javacord.api.event.server.member.ServerMemberLeaveEvent;
 import org.javacord.api.event.server.role.UserRoleEvent;
 import org.slf4j.Logger;
 import uk.co.notnull.proxydiscord.ProxyDiscord;
-import uk.co.notnull.proxydiscord.VerificationResult;
-import uk.co.notnull.proxydiscord.events.PlayerLinkEvent;
-import uk.co.notnull.proxydiscord.events.PlayerUnlinkEvent;
-import uk.co.notnull.proxydiscord.events.PlayerVerifyStateChangeEvent;
+import uk.co.notnull.proxydiscord.api.VerificationResult;
+import uk.co.notnull.proxydiscord.api.events.PlayerLinkEvent;
+import uk.co.notnull.proxydiscord.api.events.PlayerUnlinkEvent;
+import uk.co.notnull.proxydiscord.api.events.PlayerVerifyStateChangeEvent;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -31,7 +31,7 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
-public class VerificationManager {
+public class VerificationManager implements uk.co.notnull.proxydiscord.api.manager.VerificationManager {
     private final ProxyDiscord plugin;
     private final LinkingManager linkingManager;
 

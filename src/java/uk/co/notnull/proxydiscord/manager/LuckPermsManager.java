@@ -17,7 +17,7 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 import uk.co.notnull.proxydiscord.ProxyDiscord;
-import uk.co.notnull.proxydiscord.events.PlayerVerifyStateChangeEvent;
+import uk.co.notnull.proxydiscord.api.events.PlayerVerifyStateChangeEvent;
 
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;

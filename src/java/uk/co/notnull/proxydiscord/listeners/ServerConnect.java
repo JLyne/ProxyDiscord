@@ -11,7 +11,7 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import uk.co.notnull.proxydiscord.Messages;
 import uk.co.notnull.proxydiscord.ProxyDiscord;
 import uk.co.notnull.proxydiscord.manager.VerificationManager;
-import uk.co.notnull.proxydiscord.VerificationResult;
+import uk.co.notnull.proxydiscord.api.VerificationResult;
 
 public class ServerConnect {
     private final ProxyDiscord plugin;

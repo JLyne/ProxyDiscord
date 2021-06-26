@@ -16,6 +16,8 @@ import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.luckperms.api.model.user.UserManager;
 import org.javacord.api.entity.user.User;
+import uk.co.notnull.proxydiscord.api.LinkResult;
+import uk.co.notnull.proxydiscord.api.VerificationResult;
 import uk.co.notnull.proxydiscord.manager.LinkingManager;
 import uk.co.notnull.proxydiscord.manager.VerificationManager;
 

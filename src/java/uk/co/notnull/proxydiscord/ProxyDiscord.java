@@ -56,7 +56,7 @@ import uk.co.notnull.proxydiscord.manager.*;
 		@Dependency(id = "proxyqueues", optional = true),
 		@Dependency(id = "platform-detection", optional = true)
 })
-public class ProxyDiscord {
+public class ProxyDiscord implements uk.co.notnull.proxydiscord.api.ProxyDiscord {
 	private static MinecraftChannelIdentifier statusIdentifier;
 	private static ProxyDiscord instance;
 
@@ -128,7 +128,7 @@ public class ProxyDiscord {
         }
 	}
 
-	public boolean loadConfig() {
+	private boolean loadConfig() {
 		// Setup config
 		loadResource("config.yml");
 		try {
@@ -158,7 +158,7 @@ public class ProxyDiscord {
 		return true;
 	}
 
-	public void initCommands() {
+	private void initCommands() {
         CommandManager<CommandSource> manager = new VelocityCommandManager<>(
 				proxy.getPluginManager().fromInstance(this).get(),
 				proxy,

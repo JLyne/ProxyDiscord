@@ -13,7 +13,7 @@ import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import uk.co.notnull.proxydiscord.Messages;
 import uk.co.notnull.proxydiscord.ProxyDiscord;
-import uk.co.notnull.proxydiscord.events.PlayerVerifyStateChangeEvent;
+import uk.co.notnull.proxydiscord.api.events.PlayerVerifyStateChangeEvent;
 
 import java.util.Optional;
 import java.util.UUID;

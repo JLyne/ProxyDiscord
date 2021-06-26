@@ -1,1 +1,3 @@
+include "ProxyDiscordApi"
+
 rootProject.name = 'ProxyDiscord'

@@ -1,6 +1,5 @@
 package uk.co.notnull.proxydiscord.manager;
 
-import com.velocitypowered.api.proxy.Player;
 import ninja.leaping.configurate.ConfigurationNode;
 import org.slf4j.Logger;
 import uk.co.notnull.proxydiscord.ProxyDiscord;
@@ -11,7 +10,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-public class LoggingManager {
+public class LoggingManager implements uk.co.notnull.proxydiscord.api.manager.LoggingManager {
     private final ProxyDiscord plugin;
     private final Logger logger;
     private final Map<Long, LoggingChannelHandler> handlers;
@@ -27,7 +26,7 @@ public class LoggingManager {
         parseConfig(config);
     }
 
-    public void parseConfig(ConfigurationNode config) {
+    private void parseConfig(ConfigurationNode config) {
         Set<Long> existing = new HashSet<>(handlers.keySet());
 
         LoggingChannelHandler.defaultConfig = config.getNode("logging", "default");

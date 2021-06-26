@@ -1,4 +1,4 @@
-package uk.co.notnull.proxydiscord.events;
+package uk.co.notnull.proxydiscord.api.events;
 
 import com.velocitypowered.api.event.player.PlayerChatEvent;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
@@ -7,7 +7,7 @@ import net.luckperms.api.model.user.User;
 import java.util.Set;
 
 @SuppressWarnings("unused")
-public class DiscordChatEvent {
+public final class DiscordChatEvent {
 	private final User user;
 	private final Set<RegisteredServer> servers;
 	private final String message;

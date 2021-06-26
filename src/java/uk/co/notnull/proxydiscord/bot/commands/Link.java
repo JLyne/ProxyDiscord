@@ -8,11 +8,11 @@ import org.javacord.api.event.message.MessageCreateEvent;
 import org.javacord.api.listener.message.MessageCreateListener;
 import org.javacord.api.util.event.ListenerManager;
 import uk.co.notnull.proxydiscord.Messages;
-import uk.co.notnull.proxydiscord.LinkResult;
+import uk.co.notnull.proxydiscord.api.LinkResult;
 import uk.co.notnull.proxydiscord.manager.LinkingManager;
 import uk.co.notnull.proxydiscord.ProxyDiscord;
 import uk.co.notnull.proxydiscord.manager.VerificationManager;
-import uk.co.notnull.proxydiscord.VerificationResult;
+import uk.co.notnull.proxydiscord.api.VerificationResult;
 
 import java.util.HashMap;
 import java.util.Map;

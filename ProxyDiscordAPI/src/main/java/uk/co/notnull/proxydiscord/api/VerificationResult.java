@@ -1,4 +1,4 @@
-package uk.co.notnull.proxydiscord;
+package uk.co.notnull.proxydiscord.api;
 
 public enum VerificationResult {
     UNKNOWN(false), // Status hasn't been calculated yet

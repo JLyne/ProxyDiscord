@@ -7,8 +7,8 @@ import com.velocitypowered.api.proxy.server.RegisteredServer;
 import uk.co.notnull.proxydiscord.Messages;
 import uk.co.notnull.proxydiscord.ProxyDiscord;
 import uk.co.notnull.proxydiscord.manager.VerificationManager;
-import uk.co.notnull.proxydiscord.VerificationResult;
-import uk.co.notnull.proxydiscord.events.PlayerVerifyStateChangeEvent;
+import uk.co.notnull.proxydiscord.api.VerificationResult;
+import uk.co.notnull.proxydiscord.api.events.PlayerVerifyStateChangeEvent;
 import uk.co.notnull.proxyqueues.events.PlayerQueueEvent;
 
 import java.util.Optional;

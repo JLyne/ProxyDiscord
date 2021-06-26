@@ -1,4 +1,4 @@
-package uk.co.notnull.proxydiscord.logging;
+package uk.co.notnull.proxydiscord.api;
 
 public enum LogType {
 	CHAT,

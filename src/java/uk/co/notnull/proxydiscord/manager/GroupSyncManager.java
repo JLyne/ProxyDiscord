@@ -16,14 +16,14 @@ import org.javacord.api.event.server.role.UserRoleAddEvent;
 import org.javacord.api.event.server.role.UserRoleEvent;
 import org.slf4j.Logger;
 import uk.co.notnull.proxydiscord.ProxyDiscord;
-import uk.co.notnull.proxydiscord.events.PlayerLinkEvent;
-import uk.co.notnull.proxydiscord.events.PlayerUnlinkEvent;
+import uk.co.notnull.proxydiscord.api.events.PlayerLinkEvent;
+import uk.co.notnull.proxydiscord.api.events.PlayerUnlinkEvent;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class GroupSyncManager {
+public class GroupSyncManager implements uk.co.notnull.proxydiscord.api.manager.GroupSyncManager {
 	private final ProxyDiscord plugin;
 	private final Logger logger;
 	private final ProxyServer proxy;

@@ -1,0 +1,59 @@
+/*
+ * ProxyChat, a Velocity chat solution
+ * Copyright (C) 2020 James Lyne
+ *
+ * Based on BungeeChat2 (https://github.com/AuraDevelopmentTeam/BungeeChat2)
+ * Copyright (C) 2020 Aura Development Team
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+plugins {
+    id 'com.github.johnrengelman.shadow'
+    id 'java'
+    id 'maven'
+}
+
+group = 'uk.co.notnull.proxydiscord.api'
+version = 'RTGAME'
+
+description = """ProxyDiscordAPI"""
+
+sourceCompatibility = 11
+targetCompatibility = 11
+
+sourceSets {
+    main {
+        java {
+            srcDirs= ["./src/main/java"]
+        }
+        resources {
+            srcDirs= ["./src/main/resources"]
+        }
+    }
+}
+
+repositories {
+    mavenCentral()
+    maven { url 'https://nexus.velocitypowered.com/repository/maven-public/' }
+    maven {
+        name "luck-repo"
+        url "https://repo.lucko.me/"
+    }
+}
+
+dependencies {
+    compileOnly group: 'com.velocitypowered', name: 'velocity-api', version:'3.0.0-SNAPSHOT'
+    compileOnly group: 'net.luckperms', name: 'api', version:'5.0'
+}

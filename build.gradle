@@ -33,17 +33,20 @@ repositories {
 }
 
 dependencies {
+
+    compile project(":ProxyDiscordApi")
+
     implementation group: 'org.javacord', name: 'javacord', version:'3.3.0'
     implementation 'de.themoep:minedown-adventure:1.7.1-SNAPSHOT'
     implementation 'cloud.commandframework:cloud-velocity:1.4.0'
     implementation 'cloud.commandframework:cloud-minecraft-extras:1.4.0'
     implementation 'cloud.commandframework:cloud-annotations:1.4.0'
     compileOnly group: 'net.luckperms', name: 'api', version:'5.0'
-    compileOnly group: 'com.velocitypowered', name: 'velocity-api', version:'1.1.8'
+    compileOnly group: 'com.velocitypowered', name: 'velocity-api', version:'3.0.0-SNAPSHOT'
     compileOnly 'org.spongepowered:configurate-yaml:3.6'
     compileOnly name: 'ProxyQueues'
     compileOnly name: "PlatformDetection-velocity-2.0-SNAPSHOT"
-    annotationProcessor 'com.velocitypowered:velocity-api:1.1.8'
+    annotationProcessor 'com.velocitypowered:velocity-api:3.0.0-SNAPSHOT'
 }
 
 compileJava {

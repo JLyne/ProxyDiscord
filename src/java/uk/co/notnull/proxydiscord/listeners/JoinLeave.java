@@ -14,7 +14,7 @@ import uk.co.notnull.proxydiscord.manager.GroupSyncManager;
 import uk.co.notnull.proxydiscord.manager.LoggingManager;
 import uk.co.notnull.proxydiscord.ProxyDiscord;
 import uk.co.notnull.proxydiscord.manager.VerificationManager;
-import uk.co.notnull.proxydiscord.VerificationResult;
+import uk.co.notnull.proxydiscord.api.VerificationResult;
 
 public class JoinLeave {
 	private final ProxyDiscord plugin;

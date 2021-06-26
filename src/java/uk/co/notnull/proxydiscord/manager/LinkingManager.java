@@ -8,11 +8,11 @@ import org.javacord.api.DiscordApi;
 import org.javacord.api.entity.channel.TextChannel;
 import org.javacord.api.entity.user.User;
 import org.slf4j.Logger;
-import uk.co.notnull.proxydiscord.LinkResult;
+import uk.co.notnull.proxydiscord.api.LinkResult;
 import uk.co.notnull.proxydiscord.ProxyDiscord;
 import uk.co.notnull.proxydiscord.bot.commands.Link;
-import uk.co.notnull.proxydiscord.events.PlayerLinkEvent;
-import uk.co.notnull.proxydiscord.events.PlayerUnlinkEvent;
+import uk.co.notnull.proxydiscord.api.events.PlayerLinkEvent;
+import uk.co.notnull.proxydiscord.api.events.PlayerUnlinkEvent;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -26,7 +26,7 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 @SuppressWarnings("unused")
-public class LinkingManager {
+public class LinkingManager implements uk.co.notnull.proxydiscord.api.manager.LinkingManager {
     private final ProxyDiscord plugin;
     private final ProxyServer proxy;
 

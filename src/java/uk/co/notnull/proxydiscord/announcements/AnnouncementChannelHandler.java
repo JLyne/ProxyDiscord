@@ -34,6 +34,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 public class AnnouncementChannelHandler {
+	private final ProxyDiscord plugin;
 	private final ProxyServer proxy;
 	private final Logger logger;
 
@@ -62,6 +63,7 @@ public class AnnouncementChannelHandler {
 	public AnnouncementChannelHandler(String channelId, List<String> serverList) {
 		this.channelId = channelId;
 
+		this.plugin = ProxyDiscord.inst();
 		this.proxy = ProxyDiscord.inst().getProxy();
         this.logger = ProxyDiscord.inst().getLogger();
         this.sentLatestMessage = ConcurrentHashMap.newKeySet();
@@ -84,14 +86,14 @@ public class AnnouncementChannelHandler {
 			this.servers = servers;
 		}
 
-		ProxyDiscord.inst().getProxy().getEventManager().register(ProxyDiscord.inst(), this);
+		proxy.getEventManager().register(plugin, this);
 
 		createListeners();
 		getLatestMessage();
 	}
 
 	private TextChannel getChannel() {
-		Optional<TextChannel> announcementChannel = ProxyDiscord.inst().getDiscord().getApi()
+		Optional<TextChannel> announcementChannel = plugin.getDiscord().getApi()
                     .getTextChannelById(channelId);
 
 		if(announcementChannel.isEmpty()) {
@@ -129,7 +131,7 @@ public class AnnouncementChannelHandler {
 
 		channel.getMessages(1).thenAcceptAsync(messages -> {
 			if(messages.getNewestMessage().isPresent()) {
-				ProxyDiscord.inst().getDebugLogger().info("Retrieved latest announcement for " + channelName);
+				plugin.getDebugLogger().info("Retrieved latest announcement for " + channelName);
 				lastMessage = messages.getNewestMessage().get();
 			}
 		}).exceptionally(e -> {
@@ -192,7 +194,7 @@ public class AnnouncementChannelHandler {
 			});
         } else {
         	sentLatestMessage.clear();
-        	RegisteredServer linkingServer = ProxyDiscord.inst().getVerificationManager().getLinkingServer();
+        	RegisteredServer linkingServer = plugin.getVerificationManager().getLinkingServer();
 
         	List<Player> recipients = proxy.getAllPlayers().stream().filter(p -> {
         		return p.getCurrentServer().isPresent()
@@ -210,7 +212,7 @@ public class AnnouncementChannelHandler {
 		createListener.remove();
 		editListener.remove();
 		deleteListener.remove();
-		proxy.getEventManager().unregisterListener(ProxyDiscord.inst(), this);
+		proxy.getEventManager().unregisterListener(plugin, this);
 	}
 
 	@Subscribe(order = PostOrder.LATE)
@@ -223,7 +225,7 @@ public class AnnouncementChannelHandler {
 
 		RegisteredServer server = player.getCurrentServer().get().getServer();
 
-		if(ProxyDiscord.inst().getVerificationManager().getLinkingServer().equals(server)) {
+		if(plugin.getVerificationManager().getLinkingServer().equals(server)) {
 			return;
 		}
 
