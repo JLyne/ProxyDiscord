@@ -18,8 +18,7 @@ linking:
 
   # Discord roles that should be checked to determine if a player can play on servers (is "verified")
   # If no roles are defined, all players are considered verified
-  verified-role-ids:
-   - '123456789'
+  verified-role-ids: []
 
   # Permission to grant users who are verified
   verified-permission: 'group.verified'
@@ -35,7 +34,7 @@ linking:
 
 # Discord roles to sync to luckperms groups
 # Note that removing a group from this list will *not* remove it from players who have it. You will have to do this manually.
-synced-roles:
+synced-roles: {}
   # 'roleid1': 'group1' # Single group
   # 'roleid2': # Multiple groups
   #   - 'group1'
@@ -91,7 +90,7 @@ logging:
 
 
 # Settings for announcements
-announcement-channels:
+announcement-channels: {}
   # 'channelid' : {} # Messages sent in channel will be shown in all servers
   # 'channelid2': # Messages sent in channel will be shown in server1/server 2 only
   #   servers:
