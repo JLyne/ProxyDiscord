@@ -41,37 +41,54 @@ synced-roles:
   #   - 'group1'
   #   - 'group2'
 
-# Channel to log joins/leaves/chats etc in
-logging-channel-id: '123456789'
+# Settings for chat and event logging
+logging:
+  default: # Default settings which can be overridden for an individual log channel
+    # Event types to log. Valid events are 'join', 'leave', 'command', 'chat', 'discord-chat'
+    events:
+      'join'
+      'leave'
+      'command'
+      'chat'
+      'discord-chat' # If enabled, messages sent by users on discord in the log channel will be deleted and then logged using the 'discord-chat' log format.
 
-# Formats for logging various events
-# Remove or empty to disable
-logging-formats:
-  date: '<dd-MM-yy HH:mm:ss>' # Used for [date] in other formats
-  # In-game chat
-  chat: |-
-    ```md
-    [date] [[server]][[player]]([discord_id]) [message]```
-  # Messages sent in the discord logging channel. Useful for keeping the appearance of messages consistent
-  discord-chat: |-
-    ```md
-    [DISCORD] [date] [[server]][[player]]([discord_id]) [message]```
-  # Players joining the server
-  join: |-
-    ```md
-    [date] [[server]][[player]]([discord_id]) has joined the network```
-  # Players leaving the server
-  leave: |-
-    ```md
-    [date] [[server]][[player]]([discord_id]) has left the network```
-  # Commands run by players
-  command: |-
-    ```md
-    [COMMAND] [date] [[server]][[player]]([discord_id]) [command]```
+    # Optional list of servers to log, will log all server if not specified
+    # Also controls which servers will see messages sent in the Discord channel
+    # servers:
+    # - server1
+    # - server2
 
-# Whether to delete messages sent in the discord logging channel
-# Prevents duplicage messages if logging of messages sent from the discord side is enabled
-logging-delete-sent-messages: true
+    # Formats for logging various events
+    formats:
+      date: '<dd-MM-yy HH:mm:ss>' # Used for [date] in other formats
+      # In-game chat
+      chat: |-
+        ```md
+        [date] [[server]][[player]]([discord_mention]) [message]```
+      # Messages sent in the discord logging channel. Useful for keeping the appearance of messages consistent
+      discord-chat: |-
+        ```md
+        [DISCORD] [date] [[server]][[player]]([discord_mention]) [message]```
+      discord-chat-ingame: '&a&lDISCORD> &r[prefix][player][suffix]&r: [message]'
+      # Players joining the server
+      join: |-
+        ```md
+        [date] [[server]][[player]]([discord_mention]) has joined the network```
+      # Players leaving the server
+      leave: |-
+        ```md
+        [date] [[server]][[player]]([discord_mention]) has left the network```
+      # Commands run by players
+      command: |-
+        ```md
+        [COMMAND] [date] [[server]][[player]]([discord_mention]) [command]```
+  # 'channelid':
+  #   events:
+  #     - 'chat'
+  #   servers:
+  #     - 'server1'
+  #     - 'server2'
+
 
 # Settings for announcements
 announcement-channels:

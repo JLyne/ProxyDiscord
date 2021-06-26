@@ -37,8 +37,6 @@ public class JoinLeave {
 	public void onChooseInitialServer(PlayerChooseInitialServerEvent event) {
 		Player player = event.getPlayer();
 
-		loggingManager.logJoin(player);
-
 		player.sendMessage(Identity.nil(), Component.text(Messages.get("join-welcome"))
 			.color(NamedTextColor.GREEN));
 
@@ -57,7 +55,6 @@ public class JoinLeave {
 	public void onDisconnect(DisconnectEvent event) {
 		Player player = event.getPlayer();
 
-		loggingManager.logLeave(player);
 		verificationManager.clearPlayerStatus(player);
 	}
 }
