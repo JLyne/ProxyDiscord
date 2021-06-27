@@ -57,6 +57,10 @@ logging:
     # - server1
     # - server2
 
+    # Whether the log is public
+    # Not used by default, but other plugins using the API may avoid logging sensitive information in public channels
+    public: true
+
     # Formats for logging various events
     formats:
       date: '<dd-MM-yy HH:mm:ss>' # Used for [date] in other formats

@@ -1,12 +1,5 @@
 package uk.co.notnull.proxydiscord.logging;
 
-import com.velocitypowered.api.event.PostOrder;
-import com.velocitypowered.api.event.Subscribe;
-import com.velocitypowered.api.event.command.CommandExecuteEvent;
-import com.velocitypowered.api.event.connection.DisconnectEvent;
-import com.velocitypowered.api.event.player.PlayerChatEvent;
-import com.velocitypowered.api.event.player.ServerPostConnectEvent;
-import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.proxy.ServerConnection;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
@@ -27,8 +20,10 @@ import org.javacord.api.util.event.ListenerManager;
 import org.slf4j.Logger;
 import uk.co.notnull.proxydiscord.ProxyDiscord;
 import uk.co.notnull.proxydiscord.Util;
-import uk.co.notnull.proxydiscord.api.LogType;
+import uk.co.notnull.proxydiscord.api.logging.LogEntry;
+import uk.co.notnull.proxydiscord.api.logging.LogType;
 import uk.co.notnull.proxydiscord.api.events.DiscordChatEvent;
+import uk.co.notnull.proxydiscord.api.logging.LogVisibility;
 import uk.co.notnull.proxydiscord.manager.LinkingManager;
 
 import java.text.SimpleDateFormat;
@@ -44,6 +39,7 @@ public class LoggingChannelHandler {
 
 	private final long channelId;
 	private boolean logSentMessages = false;
+	private boolean logIsPublic = true;
 	private final Integer lockDummy = 0;
 
 	private SimpleDateFormat dateFormat;
@@ -73,8 +69,6 @@ public class LoggingChannelHandler {
 		this.logger = plugin.getLogger();
 		this.linkingManager = plugin.getLinkingManager();
 		this.channelId = channelId;
-
-		proxy.getEventManager().register(plugin, this);
 
 		//Decrease logs per message if a low number of messages are unsent
         proxy.getScheduler().buildTask(plugin, () -> {
@@ -108,6 +102,7 @@ public class LoggingChannelHandler {
 		}
 
         logSentMessages = events.contains(LogType.DISCORD_CHAT);
+		logIsPublic = config.getNode("public").getBoolean(defaultConfig.getNode("public").getBoolean(true));
 
         ConfigurationNode serverList = config.getNode("servers");
         serverList = serverList.isEmpty() ? defaultConfig.getNode("servers") : serverList;
@@ -179,122 +174,37 @@ public class LoggingChannelHandler {
         logger.info("Activity logging enabled for channel: #" + loggingChannel.toString().replaceAll(".*\\[|].*", "") + " (id: " + channelId + ")");
     }
 
-    private boolean shouldLogEvent(LogType type, Player player) {
-		return shouldLogEvent(type, player.getCurrentServer().map(ServerConnection::getServer)
-				.orElse(null));
-	}
-
-    private boolean shouldLogEvent(LogType type, RegisteredServer server) {
-		if(!events.isEmpty() && !events.contains(type)) {
+    private boolean shouldLogEvent(LogEntry entry) {
+		if(!events.isEmpty() && !events.contains(entry.getType())) {
 			return false;
 		}
 
-		if(formats.getOrDefault(type, "").isEmpty()) {
+		if(logIsPublic && entry.getVisibility() == LogVisibility.PRIVATE_ONLY) {
 			return false;
 		}
 
-		if(!servers.isEmpty() && server == null) {
+		if(!logIsPublic && entry.getVisibility() == LogVisibility.PUBLIC_ONLY) {
 			return false;
 		}
 
-		if(!servers.isEmpty() && !servers.contains(server)) {
+		if(formats.getOrDefault(entry.getType(), "").isEmpty()) {
 			return false;
 		}
 
-		return true;
-	}
-
-    @Subscribe(order = PostOrder.LAST)
-	public void onServerPostConnect(ServerPostConnectEvent event) {
-		Player player = event.getPlayer();
-
-		if(shouldLogEvent(LogType.JOIN, player)) {
-			sendLogMessage(LogType.JOIN, player, Collections.emptyMap());
+		if(!servers.isEmpty() && entry.getServer().isEmpty()) {
+			return false;
 		}
 
-		if(event.getPreviousServer() != null && shouldLogEvent(LogType.LEAVE, event.getPreviousServer())) {
-			sendLogMessage(LogType.LEAVE, player,
-						   Map.of("[server]", Util.escapeMarkdown(event.getPreviousServer()
-																		  .getServerInfo().getName())));
+		return servers.isEmpty() || servers.contains(entry.getServer().get());
+	}
+
+    public void logEvent(LogEntry entry) {
+		if(shouldLogEvent(entry)) {
+			queueLogMessage(Util.formatLogEntry(formats.get(entry.getType()), entry));
 		}
 	}
 
-	@Subscribe(order = PostOrder.LAST)
-	public void onDisconnect(DisconnectEvent event) {
-		Player player = event.getPlayer();
-
-		if(shouldLogEvent(LogType.LEAVE, player)) {
-			sendLogMessage(LogType.LEAVE, player, Collections.emptyMap());
-		}
-	}
-
-    @Subscribe(order = PostOrder.LATE)
-    public void onPlayerChat(PlayerChatEvent event) {
-        if(!event.getResult().isAllowed() || !shouldLogEvent(LogType.CHAT, event.getPlayer())) {
-            return;
-        }
-
-        String message = Util.escapeMarkdown(Util.stripFormatting(event.getMessage()));
-
-        sendLogMessage(LogType.CHAT, event.getPlayer(), Map.of("[message]", message));
-    }
-
-    @Subscribe(order = PostOrder.LATE)
-    public void onPlayerCommand(CommandExecuteEvent event) {
-        if(!event.getResult().isAllowed() || !(event.getCommandSource() instanceof Player)
-				|| !shouldLogEvent(LogType.COMMAND, (Player) event.getCommandSource())) {
-            return;
-        }
-
-        sendLogMessage(LogType.COMMAND, (Player) event.getCommandSource(),
-					   Map.of("[command]", Util.escapeMarkdown(event.getCommand())));
-    }
-
-    private void sendLogMessage(LogType type, Player player, Map<String, String> replacements) {
-		var ref = new Object() {
-			String message = formats.get(type);
-		};
-
-		if(ref.message.isEmpty()) {
-			return;
-		}
-
-        Long discordId = linkingManager.getLinked(player);
-        String serverName = player.getCurrentServer().
-				map(connection -> connection.getServerInfo().getName()).orElse("unknown");
-
-        replacements.forEach((String find, String replace) -> ref.message = ref.message.replace(find, replace));
-
-        ref.message = ref.message.replace("[server]", Util.escapeMarkdown(serverName));
-        ref.message = ref.message.replace("[player]", Util.escapeMarkdown(player.getUsername()));
-        ref.message = ref.message.replace("[discord_id]", discordId != null ? String.valueOf(discordId) : "Unlinked");
-        ref.message = ref.message.replace("[discord_mention]", discordId != null ? "<@!" + discordId + ">" : "");
-
-        sendLogMessage(ref.message);
-    }
-
-    private void sendLogMessage(LogType type, User user, Map<String, String> replacements) {
-		var ref = new Object() {
-			String message = formats.get(type);
-		};
-
-		if(ref.message.isEmpty()) {
-			return;
-		}
-
-        Long discordId = linkingManager.getLinked(user.getUniqueId());
-
-        replacements.forEach((String find, String replace) -> ref.message = ref.message.replace(find, replace));
-
-        ref.message = ref.message.replace("[server]", "");
-        ref.message = ref.message.replace("[player]", user.getFriendlyName());
-        ref.message = ref.message.replace("[discord_id]", discordId != null ? String.valueOf(discordId) : "Unlinked");
-        ref.message = ref.message.replace("[discord_mention]", discordId != null ? "<@!" + discordId + ">" : "");
-
-        sendLogMessage(ref.message);
-    }
-
-    private void sendLogMessage(String message) {
+    private void queueLogMessage(String message) {
         message = message.replace("[date]", dateFormat != null ?
 				Util.escapeMarkdown(dateFormat.format(new Date())) : "");
 
@@ -306,35 +216,13 @@ public class LoggingChannelHandler {
 
         synchronized (lockDummy) {
             if(currentMessage.getStringBuilder().length() + message.length() > 1950) {
-
-                queuedToSend.incrementAndGet();
-                currentMessage.setAllowedMentions(allowedMentions);
-                currentMessage.send(loggingChannel.get())
-                        .thenAcceptAsync(result -> queuedToSend.decrementAndGet()).exceptionally(error -> {
-                    logger.warn("Failed to send log message");
-                    queuedToSend.decrementAndGet();
-                    return null;
-                });
-
-                currentMessage = new MessageBuilder();
-                unsentLogs.set(0);
+            	sendLogMessage(loggingChannel.get());
             }
 
             currentMessage.append(message).append("\n");
 
             if(unsentLogs.incrementAndGet() >= logsPerMessage.get()) {
-
-                queuedToSend.incrementAndGet();
-                currentMessage.setAllowedMentions(allowedMentions);
-                currentMessage.send(loggingChannel.get())
-                        .thenAcceptAsync(result -> queuedToSend.decrementAndGet()).exceptionally(error -> {
-                    logger.warn("Failed to send log message");
-                    queuedToSend.decrementAndGet();
-                    return null;
-                });
-
-                currentMessage = new MessageBuilder();
-                unsentLogs.set(0);
+            	sendLogMessage(loggingChannel.get());
             }
 
             //Increase logsPerMessage if many messages are queued, to help stop the log falling behind
@@ -344,6 +232,19 @@ public class LoggingChannelHandler {
             }
         }
     }
+
+    private void sendLogMessage(TextChannel channel) {
+		queuedToSend.incrementAndGet();
+		currentMessage.setAllowedMentions(allowedMentions);
+		currentMessage.send(channel).thenAcceptAsync(result -> queuedToSend.decrementAndGet()).exceptionally(error -> {
+			logger.warn("Failed to send log message");
+			queuedToSend.decrementAndGet();
+			return null;
+		});
+
+		currentMessage = new MessageBuilder();
+		unsentLogs.set(0);
+	}
 
     private void handleDiscordMessageEvent(MessageCreateEvent event) {
 		if(event.getMessageAuthor().isYourself() || !event.getMessageAuthor().isRegularUser()) {
@@ -393,7 +294,9 @@ public class LoggingChannelHandler {
 
 			if(logSentMessages) {
 				try {
-					sendLogMessage(LogType.DISCORD_CHAT, user, Map.of("[message]", message));
+					String formatted = Util.formatDiscordMessage(formats.get(LogType.DISCORD_CHAT),
+																 user, Map.of("[message]", message));
+					queueLogMessage(formatted);
 				} catch (IllegalStateException e) {
 					logger.warn("Failed to send Discord message: " + e.getMessage());
 				}
@@ -427,7 +330,6 @@ public class LoggingChannelHandler {
 
     public void remove() {
 		logListener.remove();
-		proxy.getEventManager().unregisterListener(ProxyDiscord.inst(), this);
 	}
 
 	public void update(ConfigurationNode config) {
