@@ -44,7 +44,6 @@ dependencies {
     compileOnly group: 'net.luckperms', name: 'api', version:'5.0'
     compileOnly group: 'com.velocitypowered', name: 'velocity-api', version:'3.0.0-SNAPSHOT'
     compileOnly 'org.spongepowered:configurate-yaml:3.6'
-    compileOnly name: 'ProxyQueues'
     compileOnly name: "PlatformDetection-velocity-2.0-SNAPSHOT"
     annotationProcessor 'com.velocitypowered:velocity-api:3.0.0-SNAPSHOT'
 }
@@ -56,7 +55,7 @@ compileJava {
 }
 
 shadowJar {
-    relocate 'cloud.commandframework', 'uk.co.notnull.proxyqueues.shaded.cloud'
+    relocate 'cloud.commandframework', 'uk.co.notnull.proxydiscord.shaded.cloud'
     relocate 'de.themoep.minedown', 'uk.co.notnull.proxydiscord.shaded.minedown'
 }
 

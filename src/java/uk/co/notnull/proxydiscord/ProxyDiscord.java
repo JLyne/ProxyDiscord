@@ -27,7 +27,6 @@ import uk.co.notnull.proxydiscord.bot.listeners.ServerMemberLeave;
 import uk.co.notnull.proxydiscord.bot.listeners.UserRoleAdd;
 import uk.co.notnull.proxydiscord.bot.listeners.UserRoleRemove;
 import uk.co.notnull.proxydiscord.cloud.LongParser;
-import uk.co.notnull.proxydiscord.listeners.ProxyQueues;
 import uk.co.notnull.proxydiscord.listeners.JoinLeave;
 import uk.co.notnull.proxydiscord.listeners.SendStatus;
 import uk.co.notnull.proxydiscord.listeners.ServerConnect;
@@ -53,7 +52,6 @@ import uk.co.notnull.proxydiscord.manager.*;
 @Plugin(id = "proxydiscord", name = "ProxyDiscord", version = "1.0-SNAPSHOT",
         description = "Discord integrations", authors = {"Jim (NotKatuen)"}, dependencies = {
 		@Dependency(id = "luckperms"),
-		@Dependency(id = "proxyqueues", optional = true),
 		@Dependency(id = "platform-detection", optional = true)
 })
 public class ProxyDiscord implements uk.co.notnull.proxydiscord.api.ProxyDiscord {
@@ -111,13 +109,6 @@ public class ProxyDiscord implements uk.co.notnull.proxydiscord.api.ProxyDiscord
 
 		initListeners();
         initCommands();
-
-        //FIXME: Move to separate classes
-		Optional<PluginContainer> proxyQueues = proxy.getPluginManager().getPlugin("proxyqueues");
-        proxyQueues.flatMap(PluginContainer::getInstance).ifPresent(instance -> {
-			proxy.getEventManager().register(this,
-											 new ProxyQueues(this, (uk.co.notnull.proxyqueues.ProxyQueues) instance));
-		});
 
         Optional<PluginContainer> platformDetection = proxy.getPluginManager()
                 .getPlugin("platform-detection");
