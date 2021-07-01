@@ -5,6 +5,7 @@ import com.velocitypowered.api.proxy.ServerConnection;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextReplacementConfig;
 import net.luckperms.api.cacheddata.CachedMetaData;
 import net.luckperms.api.model.user.User;
 import net.luckperms.api.model.user.UserManager;
@@ -206,7 +207,7 @@ public class LoggingChannelHandler {
 
     private void queueLogMessage(String message) {
         message = message.replace("[date]", dateFormat != null ?
-				Util.escapeMarkdown(dateFormat.format(new Date())) : "");
+				Util.escapeFormatting(dateFormat.format(new Date())) : "");
 
         Optional <TextChannel> loggingChannel = plugin.getDiscord().getApi().getTextChannelById(channelId);
 
@@ -215,11 +216,25 @@ public class LoggingChannelHandler {
         }
 
         synchronized (lockDummy) {
-            if(currentMessage.getStringBuilder().length() + message.length() > 1950) {
+        	int currentLength  = currentMessage.getStringBuilder().length();
+
+        	if(message.length() > 2000) {
+        		message = message.substring(0, 1991) + "[...]";
+
+        		if(message.startsWith("```")) {
+        			message = message + "```";
+				}
+			}
+
+            if(currentLength > 0 && currentLength + message.length() > 2000) {
             	sendLogMessage(loggingChannel.get());
             }
 
-            currentMessage.append(message).append("\n");
+            if(currentLength == 0) {
+            	currentMessage.append("\n");
+			}
+
+            currentMessage.append(message);
 
             if(unsentLogs.incrementAndGet() >= logsPerMessage.get()) {
             	sendLogMessage(loggingChannel.get());
@@ -237,7 +252,7 @@ public class LoggingChannelHandler {
 		queuedToSend.incrementAndGet();
 		currentMessage.setAllowedMentions(allowedMentions);
 		currentMessage.send(channel).thenAcceptAsync(result -> queuedToSend.decrementAndGet()).exceptionally(error -> {
-			logger.warn("Failed to send log message");
+			logger.warn("Failed to send log message: " + error.getMessage());
 			queuedToSend.decrementAndGet();
 			return null;
 		});
@@ -276,55 +291,57 @@ public class LoggingChannelHandler {
 				return;
 			}
 
-			logger.info(Thread.currentThread().getName());
+			proxy.getEventManager().fire(new DiscordChatEvent(user, message, new HashSet<>(servers))).thenAccept(e -> {
+				if (!e.getResult().isAllowed() && !logSentMessages) {
+					event.deleteMessage();
+					return;
+				}
 
-			handleDiscordMessage(user, message);
+				handleDiscordMessage(user, e.getResult().getMessage().orElse(e.getMessage()), e.getServers());
+			}).exceptionally(e -> {
+				logger.warn("Failed to handle discord message: " + e.getMessage());
+				return null;
+			});
 		}).schedule();
 	}
 
-    private void handleDiscordMessage(User user, String message) {
+    private void handleDiscordMessage(User user, String message, Set<RegisteredServer> servers) {
 		if(ingameChatFormat.isEmpty()) {
 			return;
 		}
 
-		proxy.getEventManager().fire(new DiscordChatEvent(user, message, new HashSet<>(servers))).thenAccept(event -> {
-			if(!event.getResult().isAllowed()) {
-				return;
+		if(logSentMessages) {
+			try {
+				String sanitised = Util.plainSerializer.serialize(Util.plainSerializer.deserialize(message));
+				String formatted = Util.formatDiscordMessage(formats.get(LogType.DISCORD_CHAT),
+															 user, Map.of("[message]", sanitised));
+				queueLogMessage(formatted);
+			} catch (IllegalStateException e) {
+				logger.warn("Failed to send Discord message: " + e.getMessage());
 			}
+		}
 
-			if(logSentMessages) {
-				try {
-					String formatted = Util.formatDiscordMessage(formats.get(LogType.DISCORD_CHAT),
-																 user, Map.of("[message]", message));
-					queueLogMessage(formatted);
-				} catch (IllegalStateException e) {
-					logger.warn("Failed to send Discord message: " + e.getMessage());
-				}
+		CachedMetaData metaData = user.getCachedData().getMetaData(QueryOptions.nonContextual());
+		String prefix = ( metaData.getPrefix() != null) ?  metaData.getPrefix() : "";
+		String suffix = ( metaData.getSuffix() != null) ?  metaData.getSuffix() : "";
+		message = Util.stripSectionFormatting(message);
+
+		logger.info(message);
+
+		Component messageComponent = Util.legacySerializer
+				.deserialize(ingameChatFormat
+									 .replace("[prefix]", prefix)
+									 .replace("[suffix]", suffix)
+									 .replace("[player]", user.getFriendlyName()))
+				.replaceText(TextReplacementConfig.builder().matchLiteral("[message]")
+											 .replacement(message).build());
+
+		proxy.getAllPlayers().forEach(player -> {
+			RegisteredServer server = player.getCurrentServer().map(ServerConnection::getServer).orElse(null);
+
+			if (servers.isEmpty() || servers.contains(server)) {
+				player.sendMessage(Identity.identity(user.getUniqueId()), messageComponent);
 			}
-
-			Set<RegisteredServer> servers = event.getServers();
-			CachedMetaData metaData = user.getCachedData().getMetaData(QueryOptions.nonContextual());
-			String prefix = ( metaData.getPrefix() != null) ?  metaData.getPrefix() : "";
-			String suffix = ( metaData.getSuffix() != null) ?  metaData.getSuffix() : "";
-
-			Component messageComponent = Util.legacySerializer
-					.deserialize(ingameChatFormat
-										 .replace("[prefix]", prefix)
-										 .replace("[suffix]", suffix)
-										 .replace("[player]", user.getFriendlyName())
-										 .replace("[message]", Util.stripFormatting(event.getResult().getMessage()
-																							.orElse(event.getMessage()))));
-
-			proxy.getAllPlayers().forEach(player -> {
-				RegisteredServer server = player.getCurrentServer().map(ServerConnection::getServer).orElse(null);
-
-				if (servers.isEmpty() || servers.contains(server)) {
-					player.sendMessage(Identity.identity(user.getUniqueId()), messageComponent);
-				}
-			});
-		}).exceptionally(e -> {
-			logger.warn("Failed to handle discord message: " + e.getMessage());
-			return null;
 		});
     }
 

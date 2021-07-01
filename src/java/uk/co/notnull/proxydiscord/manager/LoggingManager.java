@@ -101,7 +101,7 @@ public class LoggingManager implements uk.co.notnull.proxydiscord.api.manager.Lo
             return;
         }
 
-		String message = Util.escapeMarkdown(Util.stripFormatting(event.getMessage()));
+		String message = Util.escapeFormatting(event.getMessage());
         LogEntry leaveLog = LogEntry.builder().type(LogType.CHAT).player(event.getPlayer())
 				.replacements(Map.of("[message]", message)).build();
 
@@ -114,7 +114,7 @@ public class LoggingManager implements uk.co.notnull.proxydiscord.api.manager.Lo
             return;
         }
 
-		String command = Util.escapeMarkdown(Util.stripFormatting(event.getCommand()));
+		String command = Util.escapeFormatting(event.getCommand());
         LogEntry leaveLog = LogEntry.builder().type(LogType.COMMAND).player((Player) event.getCommandSource())
 				.replacements(Map.of("[command]", command)).build();
 
