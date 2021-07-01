@@ -36,7 +36,7 @@ dependencies {
 
     compile project(":ProxyDiscordApi")
 
-    implementation group: 'org.javacord', name: 'javacord', version:'3.3.0'
+    implementation group: 'org.javacord', name: 'javacord', version:'3.3.1'
     implementation 'de.themoep:minedown-adventure:1.7.1-SNAPSHOT'
     implementation 'cloud.commandframework:cloud-velocity:1.4.0'
     implementation 'cloud.commandframework:cloud-minecraft-extras:1.4.0'
