@@ -73,7 +73,7 @@ public class ProxyDiscord implements uk.co.notnull.proxydiscord.api.ProxyDiscord
 	private GroupSyncManager groupSyncManager;
 
 	private boolean platformDetectionEnabled = false;
-	private Object platformDetection;
+	private PlatformDetectionHandler platformDetectionHandler;
 
 	@Inject
     @DataDirectory
@@ -124,7 +124,7 @@ public class ProxyDiscord implements uk.co.notnull.proxydiscord.api.ProxyDiscord
         platformDetectionEnabled = platformDetection.isPresent();
 
         if(platformDetectionEnabled) {
-            this.platformDetection = platformDetection.get().getInstance().orElse(null);
+            this.platformDetectionHandler = new PlatformDetectionHandler(this);
         }
 	}
 
@@ -303,8 +303,8 @@ public class ProxyDiscord implements uk.co.notnull.proxydiscord.api.ProxyDiscord
 		return platformDetectionEnabled;
 	}
 
-	public Object getPlatformDetection() {
-		return platformDetection;
+	public PlatformDetectionHandler getPlatformDetectionHandler() {
+		return platformDetectionHandler;
 	}
 
 	public void reload() {

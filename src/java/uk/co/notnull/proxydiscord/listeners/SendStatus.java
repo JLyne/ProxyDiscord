@@ -9,7 +9,6 @@ import com.velocitypowered.api.proxy.Player;
 import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import uk.co.notnull.platformdetection.PlatformDetectionVelocity;
 import uk.co.notnull.proxydiscord.Messages;
 import uk.co.notnull.proxydiscord.manager.LinkingManager;
 import uk.co.notnull.proxydiscord.ProxyDiscord;
@@ -64,9 +63,9 @@ public class SendStatus {
                 hmac.init(keySpec);
 
                 boolean bedrock = false;
+
                 if(plugin.isPlatformDetectionEnabled()) {
-					PlatformDetectionVelocity platformDetection = (PlatformDetectionVelocity) plugin.getPlatformDetection();
-					bedrock = platformDetection.getPlatform(player).isBedrock();
+					bedrock = plugin.getPlatformDetectionHandler().isBedrock(player);
 				}
 
                 String token = linkingManager.getLinkingToken(player);
