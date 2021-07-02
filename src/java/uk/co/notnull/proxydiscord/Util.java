@@ -30,7 +30,7 @@ import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
-import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
+import net.kyori.adventure.text.serializer.plain.PlainComponentSerializer;
 import net.luckperms.api.model.user.User;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.javacord.api.DiscordApi;
@@ -65,8 +65,8 @@ public class Util {
           .extractUrls(Style.style().color(TextColor.fromHexString("#8194e4"))
 							   .decoration(TextDecoration.UNDERLINED, true).build())
           .character('&').hexColors().useUnusualXRepeatedCharacterHexFormat().build();
-	public static final PlainTextComponentSerializer plainSerializer = PlainTextComponentSerializer.plainText();
-	public static final PlainTextComponentSerializer plainStripMarkdownSerializer = PlainTextComponentSerializer
+	public static final PlainComponentSerializer plainSerializer = PlainComponentSerializer.plain();
+	public static final PlainComponentSerializer plainStripMarkdownSerializer = PlainComponentSerializer
 			.builder().flattener(stripMarkdownFlattener).build();
 
 	public static String escapeFormatting(String message) {
