@@ -83,8 +83,10 @@ public class RedirectManager {
                 break;
 
             case LINKED_NOT_VERIFIED:
-                if(event.getPreviousState().isVerified() || !verificationManager.isPublicServer(currentServer)) {
+                if(event.getPreviousState().isVerified()) {
                     sendToLinkingServer(player, Messages.get("verification-lost-role"));
+                } else if(!verificationManager.isPublicServer(currentServer)) {
+                    sendToLinkingServer(player, Messages.get("server-change-linked-not-verified"));
                 } else {
                     destinations.computeIfPresent(player.getUniqueId(), (UUID uuid, RegisteredServer server) -> {
                         if(verificationManager.isPublicServer(server)) {
@@ -97,8 +99,10 @@ public class RedirectManager {
 
                 break;
             case NOT_LINKED:
-                if(event.getPreviousState().isVerified() || !verificationManager.isPublicServer(currentServer)) {
+                if(event.getPreviousState().isVerified()) {
                     sendToLinkingServer(player, Messages.get("verification-lost-unlinked"));
+                } else if(!verificationManager.isPublicServer(currentServer)) {
+                    sendToLinkingServer(player, Messages.get("server-change-linked-not-verified"));
                 }
         }
     }
