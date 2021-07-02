@@ -146,14 +146,12 @@ public class LuckPermsManager {
         groupsToCheck.forEach((String group) -> {
             // Add groupsToAdd groups if the user doesn't have them explicitly set
             if(groupsToAdd.contains(group)) {
-                plugin.getDebugLogger().info(group + " Not true? " + permissionData.checkPermission("group." + group));
                 if(permissionData.checkPermission("group." + group) != Tristate.TRUE) {
                     user.data().add(Node.builder("group." + group).build());
                     changed.set(true);
                 }
             } else {
                 //Remove groupsToCheck groups if the user has them explicity set, and the group isn't in groupsToAdd
-                plugin.getDebugLogger().info(group + " Not undefined? " + permissionData.checkPermission("group." + group));
                 if(permissionData.checkPermission("group." + group) != Tristate.UNDEFINED) {
                     user.data().remove(Node.builder("group." + group).build());
                     changed.set(true);
@@ -163,7 +161,6 @@ public class LuckPermsManager {
 
         // Only save if any changes occurred
         if(changed.get()) {
-            plugin.getDebugLogger().info("Saving changes");
             return userManager.saveUser(user).thenApply((ignored) -> true);
         } else {
             return CompletableFuture.completedFuture(false);

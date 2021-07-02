@@ -40,7 +40,7 @@ public class Discord {
 	/**
 	 * Discord API Instance
 	 */
-	private DiscordApi api; // Api Instance
+	private DiscordApi api;
 
 	private boolean connected = false;
 
@@ -59,7 +59,6 @@ public class Discord {
 			throw new IllegalArgumentException("No bot token provided, check the config");
 		}
 
-		// Create an Instance of the DiscordApi
 		try {
 			logger.info("Connecting to Discord...");
 			api = new DiscordApiBuilder().setToken(token)
@@ -75,10 +74,9 @@ public class Discord {
 			return;
 		}
 
-		// Print the invite url of the bot
         logger.info("Bot Invite Link: " + api.createBotInvite());
 
-		//Dont cache anything by default
+		//Dont cache any messages by default
 		api.setMessageCacheSize(0, 0);
 
 		updateActivity(config);
@@ -87,8 +85,7 @@ public class Discord {
 			connected = false;
 			logger.warn("Lost connection to Discord");
 		});
-        
-        // Add Reconnect Listener to re-add status
+
         api.addReconnectListener(event -> {
 			connected = true;
 			logger.info("Reconnected to Discord");
@@ -125,7 +122,6 @@ public class Discord {
 				break;
 		}
 
-		// Set Activity
 		if(activity != null && !activity.isEmpty()) {
         	api.updateActivity(type, activity);
 		}
