@@ -27,8 +27,8 @@ plugins {
     id 'maven'
 }
 
-group = 'uk.co.not-null.proxydiscord'
-version = 'RTGAME'
+group = 'uk.co.not-null'
+version = '1.0'
 
 description = """discord"""
 

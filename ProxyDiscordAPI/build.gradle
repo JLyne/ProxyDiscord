@@ -27,8 +27,8 @@ plugins {
     id 'maven'
 }
 
-group = 'uk.co.notnull.proxydiscord.api'
-version = 'RTGAME'
+group = 'uk.co.notnull'
+version = '1.0'
 
 description = """ProxyDiscordAPI"""
 
