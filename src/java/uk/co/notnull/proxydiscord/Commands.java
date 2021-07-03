@@ -273,7 +273,7 @@ public class Commands {
                     sender.sendMessage(Identity.nil(), playerMessage.build());
                 }
             });
-        } else if(linkingManager.isLinked(sender)) {
+        } else if(linkingManager.isLinked(sender)) { //Unlinking self
             linkingManager.unlink(sender);
         } else {
             sender.sendMessage(Identity.nil(), Component.text(

@@ -91,6 +91,7 @@ public class ProxyDiscord implements uk.co.notnull.proxydiscord.api.ProxyDiscord
 	private static LinkingManager linkingManager;
 	private static VerificationManager verificationManager;
 	private static AnnouncementManager announcementManager;
+	@SuppressWarnings("FieldCanBeLocal")
 	private static RedirectManager redirectManager;
 	private static LoggingManager loggingManager;
 	private static LuckPermsManager luckPermsManager;
@@ -103,15 +104,14 @@ public class ProxyDiscord implements uk.co.notnull.proxydiscord.api.ProxyDiscord
     @DataDirectory
     private Path dataDirectory;
 
-	private final ProxyServer proxy;
-    private final Logger logger;
-
 	@Inject
-    public ProxyDiscord(ProxyServer proxy, Logger logger) {
-    	this.proxy = proxy;
-    	this.logger = logger;
 
-		instance = this;
+	private ProxyServer proxy;
+	@Inject
+    private Logger logger;
+
+    public ProxyDiscord() {
+    	instance = this;
 		statusIdentifier = MinecraftChannelIdentifier.create("proxydiscord", "status");
 	}
 
@@ -145,6 +145,17 @@ public class ProxyDiscord implements uk.co.notnull.proxydiscord.api.ProxyDiscord
         }
 	}
 
+	@Subscribe
+	public void onProxyShutdown(ProxyShutdownEvent event) {
+    	if(linkingManager != null) {
+    		linkingManager.saveLinks();
+		}
+
+		if(discord.getApi() != null) {
+			discord.getApi().disconnect();
+		}
+	}
+
 	private boolean loadConfig() {
 		// Setup config
 		loadResource("config.yml");
@@ -176,6 +187,7 @@ public class ProxyDiscord implements uk.co.notnull.proxydiscord.api.ProxyDiscord
 	}
 
 	private void initCommands() {
+    	//Cloud setup
         CommandManager<CommandSource> manager = new VelocityCommandManager<>(
 				proxy.getPluginManager().fromInstance(this).get(),
 				proxy,
@@ -198,6 +210,7 @@ public class ProxyDiscord implements uk.co.notnull.proxydiscord.api.ProxyDiscord
         ) -> commandContext.<ProxyServer>get("ProxyServer").getAllPlayers()
 				.stream().map(Player::getUsername).collect(Collectors.toList()));
 
+        //Custom LongParser for now as the built in one doesn't work properly
         manager.getParserRegistry().registerParserSupplier(TypeToken.get(Long.class), options ->
                 new LongParser<>(
                         (long) options.get(StandardParameters.RANGE_MIN, Long.MIN_VALUE),
@@ -249,15 +262,6 @@ public class ProxyDiscord implements uk.co.notnull.proxydiscord.api.ProxyDiscord
         }
 	}
 
-	@Subscribe
-	public void onProxyShutdown(ProxyShutdownEvent event) {
-    	linkingManager.saveLinks();
-
-		if(discord.getApi() != null) {
-			discord.getApi().disconnect();
-		}
-	}
-
 	public static ProxyDiscord inst() {
     	  return instance;
     }
@@ -274,32 +278,42 @@ public class ProxyDiscord implements uk.co.notnull.proxydiscord.api.ProxyDiscord
 		return discord;
 	}
 
+	/**
+	 * Gets the {@link LinkingManager} instance
+	 * @return the linking manager
+	 */
 	public LinkingManager getLinkingManager() {
 		return linkingManager;
 	}
 
+	/**
+	 * Gets the {@link VerificationManager} instance
+	 * @return the verification manager
+	 */
 	public VerificationManager getVerificationManager() {
 		return verificationManager;
 	}
 
-	@SuppressWarnings("unused")
-	public AnnouncementManager getAnnouncementManager() {
-		return announcementManager;
-	}
-
-	@SuppressWarnings("unused")
-	public RedirectManager getRedirectManager() {
-		return redirectManager;
-	}
-
+	/**
+	 * Gets the {@link LoggingManager} instance
+	 * @return the logging manager
+	 */
 	public LoggingManager getLoggingManager() {
 		return loggingManager;
 	}
 
+	/**
+	 * Gets the {@link LuckPermsManager} instance
+	 * @return the luckperms manager
+	 */
 	public LuckPermsManager getLuckpermsManager() {
 		return luckPermsManager;
 	}
 
+	/**
+	 * Gets the {@link GroupSyncManager} instance
+	 * @return the group sync manager
+	 */
 	public GroupSyncManager getGroupSyncManager() {
 		return groupSyncManager;
 	}

@@ -46,10 +46,13 @@ import java.util.Optional;
 import java.util.regex.Pattern;
 
 public class Util {
-	private static final Pattern escapePattern = Pattern.compile("([*_|`~])");
+	private static final Pattern markdownPattern = Pattern.compile("([*_|`~])");
 	private static final Pattern emotePattern = Pattern.compile(":([\\w\\\\]{2,}):");
 	private static final Pattern sectionPattern = Pattern.compile("\\u00A7[0-9a-gA-Gk-oK-OrR]");
 
+	/**
+	 * Component flattener which escapes markdown syntax present in any components that aren't clickable links
+	 */
 	private static final ComponentFlattener stripMarkdownFlattener = ComponentFlattener.builder()
 			.mapper(TextComponent.class, (theComponent) -> {
 				ClickEvent event = theComponent.clickEvent();
@@ -57,7 +60,7 @@ public class Util {
 				if (event != null && event.action() == ClickEvent.Action.OPEN_URL) {
 					return theComponent.content();
 				} else {
-					return escapePattern.matcher(theComponent.content()).replaceAll("\\\\$1");
+					return markdownPattern.matcher(theComponent.content()).replaceAll("\\\\$1");
 				}
 			}).build();
 
@@ -65,14 +68,26 @@ public class Util {
           .extractUrls(Style.style().color(TextColor.fromHexString("#8194e4"))
 							   .decoration(TextDecoration.UNDERLINED, true).build())
           .character('&').hexColors().useUnusualXRepeatedCharacterHexFormat().build();
+
 	public static final PlainComponentSerializer plainSerializer = PlainComponentSerializer.plain();
 	public static final PlainComponentSerializer plainStripMarkdownSerializer = PlainComponentSerializer
 			.builder().flattener(stripMarkdownFlattener).build();
 
+	/**
+	 * Tries its best to escape markdown formatting and strip Minecraft formatting from the given message.
+	 * @param message The message
+	 * @return the escaped message
+	 */
 	public static String escapeFormatting(String message) {
 		return plainStripMarkdownSerializer.serialize(legacySerializer.deserialize(message));
 	}
 
+	/**
+	 * Gets the content of the given Discord message.
+	 * The URLs of any present attachments will be appended to the content.
+	 * @param message The message
+	 * @return the message content
+	 */
 	public static String getDiscordMessageContent(Message message) {
 		StringBuilder text = new StringBuilder(message.getReadableContent());
 
@@ -87,13 +102,22 @@ public class Util {
 		return text.toString();
 	}
 
+	/**
+	 * Removes any section-character based formatting from the given string
+	 * @param message The message
+	 * @return the message with any section-character formatting removed
+	 */
 	public static String stripSectionFormatting(String message) {
-		return sectionPattern.matcher(message).replaceAll(result -> {
-			ProxyDiscord.inst().getLogger().info(result.group());
-			return "";
-		});
+		return sectionPattern.matcher(message).replaceAll("");
 	}
 
+	/**
+	 * Formats the given {@link LogEntry} into a string using the given format
+	 * A standard set of replacements are applied to the format, in addition to any replacements defined in the log entry
+	 * @param format The format to use
+	 * @param entry The log entry to format
+	 * @return the formatted string
+	 */
 	public static String formatLogEntry(@NotNull String format, @NonNull LogEntry entry) {
 		var ref = new Object() {
 			String message = format;
@@ -117,6 +141,12 @@ public class Util {
         return ref.message;
 	}
 
+	/**
+	 * Replaces :emote: syntax in the given string with a Discord emote mention, if the emote name matches any known
+	 * custom emotes usable by the bot. Managed emotes are ignored as bots appear to be unable to use these.
+	 * @param message The message
+	 * @return the message with emote mentions added
+	 */
 	private static String formatEmotes(String message) {
 		DiscordApi api = ProxyDiscord.inst().getDiscord().getApi();
 
@@ -128,6 +158,14 @@ public class Util {
 		});
 	}
 
+	/**
+	 * Formats a message associated with the given Luckperms user using the given format and replacements.
+	 * A standard set of replacements are applied to the format, in addition to any provided ones.
+	 * @param format The format to use
+	 * @param user The luckperms user associated with the message
+	 * @param replacements Additional replacements to apply
+	 * @return the formatted string
+	 */
 	public static String formatDiscordMessage(@NonNull String format, @NonNull User user, @NonNull Map<String, String> replacements) {
 		var ref = new Object() {
 			String message = format;

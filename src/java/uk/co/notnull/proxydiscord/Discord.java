@@ -81,6 +81,7 @@ public class Discord {
 
 		updateActivity(config);
 
+		//Handle disconnects/reconnects
         api.addLostConnectionListener(event -> {
 			connected = false;
 			logger.warn("Lost connection to Discord");

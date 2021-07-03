@@ -87,8 +87,8 @@ public class AnnouncementChannelHandler {
 		this.channelId = channelId;
 
 		this.plugin = ProxyDiscord.inst();
-		this.proxy = ProxyDiscord.inst().getProxy();
-        this.logger = ProxyDiscord.inst().getLogger();
+		this.proxy = plugin.getProxy();
+        this.logger = plugin.getLogger();
         this.sentLatestMessage = ConcurrentHashMap.newKeySet();
 
 		if(serverList.isEmpty()) {
