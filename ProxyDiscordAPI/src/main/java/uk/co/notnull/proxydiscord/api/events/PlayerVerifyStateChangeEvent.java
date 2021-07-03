@@ -26,31 +26,58 @@ package uk.co.notnull.proxydiscord.api.events;
 import com.velocitypowered.api.proxy.Player;
 import uk.co.notnull.proxydiscord.api.VerificationResult;
 
-public class PlayerVerifyStateChangeEvent {
+/**
+ * This event is fired when the verification state of a player has changed.
+ * This event will fire without an UNKNOWN previous state, when a newly-joined player's state is first calculated
+ */
+public final class PlayerVerifyStateChangeEvent {
 	private final Player player;
 	private final VerificationResult state;
 	private final VerificationResult previousState;
 
+	/**
+   	* Constructs a PlayerLinkEvent.
+   	* @param player the player whose state has changed
+   	* @param state the player's current verification state
+   	* @param previousState the player's previous verification state
+ 	*/
 	public PlayerVerifyStateChangeEvent(Player player, VerificationResult state, VerificationResult previousState) {
 		this.player = player;
 		this.state = state;
 		this.previousState = previousState;
 	}
 
+	/**
+   	* Constructs a PlayerLinkEvent with no known previous state
+   	* @param player the player whose state has changed
+   	* @param state the player's current verification state
+ 	*/
 	public PlayerVerifyStateChangeEvent(Player player, VerificationResult state) {
 		this.player = player;
 		this.state = state;
 		this.previousState = VerificationResult.UNKNOWN;
 	}
 
+	/**
+	 * Get the player whose state has changed
+	 * @return the player
+	 */
 	public Player getPlayer() {
 		return player;
 	}
 
+	/**
+	 * Get the player's current verification state
+	 * @return the current verification state
+	 */
 	public VerificationResult getState() {
 		return state;
 	}
 
+	/**
+	 * Get the player's previous verification state
+	 * @return the previous verification state
+	 */
 	public VerificationResult getPreviousState() {
 		return previousState;
 	}

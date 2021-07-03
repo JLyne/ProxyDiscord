@@ -23,10 +23,32 @@
 
 package uk.co.notnull.proxydiscord.api.logging;
 
+/**
+ * The type of a {@link LogEntry}
+ */
 public enum LogType {
+	/**
+	 * Message sent in in-game chat
+	 */
 	CHAT,
+
+	/**
+	 * Message sent in a Discord log channel
+	 */
 	DISCORD_CHAT,
+
+	/**
+	 * In-game command execution
+	 */
 	COMMAND,
+
+	/**
+	 * Player joining a server
+	 */
 	JOIN,
+
+	/**
+	 * Player leaving a server
+	 */
 	LEAVE
 }

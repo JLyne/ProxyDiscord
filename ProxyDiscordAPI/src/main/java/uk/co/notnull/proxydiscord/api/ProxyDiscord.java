@@ -28,10 +28,32 @@ import uk.co.notnull.proxydiscord.api.manager.LinkingManager;
 import uk.co.notnull.proxydiscord.api.manager.LoggingManager;
 import uk.co.notnull.proxydiscord.api.manager.VerificationManager;
 
+/**
+ * The ProxyDiscord plugin instance
+ */
 @SuppressWarnings("unused")
 public interface ProxyDiscord {
+	/**
+	 * Gets the {@link LinkingManager} instance
+	 * @return the linking manager
+	 */
 	LinkingManager getLinkingManager();
+
+	/**
+	 * Gets the {@link VerificationManager} instance
+	 * @return the verification manager
+	 */
 	VerificationManager getVerificationManager();
+
+	/**
+	 * Gets the {@link LoggingManager} instance
+	 * @return the logging manager
+	 */
 	LoggingManager getLoggingManager();
+
+	/**
+	 * Gets the {@link GroupSyncManager} instance
+	 * @return the group sync manager
+	 */
 	GroupSyncManager getGroupSyncManager();
 }

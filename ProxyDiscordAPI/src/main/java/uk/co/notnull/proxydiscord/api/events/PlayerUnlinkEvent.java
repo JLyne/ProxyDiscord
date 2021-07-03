@@ -28,32 +28,57 @@ import com.velocitypowered.api.proxy.Player;
 import java.util.Optional;
 import java.util.UUID;
 
+/**
+ * This event is fired when a player unlinks their Discord account
+ */
 @SuppressWarnings("unused")
 public final class PlayerUnlinkEvent {
 	private final UUID uuid;
 	private final Player player;
 	private final long discordId;
 
+	/**
+	 * Constructs a PlayerUnlinkEvent for an offline player.
+	 * @param uuid the UUID of the now-unlinked player
+	 * @param discordId the ID of the previously linked discord account
+ 	 */
 	public PlayerUnlinkEvent(UUID uuid, long discordId) {
 		this.uuid = uuid;
 		this.player = null;
 		this.discordId = discordId;
 	}
 
+	/**
+	 * Constructs a PlayerUnlinkEvent for an online player.
+	 * @param player the now-unlinked player
+	 * @param discordId the ID of the previously linked discord account
+ 	 */
 	public PlayerUnlinkEvent(Player player, long discordId) {
 		this.uuid = player.getUniqueId();
 		this.player = player;
 		this.discordId = discordId;
 	}
 
+	/**
+	 * Gets the UUID of the player that has unlinked
+	 * @return the player's UUID
+	 */
 	public UUID getUuid() {
 		return uuid;
 	}
 
+	/**
+	 * Gets the player that has unlinked, if they are online
+	 * @return an optional containing the player, if they are currently online
+	 */
 	public Optional<Player> getPlayer() {
 		return Optional.ofNullable(player);
 	}
 
+	/**
+	 * Gets the Discord ID of the previously linked Discord account
+	 * @return the Discord ID
+	 */
 	public long getDiscordId() {
 		return discordId;
 	}

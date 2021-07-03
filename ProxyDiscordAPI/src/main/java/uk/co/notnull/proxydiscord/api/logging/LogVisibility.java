@@ -23,15 +23,37 @@
 
 package uk.co.notnull.proxydiscord.api.logging;
 
+/**
+ * Determines the logging channels that a {@link LogEntry} will be sent to
+ */
 public enum LogVisibility {
+	/**
+	 * Will be shown in all logging channels
+	 */
 	UNSPECIFIED,
+
+	/**
+	 * Will only be shown in `public: true` logging channels
+	 */
 	PUBLIC_ONLY,
+
+	/**
+	 * Will only be shown in `public: false` logging channels
+	 */
 	PRIVATE_ONLY;
 
+	/**
+	 * Gets whether a {@link LogVisibility} should be shown in `public: true` channels
+	 * @return boolean indicating whether message should be shown
+	 */
 	public boolean isPublic() {
 		return this != PRIVATE_ONLY;
 	}
 
+	/**
+	 * Gets whether a {@link LogVisibility} should be shown in `public: false` channels
+	 * @return boolean indicating whether message should be shown
+	 */
 	public boolean isPrivate() {
 		return this != PUBLIC_ONLY;
 	}

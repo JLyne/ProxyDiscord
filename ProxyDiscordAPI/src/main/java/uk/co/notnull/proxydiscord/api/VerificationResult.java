@@ -23,13 +23,39 @@
 
 package uk.co.notnull.proxydiscord.api;
 
+/**
+ * A player's verification status
+ */
 public enum VerificationResult {
-    UNKNOWN(false), // Status hasn't been calculated yet
-    NOT_LINKED(false), // Player hasn't linked a discord account
-    LINKED_NOT_VERIFIED(false), // Player has linked a discord account but doesn't have any verified roles
-    VERIFIED(true), // Player has linked a discord account and has a verified role
-    BYPASSED(true), // Player has the bypass permission
-    NOT_REQUIRED(true); // No verified roles are configured
+    /**
+     * Status hasn't been calculated yet
+     */
+    UNKNOWN(false),
+
+    /**
+     * The player hasn't linked a discord account
+     */
+    NOT_LINKED(false),
+
+    /**
+     * The player has linked a discord account but doesn't have any of the configured verified roles
+     */
+    LINKED_NOT_VERIFIED(false),
+
+    /**
+     * The player has linked a discord account and has a one or more of the configured verified roles
+     */
+    VERIFIED(true),
+
+    /**
+     * The player has the configured bypass permission and skipped all other requirement checks
+     */
+    BYPASSED(true),
+
+    /**
+     * No verified roles have been configured and all checks were skipped
+     */
+    NOT_REQUIRED(true);
 
     private final boolean verified;
 
@@ -37,6 +63,11 @@ public enum VerificationResult {
         this.verified = verified;
     }
 
+    /**
+     * Gets whether a result should be considered "verified" for actions requiring a verified user
+     * (i.e joining non-public servers etc)
+     * @return whether the result is considered "verified"
+     */
     public boolean isVerified() {
         return verified;
     }

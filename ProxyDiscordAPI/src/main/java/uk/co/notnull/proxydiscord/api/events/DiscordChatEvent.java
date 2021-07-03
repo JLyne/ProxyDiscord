@@ -31,6 +31,9 @@ import net.luckperms.api.model.user.User;
 import java.util.Objects;
 import java.util.Set;
 
+/**
+ * This event is fired when ProxyDiscord receives a message from a Discord logging channel
+ */
 @SuppressWarnings("unused")
 public final class DiscordChatEvent implements ResultedEvent<PlayerChatEvent.ChatResult> {
 	private final User user;
@@ -38,16 +41,30 @@ public final class DiscordChatEvent implements ResultedEvent<PlayerChatEvent.Cha
 	private final String message;
 	private PlayerChatEvent.ChatResult result = PlayerChatEvent.ChatResult.allowed();
 
+	/**
+	 * Constructs a DiscordChatEvent.
+	 * @param user The Luckperms user of the Minecraft account which is linked to the sender Discord account
+	 * @param message The sent message
+	 * @param servers The servers the message is to be shown in
+	 */
 	public DiscordChatEvent(User user, String message, Set<RegisteredServer> servers) {
 		this.user = user;
 		this.message = message;
 		this.servers = servers;
 	}
 
+	/**
+	 * Gets the luckperms {@link User} of the sending Discord account
+	 * @return the user
+	 */
 	public User getUser() {
 		return user;
 	}
 
+	/**
+	 * Gets the sent message
+	 * @return the message
+	 */
 	public String getMessage() {
 		return message;
 	}
@@ -60,6 +77,10 @@ public final class DiscordChatEvent implements ResultedEvent<PlayerChatEvent.Cha
 		this.result = Objects.requireNonNull(result);
 	}
 
+	/**
+	 * Gets the servers which the message will be shown in
+	 * @return the servers
+	 */
 	public Set<RegisteredServer> getServers() {
 		return servers;
 	}

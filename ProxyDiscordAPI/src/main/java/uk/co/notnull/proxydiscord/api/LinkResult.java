@@ -23,10 +23,32 @@
 
 package uk.co.notnull.proxydiscord.api;
 
+/**
+ * The result of a account link operation
+ */
 public enum LinkResult {
-    UNKNOWN_ERROR, //Exception occurred
-    NO_TOKEN, //No token provided
-    INVALID_TOKEN, //Invalid token provided
-    ALREADY_LINKED, //Account is already linked
-    SUCCESS //Linked successfully
+    /**
+     * An exception occurred
+     */
+    UNKNOWN_ERROR,
+
+    /**
+     * No linking token was provided
+     */
+    NO_TOKEN,
+
+    /**
+     * The provided linking token was invalid
+     */
+    INVALID_TOKEN,
+
+    /**
+     * The account attempting to link is already linked to another account
+     */
+    ALREADY_LINKED,
+
+    /**
+     * The link attempt was successful
+     */
+    SUCCESS
 }

@@ -27,8 +27,27 @@ import uk.co.notnull.proxydiscord.api.logging.LogEntry;
 
 import java.util.concurrent.CompletableFuture;
 
+/**
+ * Manager class for logging events to configured Discord channels
+ */
 @SuppressWarnings("unused")
 public interface LoggingManager {
+	/**
+	 * Logs a {@link LogEntry} to the relevant Discord channels.
+	 * Each channels settings for event types, visibility and servers are respected.
+	 * This method will fire a {@link uk.co.notnull.proxydiscord.api.events.DiscordLogEvent} for the given entry,
+	 * which can be cancelled by other plugins to prevent the log.
+	 * @param entry The log entry
+	 * @return Future
+	 */
 	CompletableFuture<Void> logEvent(LogEntry entry);
+
+	/**
+	 * Logs a {@link LogEntry} to the relevant Discord channels.
+	 * Each channels settings for event types, visibility and servers are respected.
+	 * This method will not fire any events and will always be logged in relevant channels.
+	 * which can be cancelled by other plugins to prevent the log.
+	 * @param entry The log entry
+	 */
 	void logCustomEvent(LogEntry entry);
 }

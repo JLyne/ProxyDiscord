@@ -33,6 +33,9 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
+/**
+ * A loggable event which will be sent to configured Discord logging channels
+ */
 @SuppressWarnings("unused")
 public class LogEntry {
 	private final LogType type;
@@ -41,6 +44,10 @@ public class LogEntry {
 	private final RegisteredServer server;
 	private final Map<String, String> replacements;
 
+	/**
+	 * Constructs a LogEntry.
+	 * @param builder A LogEntry builder
+	 */
 	public LogEntry(Builder builder) {
 		this.type = builder.type;
 		this.visibility = builder.visibility;
@@ -49,18 +56,34 @@ public class LogEntry {
 		this.replacements = builder.replacements;
 	}
 
+	/**
+	 * Gets the {@link LogType} of the entry
+	 * @return the log type
+	 */
 	public LogType getType() {
 		return type;
 	}
 
+	/**
+	 * Gets the {@link LogVisibility} of the entry
+	 * @return the log visibility
+	 */
 	public LogVisibility getVisibility() {
 		return visibility;
 	}
 
+	/**
+	 * Gets the player associated with the entry
+	 * @return the player
+	 */
 	public Player getPlayer() {
 		return player;
 	}
 
+	/**
+	 * Gets the server associated with the entry
+	 * @return the server
+	 */
 	public Optional<RegisteredServer> getServer() {
 		if(server != null) {
 			return Optional.of(server);
@@ -69,25 +92,44 @@ public class LogEntry {
 		return player.getCurrentServer().map(ServerConnection::getServer);
 	}
 
+	/**
+	 * Gets the list of replacements to apply to the log entry format before logging
+	 * @return the replacements
+	 */
 	public Map<String, String> getReplacements() {
 		return replacements;
 	}
 
+	/**
+	 * Create a {@link Builder} from the log entry
+	 * @return the builder
+	 */
 	@NonNull
 	public Builder toBuilder() {
 		return new Builder(this);
 	}
 
+	/**
+	 * Create a new empty {@link Builder}
+	 * @return the builder
+	 */
 	@NonNull
 	public static Builder builder() {
 		return new Builder();
 	}
 
+	/**
+	 * Create a copy of an existing {@link Builder}
+	 * @return the new builder
+	 */
 	@NonNull
 	public static Builder builder(Builder builder) {
 		return new Builder(builder);
 	}
 
+	/**
+	 * Builder for creating {@link LogEntry} objects
+	 */
 	public static class Builder {
 		private LogType type;
 		private LogVisibility visibility = LogVisibility.UNSPECIFIED;
@@ -95,9 +137,16 @@ public class LogEntry {
 		private RegisteredServer server = null;
 		private Map<String, String> replacements = Collections.emptyMap();
 
+		/**
+		 * Constructs an empty Builder.
+		 */
 		public Builder() {
 		}
 
+		/**
+		 * Constructs a Builder from another Builder instance.
+		 * @param builder An existing builder to copy the settings from
+		 */
 		public Builder(Builder builder) {
 			this.type = builder.type;
 			this.visibility = builder.visibility;
@@ -106,6 +155,10 @@ public class LogEntry {
 			this.replacements = builder.replacements;
 		}
 
+		/**
+		 * Constructs a Builder from an existing {@link LogEntry}
+		 * @param entry An existing {@link LogEntry}} to copy the properties from
+		 */
 		public Builder(LogEntry entry) {
 			this.type = entry.getType();
 			this.visibility = entry.getVisibility();
@@ -114,31 +167,55 @@ public class LogEntry {
 			this.replacements = entry.getReplacements();
 		}
 
+		/**
+		 * Set the {@link LogVisibility} for the final log entry
+		 * @return the builder
+		 */
 		public Builder visibility(@NonNull LogVisibility visibility) {
 			this.visibility = Objects.requireNonNull(visibility);
 			return this;
 		}
 
+		/**
+		 * Set the associated player for the final log entry
+		 * @return the builder
+		 */
 		public Builder player(@NonNull Player player) {
 			this.player = Objects.requireNonNull(player);
 			return this;
 		}
 
+		/**
+		 * Set the associated server for the final log entry
+		 * @return the builder
+		 */
 		public Builder server(RegisteredServer server) {
 			this.server = server;
 			return this;
 		}
 
+		/**
+		 * Set the log type for the final log entry
+		 * @return the builder
+		 */
 		public Builder type(LogType type) {
 			this.type = type;
 			return this;
 		}
 
+		/**
+		 * Set the format replacements fro the final log entry
+		 * @return the builder
+		 */
 		public Builder replacements(@NonNull Map<String, String> replacements) {
 			this.replacements = Objects.requireNonNull(replacements);
 			return this;
 		}
 
+		/**
+		 * Build the final log entry
+		 * @return the log entry
+		 */
 		public LogEntry build() {
 			if(type == null) {
 				throw new IllegalStateException("");

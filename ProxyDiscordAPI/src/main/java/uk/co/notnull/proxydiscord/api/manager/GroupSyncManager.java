@@ -23,5 +23,8 @@
 
 package uk.co.notnull.proxydiscord.api.manager;
 
+/**
+ * Manager class for syncing Discord roles with Luckperms groups
+ */
 public interface GroupSyncManager {
 }

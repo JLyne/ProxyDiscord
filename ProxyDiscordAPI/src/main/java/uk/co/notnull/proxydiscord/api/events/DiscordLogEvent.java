@@ -29,16 +29,27 @@ import uk.co.notnull.proxydiscord.api.logging.LogVisibility;
 
 import java.util.Objects;
 
+/**
+ * This event is fired when a event loggable by ProxyDiscord occurs
+ */
 @SuppressWarnings("unused")
-public class DiscordLogEvent implements ResultedEvent<DiscordLogEvent.DiscordLogResult> {
+public final class DiscordLogEvent implements ResultedEvent<DiscordLogEvent.DiscordLogResult> {
 	private final LogEntry event;
 	private DiscordLogResult result;
 
+	/**
+	 * Constructs a DiscordLogEvent.
+	 * @param event The LogEntry to be logged
+	 */
 	public DiscordLogEvent(LogEntry event) {
 		this.event = event;
 		this.result = new DiscordLogResult(true, event.getVisibility());
 	}
 
+	/**
+	 * Gets the associated {@link LogEntry}
+	 * @return the log entry
+	 */
 	public LogEntry getLogEntry() {
 		return event;
 	}
@@ -53,7 +64,10 @@ public class DiscordLogEvent implements ResultedEvent<DiscordLogEvent.DiscordLog
 		this.result = Objects.requireNonNull(result);
 	}
 
-	public static class DiscordLogResult implements ResultedEvent.Result {
+	/**
+   	* Represents the result of the {@link DiscordLogEvent}.
+   	*/
+	public static final class DiscordLogResult implements ResultedEvent.Result {
 
 		private static final DiscordLogResult ALLOWED = new DiscordLogResult(true, LogVisibility.UNSPECIFIED);
 		private static final DiscordLogResult DENIED = new DiscordLogResult(false, LogVisibility.UNSPECIFIED);
@@ -100,6 +114,8 @@ public class DiscordLogEvent implements ResultedEvent<DiscordLogEvent.DiscordLog
 
 		/**
 		 * Allows the log to be sent, but only in public log channels
+		 *
+		 * @return the result
 		 */
 		public static DiscordLogResult publicOnly() {
 			return new DiscordLogResult(true, LogVisibility.PUBLIC_ONLY);
@@ -107,6 +123,8 @@ public class DiscordLogEvent implements ResultedEvent<DiscordLogEvent.DiscordLog
 
 		/**
 		 * Allows the log to be sent, but only in private log channels
+		 *
+		 * @return the result
 		 */
 		public static DiscordLogResult privateOnly() {
 			return new DiscordLogResult(true, LogVisibility.PRIVATE_ONLY);

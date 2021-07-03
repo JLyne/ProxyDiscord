@@ -28,32 +28,57 @@ import com.velocitypowered.api.proxy.Player;
 import java.util.Optional;
 import java.util.UUID;
 
+/**
+ * This event is fired when a player successfully links their Discord account
+ */
 @SuppressWarnings("unused")
 public final class PlayerLinkEvent {
 	private final UUID uuid;
 	private final Player player;
 	private final long discordId;
 
+	/**
+   	 * Constructs a PlayerLinkEvent for an offline player.
+   	 * @param uuid the UUID of the now-linked player
+   	 * @param discordId the ID of the linked discord account
+ 	 */
 	public PlayerLinkEvent(UUID uuid, long discordId) {
 		this.uuid = uuid;
 		this.player = null;
 		this.discordId = discordId;
 	}
 
+	/**
+   	 * Constructs a PlayerLinkEvent for an online player.
+   	 * @param player the now-linked player
+   	 * @param discordId the ID of the linked discord account
+ 	 */
 	public PlayerLinkEvent(Player player, long discordId) {
 		this.uuid = player.getUniqueId();
 		this.player = player;
 		this.discordId = discordId;
 	}
 
+	/**
+	 * Gets the UUID of the player that has linked
+	 * @return the player's UUID
+	 */
 	public UUID getUuid() {
 		return uuid;
 	}
 
+	/**
+	 * Gets the player that has linked, if they are online
+	 * @return an optional containing the player, if they are currently online
+	 */
 	public Optional<Player> getPlayer() {
 		return Optional.ofNullable(player);
 	}
 
+	/**
+	 * Gets the Discord ID of the linked Discord account
+	 * @return the Discord ID
+	 */
 	public long getDiscordId() {
 		return discordId;
 	}
