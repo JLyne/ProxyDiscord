@@ -194,8 +194,21 @@ public class LoggingChannelHandler {
         }
 
         logListener = loggingChannel.get().addMessageCreateListener(this::handleDiscordMessageEvent);
+        String channelName = "#" + loggingChannel.toString().replaceAll(".*\\[|].*", "");
 
-        logger.info("Activity logging enabled for channel: #" + loggingChannel.toString().replaceAll(".*\\[|].*", "") + " (id: " + channelId + ")");
+        logger.info("Activity logging enabled for channel: " + channelName + " (id: " + channelId + ")");
+
+        loggingChannel.ifPresent(channel -> {
+            if(!channel.canYouWrite()) {
+                logger.warn("I don't have permission to send messages in " + channelName + " (id: " +
+									channel.getIdAsString() + ")!");
+            }
+
+            if(!channel.canYouManageMessages()) {
+                logger.warn("I don't have permission to manage messages in " + channelName + " (id: " +
+									channel.getIdAsString() + ")!");
+            }
+        });
     }
 
     private boolean shouldLogEvent(LogEntry entry) {

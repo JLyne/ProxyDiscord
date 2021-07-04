@@ -318,11 +318,23 @@ public class LinkingManager implements uk.co.notnull.proxydiscord.api.manager.Li
                 linkCommand.remove();
                 linkCommand = null;
             }
+
+            return;
         } else if(linkCommand == null) {
             linkCommand = new Link(this, linkingChannel.get());
         } else {
             linkCommand.setLinkingChannel(linkingChannel.get());
         }
+
+        String channelName = "#" + linkingChannel.get().toString().replaceAll(".*\\[|].*", "");
+        logger.info("Account linking enabled for channel: " + channelName + " (id: " + linkingChannelId + ")");
+
+        linkingChannel.ifPresent(channel -> {
+            if(!channel.canYouWrite()) {
+                logger.warn("I don't have permission to send messages in #" + channelName
+                                    + " (id: " + linkingChannelId + ")!");
+            }
+        });
     }
 
     public String getLinkingSecret() {
