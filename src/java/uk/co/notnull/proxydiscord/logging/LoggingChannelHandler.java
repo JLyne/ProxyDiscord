@@ -360,7 +360,7 @@ public class LoggingChannelHandler {
 		CachedMetaData metaData = user.getCachedData().getMetaData(QueryOptions.nonContextual());
 		String prefix = ( metaData.getPrefix() != null) ?  metaData.getPrefix() : "";
 		String suffix = ( metaData.getSuffix() != null) ?  metaData.getSuffix() : "";
-		message = Util.stripSectionFormatting(message);
+		message = Util.stripFormatting(message);
 
 		logger.info(message);
 
@@ -368,9 +368,8 @@ public class LoggingChannelHandler {
 				.deserialize(ingameChatFormat
 									 .replace("[prefix]", prefix)
 									 .replace("[suffix]", suffix)
-									 .replace("[player]", user.getFriendlyName()))
-				.replaceText(TextReplacementConfig.builder().matchLiteral("[message]")
-											 .replacement(message).build());
+									 .replace("[player]", user.getFriendlyName())
+									 .replace("[message]", message));
 
 		proxy.getAllPlayers().forEach(player -> {
 			RegisteredServer server = player.getCurrentServer().map(ServerConnection::getServer).orElse(null);

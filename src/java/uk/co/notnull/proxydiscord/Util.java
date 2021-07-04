@@ -103,12 +103,13 @@ public class Util {
 	}
 
 	/**
-	 * Removes any section-character based formatting from the given string
+	 * Removes any section-character or &-based formatting from the given string
 	 * @param message The message
 	 * @return the message with any section-character formatting removed
 	 */
-	public static String stripSectionFormatting(String message) {
-		return sectionPattern.matcher(message).replaceAll("");
+	public static String stripFormatting(String message) {
+		return sectionPattern.matcher(plainSerializer.serialize(legacySerializer.deserialize(message)))
+				.replaceAll("");
 	}
 
 	/**
