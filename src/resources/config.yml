@@ -45,11 +45,11 @@ logging:
   default: # Default settings which can be overridden for an individual log channel
     # Event types to log. Valid events are 'join', 'leave', 'command', 'chat', 'discord-chat'
     events:
-      'join'
-      'leave'
-      'command'
-      'chat'
-      'discord-chat' # If enabled, messages sent by users on discord in the log channel will be deleted and then logged using the 'discord-chat' log format.
+      - 'join'
+      - 'leave'
+      - 'command'
+      - 'chat'
+      - 'discord-chat' # If enabled, messages sent by users on discord in the log channel will be deleted and then logged using the 'discord-chat' log format.
 
     # Optional list of servers to log, will log all server if not specified
     # Also controls which servers will see messages sent in the Discord channel
