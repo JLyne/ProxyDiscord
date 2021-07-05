@@ -21,6 +21,4 @@
  * SOFTWARE.
  */
 
-include "ProxyDiscordAPI"
-
 rootProject.name = 'ProxyDiscord'

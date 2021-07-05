@@ -61,7 +61,7 @@ allprojects {
 }
 
 dependencies {
-    implementation project(":ProxyDiscordApi")
+    implementation project(":ProxyDiscordAPI")
     implementation group: 'org.javacord', name: 'javacord', version:'3.3.1'
     implementation 'cloud.commandframework:cloud-velocity:1.4.0'
     implementation 'cloud.commandframework:cloud-minecraft-extras:1.4.0'
@@ -79,4 +79,8 @@ shadowJar {
     relocate 'cloud.commandframework', 'uk.co.notnull.proxydiscord.shaded.cloud'
 }
 
-build.dependsOn shadowJar
+tasks {
+    build {
+        dependsOn(shadowJar)
+    }
+}
