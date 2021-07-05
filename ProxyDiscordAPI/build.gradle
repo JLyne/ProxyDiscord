@@ -22,15 +22,14 @@
  */
 
 plugins {
-    id 'com.github.johnrengelman.shadow'
     id 'java'
-    id 'maven'
+    id 'maven-publish'
 }
 
 group = 'uk.co.notnull'
-version = '1.0'
+version = '1.0-SNAPSHOT'
 
-description = """ProxyDiscordAPI"""
+description = 'API from ProxyDiscord'
 
 sourceCompatibility = 11
 targetCompatibility = 11
@@ -46,16 +45,15 @@ sourceSets {
     }
 }
 
-repositories {
-    mavenCentral()
-    maven { url 'https://nexus.velocitypowered.com/repository/maven-public/' }
-    maven {
-        name "luck-repo"
-        url "https://repo.lucko.me/"
-    }
-}
-
 dependencies {
     compileOnly group: 'com.velocitypowered', name: 'velocity-api', version:'1.1.8'
     compileOnly group: 'net.luckperms', name: 'api', version:'5.0'
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            from components.java
+        }
+    }
 }
