@@ -54,6 +54,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class LoggingChannelHandler {
 	private final ProxyDiscord plugin;
@@ -64,7 +65,7 @@ public class LoggingChannelHandler {
 	private final long channelId;
 	private boolean logSentMessages = false;
 	private boolean logIsPublic = true;
-	private final Integer lockDummy = 0;
+	private final AtomicReference<Integer> lockDummy = new AtomicReference<>(0);
 
 	private SimpleDateFormat dateFormat;
 	private String ingameChatFormat;
