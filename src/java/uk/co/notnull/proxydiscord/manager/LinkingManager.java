@@ -28,7 +28,7 @@ import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.proxy.Player;
 import ninja.leaping.configurate.ConfigurationNode;
 import org.javacord.api.DiscordApi;
-import org.javacord.api.entity.channel.TextChannel;
+import org.javacord.api.entity.channel.ServerTextChannel;
 import org.javacord.api.entity.user.User;
 import org.slf4j.Logger;
 import uk.co.notnull.proxydiscord.api.LinkResult;
@@ -309,7 +309,7 @@ public class LinkingManager implements uk.co.notnull.proxydiscord.api.manager.Li
 
     private void findChannel() {
         DiscordApi api = plugin.getDiscord().getApi();
-        Optional <TextChannel> linkingChannel = api.getTextChannelById(linkingChannelId);
+        Optional <ServerTextChannel> linkingChannel = api.getServerTextChannelById(linkingChannelId);
 
         if(linkingChannel.isEmpty()) {
             logger.warn("Unable to find linking channel. Did you put a valid channel ID in the config?");
@@ -326,7 +326,8 @@ public class LinkingManager implements uk.co.notnull.proxydiscord.api.manager.Li
             linkCommand.setLinkingChannel(linkingChannel.get());
         }
 
-        String channelName = "#" + linkingChannel.get().toString().replaceAll(".*\\[|].*", "");
+
+        String channelName = "#" + linkingChannel.get().getName();
         logger.info("Account linking enabled for channel: " + channelName + " (id: " + linkingChannelId + ")");
 
         linkingChannel.ifPresent(channel -> {

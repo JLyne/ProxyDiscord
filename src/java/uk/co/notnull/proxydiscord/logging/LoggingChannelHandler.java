@@ -34,6 +34,7 @@ import net.luckperms.api.model.user.User;
 import net.luckperms.api.model.user.UserManager;
 import net.luckperms.api.query.QueryOptions;
 import ninja.leaping.configurate.ConfigurationNode;
+import org.javacord.api.entity.channel.ServerTextChannel;
 import org.javacord.api.entity.channel.TextChannel;
 import org.javacord.api.entity.message.MessageBuilder;
 import org.javacord.api.entity.message.mention.AllowedMentions;
@@ -182,7 +183,7 @@ public class LoggingChannelHandler {
 	}
 
 	private void findChannel() {
-        Optional<TextChannel> loggingChannel = plugin.getDiscord().getApi().getTextChannelById(channelId);
+        Optional<ServerTextChannel> loggingChannel = plugin.getDiscord().getApi().getServerTextChannelById(channelId);
 
         if(loggingChannel.isEmpty()) {
             logger.warn("Unable to find logging channel. Did you put a valid channel ID in the config?");
@@ -194,7 +195,7 @@ public class LoggingChannelHandler {
         }
 
         logListener = loggingChannel.get().addMessageCreateListener(this::handleDiscordMessageEvent);
-        String channelName = "#" + loggingChannel.toString().replaceAll(".*\\[|].*", "");
+        String channelName = "#" + loggingChannel.get().getName();
 
         logger.info("Activity logging enabled for channel: " + channelName + " (id: " + channelId + ")");
 

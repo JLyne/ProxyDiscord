@@ -37,6 +37,7 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
+import org.javacord.api.entity.channel.ServerTextChannel;
 import org.javacord.api.entity.channel.TextChannel;
 import org.javacord.api.entity.message.Message;
 import org.javacord.api.listener.message.MessageCreateListener;
@@ -116,14 +117,14 @@ public class AnnouncementChannelHandler {
 	}
 
 	private TextChannel getChannel() {
-		Optional<TextChannel> announcementChannel = plugin.getDiscord().getApi()
-                    .getTextChannelById(channelId);
+		Optional<ServerTextChannel> announcementChannel = plugin.getDiscord().getApi()
+                    .getServerTextChannelById(channelId);
 
 		if(announcementChannel.isEmpty()) {
 			throw new RuntimeException("Channel " + channelId + " not found");
 		}
 
-		channelName = "#" + announcementChannel.toString().replaceAll(".*\\[|].*", "");
+		channelName = "#" + announcementChannel.get().getName();
 
 		return announcementChannel.get();
 	}
