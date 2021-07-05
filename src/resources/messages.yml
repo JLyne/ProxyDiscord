@@ -169,6 +169,28 @@ embed-link-error:
   thumbnail: 'https://cdn.discordapp.com/attachments/457984159458000908/608397934773665852/misc_3.png'
   colour: '#335bc6'
 
+embed-unlink-success:
+  title: 'Accounts unlinked successfully'
+  description: |-
+    Your accounts [discord] and **[minecraft]** have been unlinked.
+  thumbnail: 'https://cdn.discordapp.com/attachments/457984159458000908/608397929081864233/success_3.png'
+  colour: '#22d518'
+
+embed-unlink-not-linked:
+  title: 'Account not linked'
+  description: |-
+    Your Discord account [discord] is not currently linked to a Minecraft account.
+  thumbnail: 'https://cdn.discordapp.com/attachments/457984159458000908/608397930151542785/alert_3.png'
+  colour: '#ffac22'
+
+embed-unlink-error:
+  title: 'An error occurred'
+  description: |-
+    An unexpected error occurred while trying to unlink your accounts.
+    Please try again later. If problems persist, ask a mod for help.
+  thumbnail: 'https://cdn.discordapp.com/attachments/457984159458000908/608397934773665852/misc_3.png'
+  colour: '#335bc6'
+
 announcement-new: |-
   New announcement in [channel]:
 

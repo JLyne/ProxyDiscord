@@ -36,6 +36,7 @@ import uk.co.notnull.proxydiscord.ProxyDiscord;
 import uk.co.notnull.proxydiscord.bot.commands.Link;
 import uk.co.notnull.proxydiscord.api.events.PlayerLinkEvent;
 import uk.co.notnull.proxydiscord.api.events.PlayerUnlinkEvent;
+import uk.co.notnull.proxydiscord.bot.commands.Unlink;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -57,9 +58,11 @@ public class LinkingManager implements uk.co.notnull.proxydiscord.api.manager.Li
     private HashBiMap<String, UUID> pendingLinks;
     private String linkingSecret;
     private String linkingChannelId;
+    private boolean allowDiscordUnlink;
 
     private final Logger logger;
     private Link linkCommand;
+    private Unlink unlinkCommand;
 
     public LinkingManager(ProxyDiscord plugin, ConfigurationNode config) {
         this.plugin = plugin;
@@ -77,8 +80,7 @@ public class LinkingManager implements uk.co.notnull.proxydiscord.api.manager.Li
             if(linkingChannelId != null) {
                 findChannel();
             } else {
-                linkCommand.remove();
-                linkCommand = null;
+                removeCommands();
             }
         });
 
@@ -88,15 +90,16 @@ public class LinkingManager implements uk.co.notnull.proxydiscord.api.manager.Li
     private void parseConfig(ConfigurationNode config) {
         String linkingChannelId = config.getNode("linking", "discord-channel-id").getString();
 		String linkingSecret = config.getNode("linking", "secret").getString(); //TODO: Validate
+		boolean allowDiscordUnlink = config.getNode("linking", "allow-discord-unlinking").getBoolean(false);
 
 		this.linkingSecret = linkingSecret;
         this.linkingChannelId = linkingChannelId;
+        this.allowDiscordUnlink = allowDiscordUnlink;
 
         if(linkingChannelId != null) {
             findChannel();
-        } else if(linkCommand != null) {
-            linkCommand.remove();
-            linkCommand = null;
+        } else {
+            removeCommands();
         }
     }
 
@@ -186,7 +189,7 @@ public class LinkingManager implements uk.co.notnull.proxydiscord.api.manager.Li
         this.links.put(uuid, discordId);
         this.pendingLinks.remove(token);
 
-        proxy.getEventManager().fireAndForget(new PlayerLinkEvent(uuid, discordId));
+        fireLinkEvent(uuid, discordId);
 
         return LinkResult.SUCCESS;
     }
@@ -204,33 +207,39 @@ public class LinkingManager implements uk.co.notnull.proxydiscord.api.manager.Li
 
         this.links.put(uuid, discordId);
 
-        proxy.getEventManager().fireAndForget(new PlayerLinkEvent(uuid, discordId));
+        fireLinkEvent(uuid, discordId);
 
         return LinkResult.SUCCESS;
     }
 
-    public void unlink(Player player) {
+    public Long unlink(Player player) {
         Long previousLink = this.links.remove(player.getUniqueId());
 
         if(previousLink != null) {
-            proxy.getEventManager().fireAndForget(new PlayerUnlinkEvent(player, previousLink));
+            fireUnlinkEvent(player.getUniqueId(), previousLink);
         }
+
+        return previousLink;
     }
 
-    public void unlink(UUID uuid) {
+    public Long unlink(UUID uuid) {
         Long previousLink = this.links.remove(uuid);
 
         if(previousLink != null) {
-            proxy.getEventManager().fireAndForget(new PlayerUnlinkEvent(uuid, previousLink));
+            fireUnlinkEvent(uuid, previousLink);
         }
+
+        return previousLink;
     }
 
-    public void unlink(long discordId) {
+    public UUID unlink(long discordId) {
         UUID uuid = this.links.inverse().remove(discordId);
 
         if(uuid != null) {
-            proxy.getEventManager().fireAndForget(new PlayerUnlinkEvent(uuid, discordId));
+            fireUnlinkEvent(uuid, discordId);
         }
+
+        return uuid;
     }
 
     public void saveLinks() {
@@ -249,6 +258,26 @@ public class LinkingManager implements uk.co.notnull.proxydiscord.api.manager.Li
             save.writeObject(this.pendingLinks);
         } catch (IOException e) {
             logger.warn("Could not save linked accounts to disk");
+        }
+    }
+
+    private void fireLinkEvent(UUID uuid, Long linked) {
+        Optional<Player> player = proxy.getPlayer(uuid);
+
+        if(player.isPresent()) {
+            proxy.getEventManager().fireAndForget(new PlayerLinkEvent(player.get(), linked));
+        } else {
+            proxy.getEventManager().fireAndForget(new PlayerLinkEvent(uuid, linked));
+        }
+    }
+
+    private void fireUnlinkEvent(UUID uuid, Long previousLink) {
+        Optional<Player> player = proxy.getPlayer(uuid);
+
+        if(player.isPresent()) {
+            proxy.getEventManager().fireAndForget(new PlayerUnlinkEvent(player.get(), previousLink));
+        } else {
+            proxy.getEventManager().fireAndForget(new PlayerUnlinkEvent(uuid, previousLink));
         }
     }
 
@@ -314,18 +343,27 @@ public class LinkingManager implements uk.co.notnull.proxydiscord.api.manager.Li
         if(linkingChannel.isEmpty()) {
             logger.warn("Unable to find linking channel. Did you put a valid channel ID in the config?");
 
-            if(linkCommand != null) {
-                linkCommand.remove();
-                linkCommand = null;
-            }
+            removeCommands();
 
             return;
-        } else if(linkCommand == null) {
-            linkCommand = new Link(this, linkingChannel.get());
         } else {
-            linkCommand.setLinkingChannel(linkingChannel.get());
-        }
+            if(linkCommand == null) {
+                linkCommand = new Link(this, linkingChannel.get());
+            } else {
+                linkCommand.setLinkingChannel(linkingChannel.get());
+            }
 
+            if(allowDiscordUnlink) {
+                if(unlinkCommand == null) {
+                    unlinkCommand = new Unlink(this, linkingChannel.get());
+                } else {
+                    unlinkCommand.setLinkingChannel(linkingChannel.get());
+                }
+            } else if(unlinkCommand != null) {
+                unlinkCommand.remove();
+                unlinkCommand = null;
+            }
+        }
 
         String channelName = "#" + linkingChannel.get().getName();
         logger.info("Account linking enabled for channel: " + channelName + " (id: " + linkingChannelId + ")");
@@ -336,6 +374,18 @@ public class LinkingManager implements uk.co.notnull.proxydiscord.api.manager.Li
                                     + " (id: " + linkingChannelId + ")!");
             }
         });
+    }
+
+    private void removeCommands() {
+        if(linkCommand != null) {
+            linkCommand.remove();
+            linkCommand = null;
+        }
+
+        if(unlinkCommand != null) {
+            unlinkCommand.remove();
+            unlinkCommand = null;
+        }
     }
 
     public String getLinkingSecret() {

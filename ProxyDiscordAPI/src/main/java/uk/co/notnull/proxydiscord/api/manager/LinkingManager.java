@@ -31,7 +31,7 @@ import java.util.UUID;
 /**
  * Manager class for tracking and updating the Discord links of Minecraft players
  */
-@SuppressWarnings("unused")
+@SuppressWarnings({"unused", "UnusedReturnValue"})
 public interface LinkingManager {
     /**
      * Gets whether a player has linked a Discord account
@@ -108,20 +108,23 @@ public interface LinkingManager {
     /**
      * Unlinks any linked Discord account for the specified player
      * @param player The player
+     * @return The Discord ID the given UUID was previously linked to, if any
      */
-    void unlink(Player player);
+    Long unlink(Player player);
 
     /**
      * Unlinks any linked Discord account for the specified UUID
      * @param uuid The UUID
+     * @return The Discord ID the given UUID was previously linked to, if any
      */
-    void unlink(UUID uuid);
+    Long unlink(UUID uuid);
 
     /**
      * Unlinks any linked Minecraft account for the specified Discord ID
      * @param discordId The Discord ID
+     * @return The UUID the given Discord ID was previously linked to, if any
      */
-    void unlink(long discordId);
+    UUID unlink(long discordId);
 
     /**
      * Gets the currently configured linking secret
