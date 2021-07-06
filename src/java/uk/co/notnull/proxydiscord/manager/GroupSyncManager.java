@@ -75,8 +75,6 @@ public class GroupSyncManager implements uk.co.notnull.proxydiscord.api.manager.
 		groups = new HashSet<>();
 
 		parseConfig(config);
-
-		plugin.getProxy().getEventManager().register(plugin, this);
 	}
 
 	private void parseConfig(ConfigurationNode config) {

@@ -54,7 +54,6 @@ public class RedirectManager {
         this.verificationManager = plugin.getVerificationManager();
 
         destinations = new ConcurrentHashMap<>();
-        proxy.getEventManager().register(plugin, this);
     }
 
     @Subscribe(order = PostOrder.LAST)

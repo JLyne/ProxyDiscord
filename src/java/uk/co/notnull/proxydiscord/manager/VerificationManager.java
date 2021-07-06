@@ -81,7 +81,6 @@ public class VerificationManager implements uk.co.notnull.proxydiscord.api.manag
         lastKnownStatuses = new ConcurrentHashMap<>();
         publicServers = new HashSet<>();
 
-        proxy.getEventManager().register(plugin, this);
         parseConfig(config);
     }
 

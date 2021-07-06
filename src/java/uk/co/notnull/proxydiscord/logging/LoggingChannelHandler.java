@@ -52,7 +52,6 @@ import uk.co.notnull.proxydiscord.manager.LinkingManager;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -95,16 +94,12 @@ public class LoggingChannelHandler {
 		this.linkingManager = plugin.getLinkingManager();
 		this.channelId = channelId;
 
-		//Decrease logs per message if a low number of messages are unsent
-        proxy.getScheduler().buildTask(plugin, () -> {
-            if(queuedToSend.get() <= 2 && logsPerMessage.get() > 1) {
-                logger.info("Decreasing logsPerMessage due to low activity (" + queuedToSend.get() + " queued messages)");
-                logsPerMessage.set(Math.max(logsPerMessage.get() / 2, 1));
-            }
-        }).repeat(5, TimeUnit.SECONDS).delay(5, TimeUnit.SECONDS).schedule();
-
 		plugin.getDiscord().getApi().addReconnectListener(event -> findChannel());
 		parseConfig(config);
+	}
+
+	public void init() {
+		findChannel();
 	}
 
 	private void parseConfig(ConfigurationNode config) {
@@ -178,8 +173,6 @@ public class LoggingChannelHandler {
             this.formats.put(LogType.COMMAND, commandFormat.getString(defaultCommandFormat.getString("")));
             this.ingameChatFormat = ingameChatFormat.getString(defaultIngameChatFormat.getString(""));
         }
-
-        findChannel();
 	}
 
 	private void findChannel() {
@@ -234,6 +227,14 @@ public class LoggingChannelHandler {
 		}
 
 		return servers.isEmpty() || servers.contains(entry.getServer().get());
+	}
+
+	public void updateLogsPerMessage() {
+		//Decrease logs per message if a low number of messages are unsent
+		if(queuedToSend.get() <= 2 && logsPerMessage.get() > 1) {
+			logger.info("Decreasing logsPerMessage due to low activity (" + queuedToSend.get() + " queued messages)");
+			logsPerMessage.set(Math.max(logsPerMessage.get() / 2, 1));
+		}
 	}
 
     public void logEvent(LogEntry entry) {
@@ -387,5 +388,6 @@ public class LoggingChannelHandler {
 
 	public void update(ConfigurationNode config) {
 		parseConfig(config);
+		findChannel();
 	}
 }

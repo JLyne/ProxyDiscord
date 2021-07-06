@@ -42,6 +42,7 @@ import uk.co.notnull.proxydiscord.logging.LoggingChannelHandler;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 
 public class LoggingManager implements uk.co.notnull.proxydiscord.api.manager.LoggingManager {
     private final ProxyDiscord plugin;
@@ -56,12 +57,19 @@ public class LoggingManager implements uk.co.notnull.proxydiscord.api.manager.Lo
 
         this.handlers = new HashMap<>();
 
-        plugin.getProxy().getEventManager().register(plugin, this);
-
-        parseConfig(config);
+        parseConfig(config, false);
     }
 
-    private void parseConfig(ConfigurationNode config) {
+    public void init() {
+		//Can't scheduled tasks until ProxyInitializeEvent
+        proxy.getScheduler().buildTask(plugin, () -> {
+            handlers.forEach((id, handler) -> handler.updateLogsPerMessage());
+        }).repeat(5, TimeUnit.SECONDS).delay(5, TimeUnit.SECONDS).schedule();
+
+        handlers.forEach((id, handler) -> handler.init());
+	}
+
+    private void parseConfig(ConfigurationNode config, boolean reload) {
         Set<Long> existing = new HashSet<>(handlers.keySet());
 
         LoggingChannelHandler.defaultConfig = config.getNode("logging", "default");
@@ -84,7 +92,12 @@ public class LoggingManager implements uk.co.notnull.proxydiscord.api.manager.Lo
                 handlers.get(channelId).update(channelConfig);
                 existing.remove(channelId);
             } else if(!handlers.containsKey(channelId)) {
-                handlers.put(channelId, new LoggingChannelHandler(plugin, channelId, channelConfig));
+            	LoggingChannelHandler handler = new LoggingChannelHandler(plugin, channelId, channelConfig);
+                handlers.put(channelId, handler);
+
+                if(reload) {
+                	handler.init();
+				}
             }
         });
 
@@ -162,6 +175,6 @@ public class LoggingManager implements uk.co.notnull.proxydiscord.api.manager.Lo
     }
 
     public void reload(ConfigurationNode config) {
-        parseConfig(config);
+        parseConfig(config, true);
     }
 }

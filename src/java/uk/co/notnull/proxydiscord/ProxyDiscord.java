@@ -84,6 +84,10 @@ public class ProxyDiscord implements uk.co.notnull.proxydiscord.api.ProxyDiscord
 	private static MinecraftChannelIdentifier statusIdentifier;
 	private static ProxyDiscord instance;
 
+	private final ProxyServer proxy;
+	private final Logger logger;
+	private final Path dataDirectory;
+
 	private ConfigurationNode configuration;
 	private DebugLogger debugLogger;
 	private Discord discord;
@@ -101,23 +105,16 @@ public class ProxyDiscord implements uk.co.notnull.proxydiscord.api.ProxyDiscord
 	private PlatformDetectionHandler platformDetectionHandler;
 
 	@Inject
-    @DataDirectory
-    private Path dataDirectory;
-
-	@Inject
-
-	private ProxyServer proxy;
-	@Inject
-    private Logger logger;
-
-    public ProxyDiscord() {
+    public ProxyDiscord(ProxyServer proxy, Logger logger, @DataDirectory Path dataDirectory) {
     	instance = this;
-		statusIdentifier = MinecraftChannelIdentifier.create("proxydiscord", "status");
-	}
 
-	@Subscribe
-	public void onProxyInitialization(ProxyInitializeEvent event) {
-    	if(!loadConfig()) {
+    	this.proxy = proxy;
+    	this.logger = logger;
+    	this.dataDirectory = dataDirectory;
+
+		statusIdentifier = MinecraftChannelIdentifier.create("proxydiscord", "status");
+
+		if(!loadConfig()) {
     		return;
 		}
 
@@ -130,8 +127,17 @@ public class ProxyDiscord implements uk.co.notnull.proxydiscord.api.ProxyDiscord
 		verificationManager = new VerificationManager(this, configuration);
 		groupSyncManager = new GroupSyncManager(this, configuration);
 		loggingManager = new LoggingManager(this, configuration);
-		announcementManager = new AnnouncementManager(this, configuration);
 		redirectManager = new RedirectManager(this);
+	}
+
+	@Subscribe
+	public void onProxyInitialization(ProxyInitializeEvent event) {
+		announcementManager = new AnnouncementManager(this, configuration);
+
+		//Init the things we couldn't before proxy initialization
+		luckPermsManager.init();
+		linkingManager.init();
+		loggingManager.init();
 
 		initListeners();
         initCommands();
@@ -227,6 +233,12 @@ public class ProxyDiscord implements uk.co.notnull.proxydiscord.api.ProxyDiscord
     }
 
 	private void initListeners() {
+    	proxy.getEventManager().register(this, luckPermsManager);
+    	proxy.getEventManager().register(this, groupSyncManager);
+    	proxy.getEventManager().register(this, loggingManager);
+    	proxy.getEventManager().register(this, verificationManager);
+    	proxy.getEventManager().register(this, redirectManager);
+
 		proxy.getEventManager().register(this, new ServerConnect(this));
 		proxy.getEventManager().register(this, new SendStatus(this));
 		proxy.getEventManager().register(this, new JoinLeave(this));

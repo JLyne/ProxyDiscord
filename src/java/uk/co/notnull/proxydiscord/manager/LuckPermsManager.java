@@ -26,7 +26,6 @@ package uk.co.notnull.proxydiscord.manager;
 import com.velocitypowered.api.event.PostOrder;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.proxy.Player;
-import net.luckperms.api.LuckPerms;
 import net.luckperms.api.LuckPermsProvider;
 import net.luckperms.api.cacheddata.CachedPermissionData;
 import net.luckperms.api.model.user.User;
@@ -51,22 +50,22 @@ public class LuckPermsManager {
 
     private final ProxyDiscord plugin;
     private final Logger logger;
-    private final UserManager userManager;
-    private final QueryOptions groupQuery;
+    private UserManager userManager;
+    private QueryOptions groupQuery;
 
     public LuckPermsManager(ProxyDiscord plugin, ConfigurationNode config) {
         this.plugin = plugin;
         this.logger = plugin.getLogger();
 
-        LuckPerms luckPermsApi = LuckPermsProvider.get();
-        groupQuery = QueryOptions.nonContextual(
-                Set.of(Flag.INCLUDE_NODES_WITHOUT_SERVER_CONTEXT, Flag.INCLUDE_NODES_WITHOUT_WORLD_CONTEXT));
-        userManager = luckPermsApi.getUserManager();
-
-        plugin.getProxy().getEventManager().register(plugin, this);
-
         parseConfig(config);
 	}
+
+	public void init() {
+        //Luckperms isn't loaded until ProxyInitializeEvent
+        userManager = LuckPermsProvider.get().getUserManager();
+        groupQuery = QueryOptions.nonContextual(
+                Set.of(Flag.INCLUDE_NODES_WITHOUT_SERVER_CONTEXT, Flag.INCLUDE_NODES_WITHOUT_WORLD_CONTEXT));
+    }
 
 	private void parseConfig(ConfigurationNode config) {
         verifiedPermission = config.getNode("linking", "verified-permission").getString();
@@ -168,6 +167,10 @@ public class LuckPermsManager {
     }
 
     public UserManager getUserManager() {
+        if(userManager == null) {
+            throw new IllegalStateException("Calling getUserManager too early. Luckperms hasn't loaded yet");
+        }
+
         return userManager;
     }
 

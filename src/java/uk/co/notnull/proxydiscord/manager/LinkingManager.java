@@ -71,11 +71,17 @@ public class LinkingManager implements uk.co.notnull.proxydiscord.api.manager.Li
 
         this.loadLinks();
 
+        parseConfig(config);
+    }
+
+    public void init() {
+        //Can't schedule tasks until ProxyInitializeEvent
         proxy.getScheduler().buildTask(plugin, () -> {
             plugin.getDebugLogger().info("Saving linked accounts");
             saveLinks();
         }).repeat(300, TimeUnit.SECONDS).delay(300, TimeUnit.SECONDS).schedule();
 
+        //Bot commands need Luckperms to be loaded, so wait until after ProxyInitializeEvent
         plugin.getDiscord().getApi().addReconnectListener(event -> {
             if(linkingChannelId != null) {
                 findChannel();
@@ -84,7 +90,11 @@ public class LinkingManager implements uk.co.notnull.proxydiscord.api.manager.Li
             }
         });
 
-        parseConfig(config);
+        if(linkingChannelId != null) {
+            findChannel();
+        } else {
+            removeCommands();
+        }
     }
 
     private void parseConfig(ConfigurationNode config) {
@@ -95,12 +105,6 @@ public class LinkingManager implements uk.co.notnull.proxydiscord.api.manager.Li
 		this.linkingSecret = linkingSecret;
         this.linkingChannelId = linkingChannelId;
         this.allowDiscordUnlink = allowDiscordUnlink;
-
-        if(linkingChannelId != null) {
-            findChannel();
-        } else {
-            removeCommands();
-        }
     }
 
     public boolean isLinked(Player player) {
@@ -394,5 +398,11 @@ public class LinkingManager implements uk.co.notnull.proxydiscord.api.manager.Li
 
     public void reload(ConfigurationNode config) {
         parseConfig(config);
+
+        if(linkingChannelId != null) {
+            findChannel();
+        } else {
+            removeCommands();
+        }
     }
 }
