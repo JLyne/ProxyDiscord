@@ -26,14 +26,6 @@ plugins {
     id 'java'
 }
 
-group = 'uk.co.notnull'
-version = '1.0-SNAPSHOT'
-
-description = 'Velocity Discord integration solution'
-
-sourceCompatibility = 11
-targetCompatibility = 11
-
 sourceSets {
     main {
         java {
@@ -57,6 +49,7 @@ allprojects {
 
     compileJava {
         options.compilerArgs += ["-Xlint:all", "-Xlint:-processing"]
+        options.encoding = 'UTF-8'
     }
 }
 
@@ -75,12 +68,19 @@ dependencies {
     annotationProcessor 'com.velocitypowered:velocity-api:1.1.8'
 }
 
-shadowJar {
-    relocate 'cloud.commandframework', 'uk.co.notnull.proxydiscord.shaded.cloud'
-}
+group = 'uk.co.notnull'
+version = '1.0-SNAPSHOT'
+description = 'Velocity Discord integration solution'
+
+java.sourceCompatibility = JavaVersion.VERSION_11
+java.targetCompatibility = JavaVersion.VERSION_11
 
 tasks {
     build {
         dependsOn(shadowJar)
+    }
+
+    shadowJar {
+        relocate 'cloud.commandframework', 'uk.co.notnull.proxydiscord.shaded.cloud'
     }
 }
