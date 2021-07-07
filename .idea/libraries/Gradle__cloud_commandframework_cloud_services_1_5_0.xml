@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="Gradle: cloud.commandframework:cloud-services:1.5.0">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/cloud/commandframework/cloud-services/1.5.0/cloud-services-1.5.0.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$MAVEN_REPOSITORY$/cloud/commandframework/cloud-services/1.5.0/cloud-services-1.5.0-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

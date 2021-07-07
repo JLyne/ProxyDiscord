@@ -1,0 +1,3 @@
+<component name="DependencyValidationManager">
+  <scope name="New" pattern="src[ProxyDiscord*]:*..*&amp;&amp;!src[ProxyDiscord.main]:uk.co.notnull.proxydiscord.DebugLogger&amp;&amp;!src[ProxyDiscord.main]:uk.co.notnull.proxydiscord.Discord&amp;&amp;!src[ProxyDiscord.main]:uk.co.notnull.proxydiscord.ProxyDiscord&amp;&amp;!src[ProxyDiscord.main]:uk.co.notnull.proxydiscord.listeners.JoinLeave&amp;&amp;!src[ProxyDiscord.main]:uk.co.notnull.proxydiscord.cloud.*&amp;&amp;!src[ProxyDiscord.main]:uk.co.notnull.proxydiscord.cloud..*" />
+</component>

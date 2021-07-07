@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="Gradle: net.kyori:adventure-text-serializer-plain:4.7.0">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/net/kyori/adventure-text-serializer-plain/4.7.0/adventure-text-serializer-plain-4.7.0.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$MAVEN_REPOSITORY$/net/kyori/adventure-text-serializer-plain/4.7.0/adventure-text-serializer-plain-4.7.0-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

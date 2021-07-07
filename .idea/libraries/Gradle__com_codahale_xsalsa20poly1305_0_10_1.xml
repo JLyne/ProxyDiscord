@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="Gradle: com.codahale:xsalsa20poly1305:0.10.1">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.codahale/xsalsa20poly1305/0.10.1/3845c81d491b92a4428a1ae8ad5d42b5117c7e15/xsalsa20poly1305-0.10.1.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.codahale/xsalsa20poly1305/0.10.1/cd3e3a7ecbf281f68968bbdcb47bea403adf53cb/xsalsa20poly1305-0.10.1-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>
