@@ -35,6 +35,7 @@ import net.luckperms.api.query.QueryOptions;
 import ninja.leaping.configurate.ConfigurationNode;
 import org.javacord.api.entity.channel.ServerTextChannel;
 import org.javacord.api.entity.channel.TextChannel;
+import org.javacord.api.entity.message.MessageAuthor;
 import org.javacord.api.entity.message.MessageBuilder;
 import org.javacord.api.entity.message.mention.AllowedMentions;
 import org.javacord.api.entity.message.mention.AllowedMentionsBuilder;
@@ -335,7 +336,7 @@ public class LoggingChannelHandler {
 					return;
 				}
 
-				handleDiscordMessage(user, e.getResult().getMessage().orElse(e.getMessage()), e.getServers());
+				handleDiscordMessage(user, event, e.getResult().getMessage().orElse(e.getMessage()), e.getServers());
 			}).exceptionally(e -> {
 				logger.warn("Failed to handle discord message: " + e.getMessage());
 				return null;
@@ -343,16 +344,18 @@ public class LoggingChannelHandler {
 		}).schedule();
 	}
 
-    private void handleDiscordMessage(User user, String message, Set<RegisteredServer> servers) {
+    private void handleDiscordMessage(User user, MessageCreateEvent originalEvent, String message, Set<RegisteredServer> servers) {
 		if(ingameChatFormat.isEmpty()) {
 			return;
 		}
+
+		MessageAuthor author = originalEvent.getMessageAuthor();
 
 		if(logSentMessages) {
 			try {
 				String sanitised = Util.plainSerializer.serialize(Util.plainSerializer.deserialize(message));
 				String formatted = Util.formatDiscordMessage(formats.get(LogType.DISCORD_CHAT),
-															 user, Map.of("[message]", sanitised));
+															 user, author, Map.of("[message]", sanitised));
 				queueLogMessage(formatted);
 			} catch (IllegalStateException e) {
 				logger.warn("Failed to send Discord message: " + e.getMessage());
@@ -364,13 +367,15 @@ public class LoggingChannelHandler {
 		String suffix = ( metaData.getSuffix() != null) ?  metaData.getSuffix() : "";
 		message = Util.stripFormatting(message);
 
-		logger.info(message);
-
 		Component messageComponent = Util.legacySerializer
 				.deserialize(ingameChatFormat
 									 .replace("[prefix]", prefix)
 									 .replace("[suffix]", suffix)
 									 .replace("[player]", user.getFriendlyName())
+									 .replace("[uuid]", user.getUniqueId().toString())
+
+									 .replace("[discord_id]", author.getIdAsString())
+									 .replace("[discord_username]", author.getDiscriminatedName())
 									 .replace("[message]", message));
 
 		proxy.getAllPlayers().forEach(player -> {

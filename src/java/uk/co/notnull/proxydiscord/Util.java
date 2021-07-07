@@ -38,6 +38,7 @@ import org.javacord.api.entity.emoji.CustomEmoji;
 import org.javacord.api.entity.emoji.KnownCustomEmoji;
 import org.javacord.api.entity.message.Message;
 import org.javacord.api.entity.message.MessageAttachment;
+import org.javacord.api.entity.message.MessageAuthor;
 import org.jetbrains.annotations.NotNull;
 import uk.co.notnull.proxydiscord.api.logging.LogEntry;
 
@@ -129,6 +130,12 @@ public class Util {
 		}
 
         Long discordId = ProxyDiscord.inst().getLinkingManager().getLinked(entry.getPlayer());
+		Optional<org.javacord.api.entity.user.User> discordUser = Optional.empty();
+
+		if(discordId != null) {
+			discordUser = ProxyDiscord.inst().getDiscord().getApi().getCachedUserById(discordId);
+		}
+
         String serverName = entry.getServer().map(server -> server.getServerInfo().getName()).orElse("unknown");
 
         entry.getReplacements().forEach((String find, String replace) -> ref.message = ref.message
@@ -136,8 +143,18 @@ public class Util {
 
         ref.message = ref.message.replace("[server]", Util.escapeFormatting(serverName));
         ref.message = ref.message.replace("[player]", Util.escapeFormatting(entry.getPlayer().getUsername()));
-        ref.message = ref.message.replace("[discord_id]", discordId != null ? String.valueOf(discordId) : "Unlinked");
-        ref.message = ref.message.replace("[discord_mention]", discordId != null ? "<@!" + discordId + ">" : "");
+        ref.message = ref.message.replace("[uuid]", entry.getPlayer().getUniqueId().toString());
+
+        if(discordId != null) {
+			ref.message = ref.message.replace("[discord_id]", String.valueOf(discordId));
+			ref.message = ref.message.replace("[discord_mention]", "<@!" + discordId + ">");
+			ref.message = ref.message.replace("[discord_username]", discordUser.map(
+					org.javacord.api.entity.user.User::getDiscriminatedName).orElse("Unknown"));
+		} else {
+        	ref.message = ref.message.replace("[discord_id]", "Unlinked");
+			ref.message = ref.message.replace("[discord_mention]", "Unlinked");
+			ref.message = ref.message.replace("[discord_username]", "Unlinked");
+		}
 
         return ref.message;
 	}
@@ -167,7 +184,9 @@ public class Util {
 	 * @param replacements Additional replacements to apply
 	 * @return the formatted string
 	 */
-	public static String formatDiscordMessage(@NonNull String format, @NonNull User user, @NonNull Map<String, String> replacements) {
+	public static String formatDiscordMessage(@NonNull String format, @NonNull User user,
+											  @NonNull MessageAuthor author,
+											  @NonNull Map<String, String> replacements) {
 		var ref = new Object() {
 			String message = format;
 		};
@@ -176,15 +195,16 @@ public class Util {
 			return null;
 		}
 
-        Long discordId = ProxyDiscord.inst().getLinkingManager().getLinked(user.getUniqueId());
-
         replacements.forEach((String find, String replace) -> ref.message = ref.message
 				.replace(find, replace));
 
-        ref.message = ref.message.replace("[server]", "");
+        ref.message = ref.message.replace("[server]", "Discord");
         ref.message = ref.message.replace("[player]", user.getFriendlyName());
-        ref.message = ref.message.replace("[discord_id]", discordId != null ? String.valueOf(discordId) : "Unlinked");
-        ref.message = ref.message.replace("[discord_mention]", discordId != null ? "<@!" + discordId + ">" : "");
+        ref.message = ref.message.replace("[uuid]", user.getUniqueId().toString());
+
+		ref.message = ref.message.replace("[discord_id]", author.getIdAsString());
+		ref.message = ref.message.replace("[discord_mention]", "<@!" + author.getIdAsString() + ">");
+		ref.message = ref.message.replace("[discord_username]", author.getDiscriminatedName());
 
         return ref.message;
 	}
