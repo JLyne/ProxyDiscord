@@ -1,0 +1,17 @@
+{
+  "id": "proxydiscord",
+  "name": "ProxyDiscord",
+  "version": "@project.version@",
+  "authors": ["Jim (NotKatuen)"],
+  "dependencies": [
+    {
+      "id": "luckperms",
+      "optional": false
+    },
+    {
+      "id": "platform-detection",
+      "optional": true
+    }
+  ],
+  "main": "uk.co.notnull.proxydiscord.ProxyDiscord"
+}

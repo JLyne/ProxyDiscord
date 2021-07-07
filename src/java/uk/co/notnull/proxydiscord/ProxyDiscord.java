@@ -75,11 +75,6 @@ import javax.inject.Inject;
 import ninja.leaping.configurate.yaml.YAMLConfigurationLoader;
 import uk.co.notnull.proxydiscord.manager.*;
 
-@Plugin(id = "proxydiscord", name = "ProxyDiscord", version = "1.0-SNAPSHOT",
-        description = "Discord integrations", authors = {"Jim (NotKatuen)"}, dependencies = {
-		@Dependency(id = "luckperms"),
-		@Dependency(id = "platform-detection", optional = true)
-})
 public class ProxyDiscord implements uk.co.notnull.proxydiscord.api.ProxyDiscord {
 	private static MinecraftChannelIdentifier statusIdentifier;
 	private static ProxyDiscord instance;

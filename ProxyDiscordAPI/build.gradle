@@ -26,17 +26,6 @@ plugins {
     id 'maven-publish'
 }
 
-sourceSets {
-    main {
-        java {
-            srcDirs= ["./src/main/java"]
-        }
-        resources {
-            srcDirs= ["./src/main/resources"]
-        }
-    }
-}
-
 dependencies {
     compileOnly 'com.velocitypowered:velocity-api:1.1.8'
     compileOnly 'net.luckperms:api:5.0'
@@ -46,8 +35,8 @@ group = 'uk.co.notnull'
 version = '1.0-SNAPSHOT'
 description = 'API from ProxyDiscord'
 
-java.sourceCompatibility = 11
-java.targetCompatibility = 11
+java.sourceCompatibility = JavaVersion.VERSION_11
+java.targetCompatibility = JavaVersion.VERSION_11
 
 publishing {
     publications {

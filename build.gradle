@@ -21,6 +21,8 @@
  * SOFTWARE.
  */
 
+import org.apache.tools.ant.filters.ReplaceTokens
+
 plugins {
     id 'com.github.johnrengelman.shadow' version '7.0.0'
     id 'java'
@@ -74,6 +76,18 @@ java.sourceCompatibility = JavaVersion.VERSION_11
 java.targetCompatibility = JavaVersion.VERSION_11
 
 tasks {
+    processResources {
+        from("${project.rootDir}/src/main/resources") {
+            project.properties.findAll().each {
+                prop ->
+                    if (prop.value != null && prop.value instanceof java.lang.String) {
+                        filter(ReplaceTokens, tokens: [(prop.key): prop.value])
+                        filter(ReplaceTokens, tokens: [('project.' + prop.key): prop.value])
+                    }
+            }
+        }
+    }
+
     build {
         dependsOn(shadowJar)
     }
