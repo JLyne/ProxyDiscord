@@ -208,12 +208,6 @@ public class GroupSyncManager implements uk.co.notnull.proxydiscord.api.manager.
 			return;
 		}
 
-		Optional<Player> player = proxy.getPlayer(uuid);
-
-		if (player.isEmpty()) {
-			return;
-		}
-
 		if (userRoleEvent instanceof UserRoleAddEvent) {
 			// Add synced role
 			roleUsers.get(role.getId()).add(user.getId());
@@ -222,7 +216,7 @@ public class GroupSyncManager implements uk.co.notnull.proxydiscord.api.manager.
 			roleUsers.get(role.getId()).remove(user.getId());
 		}
 
-		syncPlayer(player.get());
+		proxy.getPlayer(uuid).ifPresent(this::syncPlayer);
 	}
 
 	public void handleServerMemberEvent(ServerMemberEvent event) {
@@ -233,21 +227,17 @@ public class GroupSyncManager implements uk.co.notnull.proxydiscord.api.manager.
 			return;
 		}
 
-		Optional<Player> player = proxy.getPlayer(uuid);
-
-		if (player.isEmpty()) {
-			return;
-		}
-
 		if(event instanceof ServerMemberLeaveEvent || event instanceof ServerMemberBanEvent) {
 			//Remove from all synced roles
 			roleUsers.forEach((Long roleId, Set<Long> users) -> users.remove(user.getId()));
-			luckPermsManager.updateUserGroups(player.get(), Collections.emptySet(), this.groups)
+
+			proxy.getPlayer(uuid).ifPresent(player -> luckPermsManager
+					.updateUserGroups(player, Collections.emptySet(), this.groups)
 					.thenAccept((Boolean changed) -> {
 						if (changed) {
-							verificationManager.checkVerificationStatus(player.get());
+							verificationManager.checkVerificationStatus(player);
 						}
-					});
+					}));
 		} else if(event instanceof ServerMemberJoinEvent) {
 			//Add to all synced roles the user has
 			user.getRoles(event.getServer()).forEach((Role role) -> {
@@ -255,7 +245,8 @@ public class GroupSyncManager implements uk.co.notnull.proxydiscord.api.manager.
 					roleUsers.get(role.getId()).add(user.getId());
 				}
 			});
-			syncPlayer(player.get());
+
+			proxy.getPlayer(uuid).ifPresent(this::syncPlayer);
 		}
 	}
 
