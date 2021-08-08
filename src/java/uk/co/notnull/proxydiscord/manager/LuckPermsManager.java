@@ -26,6 +26,7 @@ package uk.co.notnull.proxydiscord.manager;
 import com.velocitypowered.api.event.PostOrder;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.proxy.Player;
+import net.luckperms.api.LuckPerms;
 import net.luckperms.api.LuckPermsProvider;
 import net.luckperms.api.cacheddata.CachedPermissionData;
 import net.luckperms.api.model.user.User;
@@ -50,6 +51,7 @@ public class LuckPermsManager {
 
     private final ProxyDiscord plugin;
     private final Logger logger;
+    private LuckPerms luckperms;
     private UserManager userManager;
     private QueryOptions groupQuery;
 
@@ -62,7 +64,8 @@ public class LuckPermsManager {
 
 	public void init() {
         //Luckperms isn't loaded until ProxyInitializeEvent
-        userManager = LuckPermsProvider.get().getUserManager();
+        luckperms = LuckPermsProvider.get();
+        userManager = luckperms.getUserManager();
         groupQuery = QueryOptions.nonContextual(
                 Set.of(Flag.INCLUDE_NODES_WITHOUT_SERVER_CONTEXT, Flag.INCLUDE_NODES_WITHOUT_WORLD_CONTEXT));
     }
@@ -142,6 +145,9 @@ public class LuckPermsManager {
         AtomicBoolean changed = new AtomicBoolean(false);
         CachedPermissionData permissionData = user.getCachedData().getPermissionData(groupQuery);
 
+        plugin.getDebugLogger().info(String.format("Updating groups for %s. Groups to add: %s, groups to check: %s",
+												   player.getUsername(), groupsToAdd, groupsToCheck));
+
         groupsToCheck.forEach((String group) -> {
             // Add groupsToAdd groups if the user doesn't have them explicitly set
             if(groupsToAdd.contains(group)) {
@@ -160,7 +166,15 @@ public class LuckPermsManager {
 
         // Only save if any changes occurred
         if(changed.get()) {
-            return userManager.saveUser(user).thenApply((ignored) -> true);
+            return userManager.saveUser(user)
+                    .thenApply((ignored) -> {
+                        luckperms.getMessagingService()
+                                .ifPresent((service) -> service.pushUserUpdate(user));
+                        return true;
+                    }).exceptionally(e -> {
+                        logger.warn("Failed to save and propagate groups for " + user.getUsername(), e);
+                        return false;
+                    });
         } else {
             return CompletableFuture.completedFuture(false);
         }
