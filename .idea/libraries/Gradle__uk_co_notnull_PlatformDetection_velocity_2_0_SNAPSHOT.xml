@@ -1,9 +1,0 @@
-<component name="libraryTable">
-  <library name="Gradle: uk.co.notnull:PlatformDetection-velocity:2.0-SNAPSHOT">
-    <CLASSES>
-      <root url="jar://$MAVEN_REPOSITORY$/uk/co/notnull/PlatformDetection-velocity/2.0-SNAPSHOT/PlatformDetection-velocity-2.0-SNAPSHOT.jar!/" />
-    </CLASSES>
-    <JAVADOC />
-    <SOURCES />
-  </library>
-</component>

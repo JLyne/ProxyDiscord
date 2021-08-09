@@ -21,27 +21,47 @@
  * SOFTWARE.
  */
 
-plugins {
-    id 'java'
-    id 'maven-publish'
-}
-
 dependencies {
     compileOnly 'com.velocitypowered:velocity-api:1.1.8'
     compileOnly 'net.luckperms:api:5.0'
 }
 
-group = 'uk.co.notnull'
-version = '1.0-SNAPSHOT'
-description = 'API from ProxyDiscord'
-
-java.sourceCompatibility = JavaVersion.VERSION_11
-java.targetCompatibility = JavaVersion.VERSION_11
+description = 'API for ProxyDiscord'
 
 publishing {
     publications {
-        maven(MavenPublication) {
+        mavenJava(MavenPublication) {
             from components.java
+            pom {
+                description = 'Velocity Discord integration solution'
+                url = 'https://github.com/JLyne/ProxyDiscord'
+                developers {
+                    developer {
+                        id = 'jim'
+                        name = 'James Lyne'
+                    }
+                }
+                scm {
+                    connection = 'scm:git:git://github.com/JLyne/ProxyDiscord.git'
+                    developerConnection = 'scm:git:ssh://github.com/JLyne/ProxyDiscord.git'
+                    url = 'https://github.com/JLyne/ProxyDiscord'
+                }
+            }
+        }
+    }
+    repositories {
+        maven {
+            credentials {
+                username = rootProject.ext.mavenUserName
+                password = rootProject.ext.mavenPassword
+            }
+            authentication {
+                basic(BasicAuthentication)
+            }
+
+            def releasesRepoUrl = "https://repo.not-null.co.uk/releases/" // gradle -Prelease publish
+            def snapshotsRepoUrl = "https://repo.not-null.co.uk/snapshots/"
+            url = project.hasProperty('release') ? releasesRepoUrl : snapshotsRepoUrl
         }
     }
 }
