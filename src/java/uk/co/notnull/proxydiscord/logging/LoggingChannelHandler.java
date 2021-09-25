@@ -301,7 +301,11 @@ public class LoggingChannelHandler {
 	}
 
     private void handleDiscordMessageEvent(MessageCreateEvent event) {
+		String channelName = "#" + event.getServerTextChannel().map(ServerTextChannel::getName).orElse("Unknown channel");
+		String ignoreMessage = "Ignoring message from " + event.getMessageAuthor().getDiscriminatedName() + " in " + channelName + ": ";
+
 		if(event.getMessageAuthor().isYourself() || !event.getMessageAuthor().isRegularUser()) {
+			plugin.getDebugLogger().info(ignoreMessage + "sent by bot user");
 			return;
 		}
 
@@ -313,12 +317,14 @@ public class LoggingChannelHandler {
 		UUID linked = linkingManager.getLinked(discordId);
 
 		if(linked == null) {
+			plugin.getDebugLogger().info(ignoreMessage + "sent by unlinked user");
 			return;
 		}
 
 		String message = Util.getDiscordMessageContent(event.getMessage());
 
 		if(message.isEmpty()) {
+			plugin.getDebugLogger().info(ignoreMessage + "empty message");
 			return;
 		}
 
@@ -327,12 +333,14 @@ public class LoggingChannelHandler {
 			User user = userManager.loadUser(linked).join();
 
 			if(user == null) {
+				plugin.getDebugLogger().info(ignoreMessage + "unable to find matching luckperms user");
 				return;
 			}
 
 			proxy.getEventManager().fire(new DiscordChatEvent(user, message, new HashSet<>(servers))).thenAccept(e -> {
 				if (!e.getResult().isAllowed() && !logSentMessages) {
 					event.deleteMessage();
+					plugin.getDebugLogger().info(ignoreMessage + "DiscordChatEvent got denied result");
 					return;
 				}
 
