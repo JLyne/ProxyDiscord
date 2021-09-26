@@ -24,13 +24,20 @@
 package uk.co.notnull.proxydiscord.bot.commands;
 
 import net.luckperms.api.model.user.UserManager;
-import org.javacord.api.entity.channel.TextChannel;
+import org.javacord.api.entity.channel.ServerTextChannel;
 import org.javacord.api.entity.message.MessageAuthor;
 import org.javacord.api.entity.message.embed.EmbedBuilder;
+import org.javacord.api.event.interaction.SlashCommandCreateEvent;
 import org.javacord.api.event.message.MessageCreateEvent;
+import org.javacord.api.interaction.SlashCommand;
+import org.javacord.api.interaction.SlashCommandInteraction;
+import org.javacord.api.interaction.SlashCommandOption;
+import org.javacord.api.interaction.SlashCommandOptionType;
+import org.javacord.api.listener.interaction.SlashCommandCreateListener;
 import org.javacord.api.listener.message.MessageCreateListener;
 import org.javacord.api.util.event.ListenerManager;
 import uk.co.notnull.proxydiscord.Messages;
+import uk.co.notnull.proxydiscord.Util;
 import uk.co.notnull.proxydiscord.api.LinkResult;
 import uk.co.notnull.proxydiscord.manager.LinkingManager;
 import uk.co.notnull.proxydiscord.ProxyDiscord;
@@ -42,48 +49,99 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
-public class Link implements MessageCreateListener {
+public class Link implements MessageCreateListener, SlashCommandCreateListener {
     private final LinkingManager linkingManager;
     private final UserManager userManager;
-    private ListenerManager<MessageCreateListener> messageListener;
 
-    public Link(LinkingManager linkingManager, TextChannel linkingChannel) {
+    private ListenerManager<MessageCreateListener> messageListener;
+    private ListenerManager<SlashCommandCreateListener> slashCommandListener;
+    private final SlashCommand slashCommand;
+    private long linkingChannelId;
+
+    public Link(LinkingManager linkingManager, ServerTextChannel linkingChannel) {
 	    this.linkingManager = linkingManager;
 	    this.userManager = ProxyDiscord.inst().getLuckpermsManager().getUserManager();
+
+        slashCommand = ProxyDiscord.inst().getDiscord()
+                .createSlashCommand(SlashCommand.with("link", Messages.get("slash-command-link-description"))
+                                            .addOption(SlashCommandOption.create(SlashCommandOptionType.STRING, "token",
+                                                                                 Messages.get(
+                                                                                         "slash-command-token-description"),
+                                                                                 true)));
+
 	    setLinkingChannel(linkingChannel);
 	}
 
     @Override
     public void onMessageCreate(MessageCreateEvent event) {
-        String command = "!link";
+        String content = event.getMessageContent();
+
+        ProxyDiscord.inst().getDebugLogger().info("Here");
+        ProxyDiscord.inst().getDebugLogger().info(content);
 
         //Ignore random messages
-        if(!event.getMessage().getContent().startsWith(command)) {
+        if(!event.getMessageAuthor().isRegularUser() || (!content.startsWith("!link") && !content.startsWith("/link"))) {
             return;
         }
 
         MessageAuthor author = event.getMessageAuthor();
         Long id = author.getId();
-        String token = event.getMessageContent().replace(command + " ", "").toUpperCase();
-        LinkResult result = LinkResult.UNKNOWN_ERROR;
+        String token = content.replace("!link ", "")
+                .replace("/link ", "").toUpperCase();
+        LinkResult result;
 
         try {
             result = linkingManager.completeLink(token, id);
         } catch (Exception e) {
             e.printStackTrace();
-            sendResponse(LinkResult.UNKNOWN_ERROR, event);
-        } finally {
-            sendResponse(result, event);
+            result = LinkResult.UNKNOWN_ERROR;
         }
+
+        getResponse(result, event.getMessageAuthor().getId())
+                .thenAccept((EmbedBuilder e) -> event.getMessage().reply(e))
+                .exceptionally((e) -> {
+                    e.printStackTrace();
+                    event.getMessage().reply(Messages.getEmbed("embed-link-error"));
+                    return null;
+                });
     }
 
-    private void sendResponse(LinkResult result, MessageCreateEvent event) {
+    @Override
+    public void onSlashCommandCreate(SlashCommandCreateEvent event) {
+        SlashCommandInteraction interaction = event.getSlashCommandInteraction();
+        LinkResult result;
+
+        if(!Util.validateSlashCommand(interaction, slashCommand.getId(), linkingChannelId)) {
+            return;
+        }
+
+        try {
+            String token = interaction.getFirstOptionStringValue().orElse("").toUpperCase();
+            result = linkingManager.completeLink(token, interaction.getUser().getId());
+        } catch (Exception e) {
+            e.printStackTrace();
+            result = LinkResult.UNKNOWN_ERROR;
+        }
+
+        getResponse(result, interaction.getUser().getId())
+                .thenAccept((EmbedBuilder e) -> interaction.createImmediateResponder()
+                        .addEmbed(e)
+                        .respond())
+                .exceptionally((e) -> {
+                    e.printStackTrace();
+                    interaction.createImmediateResponder()
+                            .addEmbed(Messages.getEmbed("embed-link-error"))
+                            .respond();
+                    return null;
+                });
+    }
+
+    private CompletableFuture<EmbedBuilder> getResponse(LinkResult result, long userId) {
         VerificationManager verificationManager = ProxyDiscord.inst().getVerificationManager();
         CompletableFuture<EmbedBuilder> embed = null;
-        UUID linked = linkingManager.getLinked(event.getMessageAuthor().getId());
+        UUID linked = linkingManager.getLinked(userId);
 
-        Map<String, String> replacements = new HashMap<>(
-                Map.of("[discord]", "<@!" + event.getMessageAuthor().getId() + ">"));
+        Map<String, String> replacements = new HashMap<>(Map.of("[discord]", "<@!" + userId + ">"));
 
         switch(result) {
             case UNKNOWN_ERROR:
@@ -103,8 +161,7 @@ public class Link implements MessageCreateListener {
                     String username = userManager.lookupUsername(linked).join();
                     replacements.put("[minecraft]", (username != null) ? username : "Unknown account (" + linked + ")");
 
-                    VerificationResult verificationResult = verificationManager.checkVerificationStatus(
-                            event.getMessageAuthor().getId());
+                    VerificationResult verificationResult = verificationManager.checkVerificationStatus(userId);
 
                     if(verificationResult.isVerified()) {
                         return Messages.getEmbed("embed-link-already-linked", replacements);
@@ -119,8 +176,7 @@ public class Link implements MessageCreateListener {
                     String username = userManager.lookupUsername(linked).join();
                     replacements.put("[minecraft]", (username != null) ? username : "Unknown account (" + linked + ")");
 
-                    VerificationResult verificationResult = verificationManager.checkVerificationStatus(
-                            event.getMessageAuthor().getId());
+                    VerificationResult verificationResult = verificationManager.checkVerificationStatus(userId);
 
                     if(verificationResult.isVerified()) {
                         return Messages.getEmbed("embed-link-success", replacements);
@@ -131,24 +187,33 @@ public class Link implements MessageCreateListener {
                 break;
         }
 
-        embed.thenAccept((EmbedBuilder e) -> event.getMessage().reply(e)).exceptionally((e) -> {
-            e.printStackTrace();
-            event.getMessage().reply(Messages.getEmbed("embed-link-error"));
-            return null;
-        });
+        return embed;
     }
 
-    public void setLinkingChannel(TextChannel linkingChannel) {
+    public void setLinkingChannel(ServerTextChannel linkingChannel) {
         if(messageListener != null) {
             messageListener.remove();
         }
 
+        if(slashCommandListener != null) {
+            slashCommandListener.remove();
+        }
+
+        linkingChannelId = linkingChannel.getId();
         messageListener = linkingChannel.addMessageCreateListener(this);
+
+        if(slashCommand != null) {
+            slashCommandListener = linkingChannel.getApi().addSlashCommandCreateListener(this);
+        }
     }
 
     public void remove() {
         if(messageListener != null) {
             messageListener.remove();
+        }
+
+        if(slashCommandListener != null) {
+            slashCommandListener.remove();
         }
     }
 }

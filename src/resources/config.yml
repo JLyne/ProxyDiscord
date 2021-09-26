@@ -6,6 +6,9 @@ bot:
   activity-type: 'playing' # Valid values: playing, streaming, listening, watching, competing
   activity: 'Minecraft'
 
+  # Whether to enable slash commands
+  slash-commands: true
+
 # Settings for linking discord accounts and verification
 linking:
   secret: ')2z#*MR^BrGVygg7'

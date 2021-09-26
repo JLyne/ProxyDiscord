@@ -199,3 +199,9 @@ announcement-latest: |-
 
 announcement-read-more: |-
   Read the full message in Discord
+
+slash-command-link-description: Link your Discord and Minecraft accounts to play on the RTGame Minecraft Server.
+slash-command-unlink-description: Unlink your Discord and Minecraft accounts.
+
+slash-command-token-description: Your linking token. Connect to the server and follow the instructions to obtain this.
+slash-command-wrong-channel: Please run this command in <#[channel]>

@@ -34,6 +34,7 @@ import org.javacord.api.DiscordApiBuilder;
 import java.util.concurrent.CompletionException;
 
 import org.javacord.api.DiscordApi;
+import org.javacord.api.interaction.*;
 import org.slf4j.Logger;
 
 public class Discord {
@@ -46,12 +47,16 @@ public class Discord {
 
 	private final Logger logger;
 
+	private final boolean slashCommandsAllowed;
+
 	/**
 	 * Class
 	 * @param config configuration
 	 */
 	public Discord(ProxyDiscord plugin, ConfigurationNode config) {
 		this.logger = plugin.getLogger();
+
+		slashCommandsAllowed = config.getNode("bot.slash-commands").getBoolean(false);
 
 		String token = config.getNode("bot", "token").getString(null);
 
@@ -66,6 +71,10 @@ public class Discord {
 					.setWaitForUsersOnStartup(true)
 					.setWaitForServersOnStartup(true)
 					.login().join();
+
+			if(!slashCommandsAllowed) {
+				api.getGlobalSlashCommands().join().forEach(slashCommand -> slashCommand.deleteGlobal().join());
+			}
 
 			connected = true;
 		} catch (CompletionException e) {
@@ -134,5 +143,13 @@ public class Discord {
 
 	public Boolean isConnected() {
 		return connected;
+	}
+
+	public SlashCommand createSlashCommand(SlashCommandBuilder slashCommand) {
+		if(!slashCommandsAllowed) {
+			return null;
+		}
+
+		return slashCommand.createGlobal(api).join();
 	}
 }
