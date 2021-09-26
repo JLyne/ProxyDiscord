@@ -56,7 +56,7 @@ public class Discord {
 	public Discord(ProxyDiscord plugin, ConfigurationNode config) {
 		this.logger = plugin.getLogger();
 
-		slashCommandsAllowed = config.getNode("bot.slash-commands").getBoolean(false);
+		slashCommandsAllowed = config.getNode("bot", "slash-commands").getBoolean(false);
 
 		String token = config.getNode("bot", "token").getString(null);
 
