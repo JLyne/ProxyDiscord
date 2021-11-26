@@ -6,6 +6,7 @@
     <JAVADOC />
     <SOURCES>
       <root url="jar://$MAVEN_REPOSITORY$/com/moandjiezana/toml/toml4j/0.7.2/toml4j-0.7.2-sources.jar!/" />
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.moandjiezana.toml/toml4j/0.7.2/b957d79fcb9e8a7d06c9634a0c1110128f65405a/toml4j-0.7.2-sources.jar!/" />
     </SOURCES>
   </library>
 </component>

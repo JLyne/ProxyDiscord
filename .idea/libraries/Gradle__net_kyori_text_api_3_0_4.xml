@@ -6,6 +6,7 @@
     <JAVADOC />
     <SOURCES>
       <root url="jar://$MAVEN_REPOSITORY$/net/kyori/text-api/3.0.4/text-api-3.0.4-sources.jar!/" />
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/net.kyori/text-api/3.0.4/8aa6cde0767ad0ab778370d3455e284d0e18ccf2/text-api-3.0.4-sources.jar!/" />
     </SOURCES>
   </library>
 </component>

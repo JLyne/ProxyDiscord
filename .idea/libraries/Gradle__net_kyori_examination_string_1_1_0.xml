@@ -2,10 +2,12 @@
   <library name="Gradle: net.kyori:examination-string:1.1.0">
     <CLASSES>
       <root url="jar://$MAVEN_REPOSITORY$/net/kyori/examination-string/1.1.0/examination-string-1.1.0.jar!/" />
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/net.kyori/examination-string/1.1.0/9a6f6f9e10ca3ff3ce46db59845aae63f9d16fd8/examination-string-1.1.0.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES>
       <root url="jar://$MAVEN_REPOSITORY$/net/kyori/examination-string/1.1.0/examination-string-1.1.0-sources.jar!/" />
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/net.kyori/examination-string/1.1.0/9cfa5d367e13f68b3e90da0d531280b07207afbd/examination-string-1.1.0-sources.jar!/" />
     </SOURCES>
   </library>
 </component>

@@ -6,6 +6,7 @@
     <JAVADOC />
     <SOURCES>
       <root url="jar://$MAVEN_REPOSITORY$/org/spongepowered/configurate-hocon/3.7.1/configurate-hocon-3.7.1-sources.jar!/" />
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.spongepowered/configurate-hocon/3.7.1/95a50e430d226a361a3b67aa342d0db060f1d150/configurate-hocon-3.7.1-sources.jar!/" />
     </SOURCES>
   </library>
 </component>

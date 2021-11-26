@@ -2,10 +2,12 @@
   <library name="Gradle: net.kyori:adventure-api:4.7.0">
     <CLASSES>
       <root url="jar://$MAVEN_REPOSITORY$/net/kyori/adventure-api/4.7.0/adventure-api-4.7.0.jar!/" />
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/net.kyori/adventure-api/4.7.0/2c75a48918aa1a2063e85d2ed866e84dcf1aaa2/adventure-api-4.7.0.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES>
       <root url="jar://$MAVEN_REPOSITORY$/net/kyori/adventure-api/4.7.0/adventure-api-4.7.0-sources.jar!/" />
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/net.kyori/adventure-api/4.7.0/1a63b2f045fab8e273405b7b7a54d056866b0c10/adventure-api-4.7.0-sources.jar!/" />
     </SOURCES>
   </library>
 </component>

@@ -6,6 +6,7 @@
     <JAVADOC />
     <SOURCES>
       <root url="jar://$MAVEN_REPOSITORY$/com/google/errorprone/error_prone_annotations/2.5.1/error_prone_annotations-2.5.1-sources.jar!/" />
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.google.errorprone/error_prone_annotations/2.5.1/600a12b3f1ec5aab8f10aff4e11cd28c6ee52697/error_prone_annotations-2.5.1-sources.jar!/" />
     </SOURCES>
   </library>
 </component>

@@ -23,6 +23,9 @@
     <orderEntry type="library" scope="PROVIDED" name="Gradle: net.luckperms:api:5.0" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Gradle: net.kyori:text-serializer-gson:3.0.4" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Gradle: com.moandjiezana.toml:toml4j:0.7.2" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Gradle: net.kyori:adventure-text-serializer-legacy:4.8.0" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Gradle: net.kyori:adventure-text-serializer-plain:4.8.0" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Gradle: net.kyori:adventure-api:4.8.0" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Gradle: net.kyori:adventure-text-serializer-gson:4.8.0" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Gradle: com.google.code.gson:gson:2.8.6" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Gradle: com.google.inject:guice:4.2.3" level="project" />
@@ -33,13 +36,14 @@
     <orderEntry type="library" scope="PROVIDED" name="Gradle: net.kyori:text-serializer-legacy:3.0.4" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Gradle: net.kyori:text-serializer-plain:3.0.4" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Gradle: net.kyori:text-api:3.0.4" level="project" />
-    <orderEntry type="library" scope="PROVIDED" name="Gradle: net.kyori:adventure-text-serializer-legacy:4.8.0" level="project" />
-    <orderEntry type="library" scope="PROVIDED" name="Gradle: net.kyori:adventure-text-serializer-plain:4.8.0" level="project" />
-    <orderEntry type="library" scope="PROVIDED" name="Gradle: net.kyori:adventure-api:4.8.0" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Gradle: net.kyori:adventure-text-serializer-legacy-text3:4.0.0-SNAPSHOT" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Gradle: org.slf4j:slf4j-api:1.7.30" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Gradle: org.checkerframework:checker-qual:3.10.0" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Gradle: com.velocitypowered:velocity-brigadier:1.0.0-SNAPSHOT" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Gradle: net.kyori:adventure-key:4.8.0" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Gradle: net.kyori:examination-string:1.1.0" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Gradle: net.kyori:examination-api:1.1.0" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Gradle: org.jetbrains:annotations:21.0.1" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Gradle: javax.inject:javax.inject:1" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Gradle: aopalliance:aopalliance:1.0" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Gradle: org.spongepowered:configurate-core:3.7.1" level="project" />
@@ -51,9 +55,5 @@
     <orderEntry type="library" scope="PROVIDED" name="Gradle: org.codehaus.mojo:animal-sniffer-annotations:1.17" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Gradle: com.google.guava:failureaccess:1.0.1" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Gradle: com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava" level="project" />
-    <orderEntry type="library" scope="PROVIDED" name="Gradle: net.kyori:adventure-key:4.8.0" level="project" />
-    <orderEntry type="library" scope="PROVIDED" name="Gradle: net.kyori:examination-string:1.1.0" level="project" />
-    <orderEntry type="library" scope="PROVIDED" name="Gradle: net.kyori:examination-api:1.1.0" level="project" />
-    <orderEntry type="library" scope="PROVIDED" name="Gradle: org.jetbrains:annotations:21.0.1" level="project" />
   </component>
 </module>

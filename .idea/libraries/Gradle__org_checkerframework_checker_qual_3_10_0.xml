@@ -6,6 +6,7 @@
     <JAVADOC />
     <SOURCES>
       <root url="jar://$MAVEN_REPOSITORY$/org/checkerframework/checker-qual/3.10.0/checker-qual-3.10.0-sources.jar!/" />
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.checkerframework/checker-qual/3.10.0/f503a8f16118db22642c950342dc0460d19409fa/checker-qual-3.10.0-sources.jar!/" />
     </SOURCES>
   </library>
 </component>

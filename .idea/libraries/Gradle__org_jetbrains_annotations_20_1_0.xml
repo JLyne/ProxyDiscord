@@ -6,6 +6,7 @@
     <JAVADOC />
     <SOURCES>
       <root url="jar://$MAVEN_REPOSITORY$/org/jetbrains/annotations/20.1.0/annotations-20.1.0-sources.jar!/" />
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jetbrains/annotations/20.1.0/ffdf5f82454276113cc294e557017ad5fe2d4015/annotations-20.1.0-sources.jar!/" />
     </SOURCES>
   </library>
 </component>

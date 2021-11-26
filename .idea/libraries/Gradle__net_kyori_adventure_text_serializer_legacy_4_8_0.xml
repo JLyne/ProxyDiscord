@@ -2,10 +2,12 @@
   <library name="Gradle: net.kyori:adventure-text-serializer-legacy:4.8.0">
     <CLASSES>
       <root url="jar://$MAVEN_REPOSITORY$/net/kyori/adventure-text-serializer-legacy/4.8.0/adventure-text-serializer-legacy-4.8.0.jar!/" />
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/net.kyori/adventure-text-serializer-legacy/4.8.0/a247f2e8b78b8246c0c08d9ad8addef732413ad1/adventure-text-serializer-legacy-4.8.0.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES>
       <root url="jar://$MAVEN_REPOSITORY$/net/kyori/adventure-text-serializer-legacy/4.8.0/adventure-text-serializer-legacy-4.8.0-sources.jar!/" />
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/net.kyori/adventure-text-serializer-legacy/4.8.0/2ca0ecf90830fe94140fa402311a0f4293564bbf/adventure-text-serializer-legacy-4.8.0-sources.jar!/" />
     </SOURCES>
   </library>
 </component>

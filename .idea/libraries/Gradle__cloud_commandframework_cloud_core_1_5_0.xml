@@ -6,6 +6,7 @@
     <JAVADOC />
     <SOURCES>
       <root url="jar://$MAVEN_REPOSITORY$/cloud/commandframework/cloud-core/1.5.0/cloud-core-1.5.0-sources.jar!/" />
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/cloud.commandframework/cloud-core/1.5.0/f897765bbb120cff531c61d644e448b0a5387880/cloud-core-1.5.0-sources.jar!/" />
     </SOURCES>
   </library>
 </component>

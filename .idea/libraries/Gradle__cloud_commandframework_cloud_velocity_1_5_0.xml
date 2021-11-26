@@ -1,7 +1,7 @@
 <component name="libraryTable">
   <library name="Gradle: cloud.commandframework:cloud-velocity:1.5.0">
     <CLASSES>
-      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/cloud.commandframework/cloud-velocity/1.5.0/8e3817d369b0c708fc1b42eb1f796d7cf9b957f2/cloud-velocity-1.5.0.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/cloud/commandframework/cloud-velocity/1.5.0/cloud-velocity-1.5.0.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES>

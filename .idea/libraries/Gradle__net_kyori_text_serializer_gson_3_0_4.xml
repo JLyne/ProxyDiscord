@@ -6,6 +6,7 @@
     <JAVADOC />
     <SOURCES>
       <root url="jar://$MAVEN_REPOSITORY$/net/kyori/text-serializer-gson/3.0.4/text-serializer-gson-3.0.4-sources.jar!/" />
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/net.kyori/text-serializer-gson/3.0.4/90479baf6035108b43a1de97921d2718b972b8b5/text-serializer-gson-3.0.4-sources.jar!/" />
     </SOURCES>
   </library>
 </component>
