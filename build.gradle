@@ -55,7 +55,7 @@ allprojects {
         mavenCentral()
         maven { url 'https://repo.not-null.co.uk/releases/' }
         maven { url 'https://repo.minebench.de/' }
-        maven { url 'https://nexus.velocitypowered.com/repository/maven-public/' }
+        maven { url "https://papermc.io/repo/repository/maven-public/" }
     }
 
     group = 'uk.co.notnull'
@@ -73,17 +73,16 @@ allprojects {
 
 dependencies {
     implementation project(":ProxyDiscordAPI")
-    implementation 'org.javacord:javacord:3.3.2'
+    implementation 'org.javacord:javacord:3.4.0'
     implementation 'cloud.commandframework:cloud-velocity:1.5.0'
     implementation 'cloud.commandframework:cloud-minecraft-extras:1.5.0'
     implementation 'cloud.commandframework:cloud-annotations:1.5.0'
 
-    compileOnly 'net.luckperms:api:5.0'
-    compileOnly 'com.velocitypowered:velocity-api:1.1.8'
-    compileOnly 'org.spongepowered:configurate-yaml:3.6'
+    compileOnly 'net.luckperms:api:5.4'
+    compileOnly 'com.velocitypowered:velocity-api:3.1.2-SNAPSHOT'
     compileOnly 'uk.co.notnull:PlatformDetection-velocity:2.0'
 
-    annotationProcessor 'com.velocitypowered:velocity-api:1.1.8'
+    annotationProcessor 'com.velocitypowered:velocity-api:3.1.2-SNAPSHOT'
 }
 
 tasks {

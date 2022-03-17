@@ -151,7 +151,7 @@ public class ProxyDiscord implements uk.co.notnull.proxydiscord.api.ProxyDiscord
 		}
 
 		if(discord.getApi() != null) {
-			discord.getApi().disconnect();
+			discord.getApi().disconnect().join();
 		}
 	}
 

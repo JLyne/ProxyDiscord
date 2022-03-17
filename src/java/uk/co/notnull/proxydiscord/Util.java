@@ -30,7 +30,7 @@ import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
-import net.kyori.adventure.text.serializer.plain.PlainComponentSerializer;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.luckperms.api.model.user.User;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.javacord.api.DiscordApi;
@@ -39,8 +39,8 @@ import org.javacord.api.entity.emoji.KnownCustomEmoji;
 import org.javacord.api.entity.message.Message;
 import org.javacord.api.entity.message.MessageAttachment;
 import org.javacord.api.entity.message.MessageAuthor;
-import org.javacord.api.entity.message.MessageFlag;
 import org.javacord.api.interaction.SlashCommandInteraction;
+import org.javacord.api.interaction.callback.InteractionCallbackDataFlag;
 import org.jetbrains.annotations.NotNull;
 import uk.co.notnull.proxydiscord.api.logging.LogEntry;
 
@@ -72,8 +72,8 @@ public class Util {
 							   .decoration(TextDecoration.UNDERLINED, true).build())
           .character('&').hexColors().useUnusualXRepeatedCharacterHexFormat().build();
 
-	public static final PlainComponentSerializer plainSerializer = PlainComponentSerializer.plain();
-	public static final PlainComponentSerializer plainStripMarkdownSerializer = PlainComponentSerializer
+	public static final PlainTextComponentSerializer plainSerializer = PlainTextComponentSerializer.plainText();
+	public static final PlainTextComponentSerializer plainStripMarkdownSerializer = PlainTextComponentSerializer
 			.builder().flattener(stripMarkdownFlattener).build();
 
 	/**
@@ -218,7 +218,7 @@ public class Util {
 
         if(interaction.getChannel().isEmpty() || interaction.getChannel().get().getId() != channelId) {
             interaction.createImmediateResponder()
-					.setFlags(MessageFlag.EPHEMERAL)
+					.setFlags(InteractionCallbackDataFlag.EPHEMERAL)
                     .setContent(Messages.get("slash-command-wrong-channel",
 											 Map.of("[channel]", String.valueOf(channelId))))
                     .respond();
