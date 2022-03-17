@@ -29,6 +29,7 @@ package uk.co.notnull.proxydiscord;
 import cloud.commandframework.CommandManager;
 import cloud.commandframework.annotations.AnnotationParser;
 import cloud.commandframework.arguments.parser.StandardParameters;
+import cloud.commandframework.arguments.standard.LongArgument;
 import cloud.commandframework.context.CommandContext;
 import cloud.commandframework.execution.CommandExecutionCoordinator;
 import cloud.commandframework.meta.SimpleCommandMeta;
@@ -50,7 +51,6 @@ import uk.co.notnull.proxydiscord.bot.listeners.ServerMemberJoin;
 import uk.co.notnull.proxydiscord.bot.listeners.ServerMemberLeave;
 import uk.co.notnull.proxydiscord.bot.listeners.UserRoleAdd;
 import uk.co.notnull.proxydiscord.bot.listeners.UserRoleRemove;
-import uk.co.notnull.proxydiscord.cloud.LongParser;
 import uk.co.notnull.proxydiscord.listeners.JoinLeave;
 import uk.co.notnull.proxydiscord.listeners.SendStatus;
 import uk.co.notnull.proxydiscord.listeners.ServerConnect;
@@ -211,7 +211,7 @@ public class ProxyDiscord implements uk.co.notnull.proxydiscord.api.ProxyDiscord
 
         //Custom LongParser for now as the built in one doesn't work properly
         manager.getParserRegistry().registerParserSupplier(TypeToken.get(Long.class), options ->
-                new LongParser<>(
+                new LongArgument.LongParser<>(
                         (long) options.get(StandardParameters.RANGE_MIN, Long.MIN_VALUE),
                         (long) options.get(StandardParameters.RANGE_MAX, Long.MAX_VALUE)
                 ));
