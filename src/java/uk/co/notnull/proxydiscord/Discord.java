@@ -31,6 +31,7 @@ import org.javacord.api.entity.activity.ActivityType;
 import org.javacord.api.entity.intent.Intent;
 import org.javacord.api.DiscordApiBuilder;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 
 import org.javacord.api.DiscordApi;
@@ -70,6 +71,7 @@ public class Discord {
 					.setIntents(Intent.GUILDS, Intent.GUILD_EMOJIS, Intent.GUILD_MEMBERS, Intent.GUILD_MESSAGES)
 					.setWaitForUsersOnStartup(true)
 					.setWaitForServersOnStartup(true)
+					.setShutdownHookRegistrationEnabled(false)
 					.login().join();
 
 			if(!slashCommandsAllowed) {
@@ -145,11 +147,29 @@ public class Discord {
 		return connected;
 	}
 
+	public CompletableFuture<Void> disconnect() {
+		if(api != null) {
+			return api.disconnect();
+		} else {
+			return CompletableFuture.completedFuture(null);
+		}
+	}
+
 	public SlashCommand createSlashCommand(SlashCommandBuilder slashCommand) {
 		if(!slashCommandsAllowed) {
 			return null;
 		}
 
 		return slashCommand.createGlobal(api).join();
+	}
+
+	public void reload(ConfigurationNode config) {
+		if(connected && !api.getToken().equals(config.getNode("bot", "token").getString(null))) {
+			logger.warn("You must restart the proxy for bot token changes to take effect");
+		}
+
+		if(connected) {
+			updateActivity(config);
+		}
 	}
 }
