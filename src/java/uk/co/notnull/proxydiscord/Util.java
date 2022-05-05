@@ -23,6 +23,11 @@
 
 package uk.co.notnull.proxydiscord;
 
+import dev.vankka.mcdiscordreserializer.minecraft.MinecraftSerializer;
+import dev.vankka.mcdiscordreserializer.minecraft.MinecraftSerializerOptions;
+import dev.vankka.mcdiscordreserializer.rules.DiscordMarkdownRules;
+import dev.vankka.simpleast.core.parser.Parser;
+import dev.vankka.simpleast.core.simple.SimpleMarkdownRules;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.flattener.ComponentFlattener;
@@ -43,7 +48,10 @@ import org.javacord.api.interaction.SlashCommandInteraction;
 import org.javacord.api.interaction.callback.InteractionCallbackDataFlag;
 import org.jetbrains.annotations.NotNull;
 import uk.co.notnull.proxydiscord.api.logging.LogEntry;
+import uk.co.notnull.proxydiscord.renderer.CustomMinecraftRenderer;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.regex.Pattern;
@@ -75,6 +83,27 @@ public class Util {
 	public static final PlainTextComponentSerializer plainSerializer = PlainTextComponentSerializer.plainText();
 	public static final PlainTextComponentSerializer plainStripMarkdownSerializer = PlainTextComponentSerializer
 			.builder().flattener(stripMarkdownFlattener).build();
+
+	public static final MinecraftSerializer markdownSerializer = new MinecraftSerializer(
+			new MinecraftSerializerOptions<>(
+					new Parser<>(),
+					List.of(
+							DiscordMarkdownRules.createQuoteRule(),
+							DiscordMarkdownRules.createSpoilerRule(),
+							DiscordMarkdownRules.createCodeBlockRule(),
+							DiscordMarkdownRules.createCodeStringRule(),
+							SimpleMarkdownRules.createEscapeRule(),
+							SimpleMarkdownRules.createLinkRule(),
+							SimpleMarkdownRules.createNewlineRule(),
+							SimpleMarkdownRules.createBoldRule(),
+							SimpleMarkdownRules.createUnderlineRule(),
+							SimpleMarkdownRules.createItalicsRule(),
+							SimpleMarkdownRules.createStrikethruRule(),
+							SimpleMarkdownRules.createTextRule()
+					),
+					Collections.singletonList(new CustomMinecraftRenderer()),
+					false
+			));
 
 	/**
 	 * Tries its best to escape markdown formatting and strip Minecraft formatting from the given message.

@@ -34,9 +34,7 @@ import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextDecoration;
-import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.javacord.api.entity.channel.ServerTextChannel;
 import org.javacord.api.entity.channel.TextChannel;
 import org.javacord.api.entity.message.Message;
@@ -47,6 +45,7 @@ import org.javacord.api.util.event.ListenerManager;
 import org.slf4j.Logger;
 import uk.co.notnull.proxydiscord.Messages;
 import uk.co.notnull.proxydiscord.ProxyDiscord;
+import uk.co.notnull.proxydiscord.Util;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -73,12 +72,6 @@ public class AnnouncementChannelHandler {
 	private final Set<UUID> sentLatestMessage;
 
 	private Message lastMessage;
-
-	private final LegacyComponentSerializer serializer = LegacyComponentSerializer.builder()
-			.extractUrls(Style.style()
-								 .decoration(TextDecoration.UNDERLINED, TextDecoration.State.TRUE)
-								 .color(NamedTextColor.BLUE).build())
-			.build();
 
 	public AnnouncementChannelHandler(String channelId) {
 		this(channelId, Collections.emptyList());
@@ -189,7 +182,7 @@ public class AnnouncementChannelHandler {
 
         String text = content.length() > 250 ? content.subSequence(0, 250) + "..." : content;
 
-        announcement.append(serializer.deserialize(text).color(NamedTextColor.GOLD)
+        announcement.append(Util.markdownSerializer.serialize(text).color(NamedTextColor.GOLD)
 				.decoration(TextDecoration.BOLD, false));
 
 		if(content.length() > 250) {
