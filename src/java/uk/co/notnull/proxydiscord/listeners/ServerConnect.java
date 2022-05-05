@@ -29,7 +29,6 @@ import com.velocitypowered.api.event.player.ServerPreConnectEvent;
 import com.velocitypowered.api.proxy.ServerConnection;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import uk.co.notnull.proxydiscord.Messages;
 import uk.co.notnull.proxydiscord.ProxyDiscord;
@@ -60,20 +59,19 @@ public class ServerConnect {
             return;
         }
 
-        TextComponent.Builder message;
+        Component message;
 
         switch(result) {
             case NOT_LINKED:
-                message = Component.text().content(Messages.get("server-change-not-linked"));
+                message = Messages.getComponent("server-change-not-linked");
                 break;
             case LINKED_NOT_VERIFIED:
-                message = Component.text().content(Messages.get("server-change-linked-not-verified"));
+                message = Messages.getComponent("server-change-linked-not-verified");
                 break;
             default:
-                message = Component.text().content("An error has occurred.");
+                //TODO Make configurable
+                message = Component.text("An error has occurred.").color(NamedTextColor.RED);
         }
-
-        message.color(NamedTextColor.RED);
 
         if(!verificationManager.getPublicServers().isEmpty()) {
             plugin.getDebugLogger().info("Blocking unverified player " + e.getPlayer().getUsername() + " from joining " + e.getOriginalServer().getServerInfo().getName());
@@ -87,7 +85,7 @@ public class ServerConnect {
             }
         } else {
             plugin.getDebugLogger().info("Disconnecting unverified player " + e.getPlayer().getUsername());
-            e.getPlayer().disconnect(message.build());
+            e.getPlayer().disconnect(message);
         }
     }
 }

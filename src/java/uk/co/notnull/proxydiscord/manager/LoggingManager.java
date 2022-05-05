@@ -116,10 +116,10 @@ public class LoggingManager implements uk.co.notnull.proxydiscord.api.manager.Lo
 		logEvent(joinLog);
 
 		if(event.getPreviousServer() != null) {
-			LogEntry leaveLog = LogEntry.builder().type(LogType.LEAVE).player(player).server(event.getPreviousServer())
+			joinLog = LogEntry.builder().type(LogType.LEAVE).player(player).server(event.getPreviousServer())
 					.build();
 
-			logEvent(leaveLog);
+			logEvent(joinLog);
 		}
 	}
 
@@ -138,10 +138,10 @@ public class LoggingManager implements uk.co.notnull.proxydiscord.api.manager.Lo
         }
 
 		String message = Util.escapeFormatting(event.getMessage());
-        LogEntry leaveLog = LogEntry.builder().type(LogType.CHAT).player(event.getPlayer())
-				.replacements(Map.of("[message]", message)).build();
+        LogEntry chatLog = LogEntry.builder().type(LogType.CHAT).player(event.getPlayer())
+				.replacements(Map.of("message", message)).build();
 
-        logEvent(leaveLog);
+        logEvent(chatLog);
     }
 
     @Subscribe(order = PostOrder.LATE)
@@ -151,10 +151,10 @@ public class LoggingManager implements uk.co.notnull.proxydiscord.api.manager.Lo
         }
 
 		String command = Util.escapeFormatting(event.getCommand());
-        LogEntry leaveLog = LogEntry.builder().type(LogType.COMMAND).player((Player) event.getCommandSource())
-				.replacements(Map.of("[command]", command)).build();
+        LogEntry commandLog = LogEntry.builder().type(LogType.COMMAND).player((Player) event.getCommandSource())
+				.replacements(Map.of("command", command)).build();
 
-        logEvent(leaveLog);
+        logEvent(commandLog);
     }
 
     @Override

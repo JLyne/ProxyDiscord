@@ -33,8 +33,6 @@ import com.velocitypowered.api.proxy.server.RegisteredServer;
 import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
-import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.format.TextDecoration;
 import org.javacord.api.entity.channel.ServerTextChannel;
 import org.javacord.api.entity.channel.TextChannel;
 import org.javacord.api.entity.message.Message;
@@ -167,37 +165,26 @@ public class AnnouncementChannelHandler {
         }
 
         lastMessage = message;
-        TextComponent.Builder announcement;
-        String content = "\n" + message.getReadableContent();
-        String heading;
-
-        if(isNew) {
-            heading = Messages.get("announcement-new").replace("[channel]", channelName);
-        } else {
-            heading = Messages.get("announcement-latest").replace("[channel]", channelName);
-        }
-
-        announcement = Component.text().content(heading)
-                .color(NamedTextColor.DARK_GREEN).decoration(TextDecoration.BOLD, true);
-
+        String content = message.getReadableContent();
+        String headingKey = isNew ? "announcement-new" : "announcement-latest";
         String text = content.length() > 250 ? content.subSequence(0, 250) + "..." : content;
 
-        announcement.append(Util.markdownSerializer.serialize(text).color(NamedTextColor.GOLD)
-				.decoration(TextDecoration.BOLD, false));
+		TextComponent.Builder announcement = Component.text()
+				.append(Messages.getComponent(headingKey,
+											  Collections.singletonMap("channel", channelName),
+											  Collections.emptyMap()))
+				.append(Component.newline())
+				.append(Util.markdownSerializer.serialize(text));
 
 		if(content.length() > 250) {
-            TextComponent readMore = Component.text("\n" + Messages.get("announcement-read-more"))
-                    .color(NamedTextColor.LIGHT_PURPLE)
-                    .decoration(TextDecoration.BOLD, false);
-
-            announcement.append(readMore);
+            announcement.append(Component.newline()).append(Messages.getComponent("announcement-read-more"));
         }
 
-        Component result = announcement.build();
+		Component finalMessage = announcement.build();
 
         if(player != null) {
 			sentLatestMessage.add(player.getUniqueId());
-            player.sendMessage(Identity.nil(), announcement.build());
+            player.sendMessage(Identity.nil(), finalMessage);
         } else if(servers != null) {
         	sentLatestMessage.clear();
 
@@ -207,7 +194,7 @@ public class AnnouncementChannelHandler {
 
             recipients.forEach(p ->{
             	sentLatestMessage.add(p.getUniqueId());
-            	p.sendMessage(Identity.nil(), result);
+            	p.sendMessage(Identity.nil(), finalMessage);
 			});
         } else {
         	sentLatestMessage.clear();
@@ -220,7 +207,7 @@ public class AnnouncementChannelHandler {
 
         	recipients.forEach(p -> {
             	sentLatestMessage.add(p.getUniqueId());
-        		p.sendMessage(Identity.nil(), result);
+        		p.sendMessage(Identity.nil(), finalMessage);
 			});
 		}
     }

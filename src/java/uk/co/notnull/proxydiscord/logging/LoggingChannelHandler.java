@@ -28,6 +28,8 @@ import com.velocitypowered.api.proxy.ServerConnection;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
+import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import net.luckperms.api.cacheddata.CachedMetaData;
 import net.luckperms.api.model.user.User;
 import net.luckperms.api.model.user.UserManager;
@@ -52,7 +54,13 @@ import uk.co.notnull.proxydiscord.api.logging.LogVisibility;
 import uk.co.notnull.proxydiscord.manager.LinkingManager;
 
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -68,6 +76,7 @@ public class LoggingChannelHandler {
 	private final AtomicReference<Integer> lockDummy = new AtomicReference<>(0);
 
 	private SimpleDateFormat dateFormat;
+	private boolean useMiniMessage;
 	private String ingameChatFormat;
     private final Set<LogType> events = new HashSet<>();
 	private final Map<LogType, String> formats = new HashMap<>();
@@ -146,6 +155,7 @@ public class LoggingChannelHandler {
 
         if(logFormats.isMap() || defaultLogFormats.isMap()) {
             ConfigurationNode dateFormat = logFormats.getNode("date");
+           	ConfigurationNode minimessage = logFormats.getNode("use-minimessage");
             ConfigurationNode chatFormat = logFormats.getNode("chat");
             ConfigurationNode discordChatFormat = logFormats.getNode("discord-chat");
             ConfigurationNode joinFormat = logFormats.getNode("join");
@@ -154,6 +164,7 @@ public class LoggingChannelHandler {
             ConfigurationNode ingameChatFormat = logFormats.getNode("discord-chat-ingame");
 
             ConfigurationNode defaultDateFormat = defaultLogFormats.getNode("date");
+            ConfigurationNode defaultMiniMessage = defaultLogFormats.getNode("use-minimessage");
             ConfigurationNode defaultChatFormat = defaultLogFormats.getNode("chat");
             ConfigurationNode defaultDiscordChatFormat = defaultLogFormats.getNode("discord-chat");
             ConfigurationNode defaultJoinFormat = defaultLogFormats.getNode("join");
@@ -166,6 +177,8 @@ public class LoggingChannelHandler {
             } catch(IllegalArgumentException e) {
                 logger.warn("Invalid logging date format: " + e.getMessage());
             }
+
+			this.useMiniMessage = minimessage.getBoolean(defaultMiniMessage.getBoolean(false));
 
             this.formats.put(LogType.CHAT, chatFormat.getString(defaultChatFormat.getString("")));
             this.formats.put(LogType.DISCORD_CHAT, discordChatFormat.getString(defaultDiscordChatFormat.getString("")));
@@ -245,7 +258,7 @@ public class LoggingChannelHandler {
 	}
 
     private void queueLogMessage(String message) {
-        message = message.replace("[date]", dateFormat != null ?
+        message = message.replace("<date>", dateFormat != null ?
 				Util.escapeFormatting(dateFormat.format(new Date())) : "");
 
         Optional <TextChannel> loggingChannel = plugin.getDiscord().getApi().getTextChannelById(channelId);
@@ -363,7 +376,7 @@ public class LoggingChannelHandler {
 			try {
 				String sanitised = Util.plainSerializer.serialize(Util.plainSerializer.deserialize(message));
 				String formatted = Util.formatDiscordMessage(formats.get(LogType.DISCORD_CHAT),
-															 user, author, Map.of("[message]", sanitised));
+															 user, author, Map.of("message", sanitised));
 				queueLogMessage(formatted);
 			} catch (IllegalStateException e) {
 				logger.warn("Failed to send Discord message: " + e.getMessage());
@@ -373,18 +386,25 @@ public class LoggingChannelHandler {
 		CachedMetaData metaData = user.getCachedData().getMetaData(QueryOptions.nonContextual());
 		String prefix = ( metaData.getPrefix() != null) ?  metaData.getPrefix() : "";
 		String suffix = ( metaData.getSuffix() != null) ?  metaData.getSuffix() : "";
-		message = Util.stripFormatting(message);
 
-		Component messageComponent = Util.legacySerializer
-				.deserialize(ingameChatFormat
-									 .replace("[prefix]", prefix)
-									 .replace("[suffix]", suffix)
-									 .replace("[player]", user.getFriendlyName())
-									 .replace("[uuid]", user.getUniqueId().toString())
+		TagResolver.Builder placeholders = TagResolver.builder();
 
-									 .replace("[discord_id]", author.getIdAsString())
-									 .replace("[discord_username]", author.getDiscriminatedName())
-									 .replace("[message]", message));
+        placeholders.resolver(Placeholder.unparsed("player", user.getFriendlyName()));
+        placeholders.resolver(Placeholder.unparsed("uuid", user.getUniqueId().toString()));
+        placeholders.resolver(Placeholder.unparsed("discord_id", author.getIdAsString()));
+        placeholders.resolver(Placeholder.unparsed("discord_username", author.getDiscriminatedName()));
+        placeholders.resolver(Placeholder.unparsed("discord_username", author.getDiscriminatedName()));
+        placeholders.resolver(Placeholder.component("message", Util.prepareDiscordMessage(message)));
+
+		if(useMiniMessage) {
+			placeholders.resolver(Placeholder.parsed("prefix", prefix));
+			placeholders.resolver(Placeholder.parsed("suffix", suffix));
+		} else {
+			placeholders.resolver(Placeholder.parsed("prefix", Util.miniMessage.serialize(Util.legacySerializer.deserialize(prefix))));
+			placeholders.resolver(Placeholder.parsed("suffix", Util.miniMessage.serialize(Util.legacySerializer.deserialize(suffix))));
+		}
+
+		Component messageComponent = Util.miniMessage.deserialize(ingameChatFormat, placeholders.build());
 
 		proxy.getAllPlayers().forEach(player -> {
 			RegisteredServer server = player.getCurrentServer().map(ServerConnection::getServer).orElse(null);

@@ -28,12 +28,11 @@ import dev.vankka.mcdiscordreserializer.minecraft.MinecraftSerializerOptions;
 import dev.vankka.mcdiscordreserializer.rules.DiscordMarkdownRules;
 import dev.vankka.simpleast.core.parser.Parser;
 import dev.vankka.simpleast.core.simple.SimpleMarkdownRules;
+import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.flattener.ComponentFlattener;
-import net.kyori.adventure.text.format.Style;
-import net.kyori.adventure.text.format.TextColor;
-import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.luckperms.api.model.user.User;
@@ -64,7 +63,7 @@ public class Util {
 	/**
 	 * Component flattener which escapes markdown syntax present in any components that aren't clickable links
 	 */
-	private static final ComponentFlattener stripMarkdownFlattener = ComponentFlattener.builder()
+	public static final ComponentFlattener stripMarkdownFlattener = ComponentFlattener.builder()
 			.mapper(TextComponent.class, (theComponent) -> {
 				ClickEvent event = theComponent.clickEvent();
 
@@ -76,9 +75,7 @@ public class Util {
 			}).build();
 
 	public static final LegacyComponentSerializer legacySerializer = LegacyComponentSerializer.builder()
-          .extractUrls(Style.style().color(TextColor.fromHexString("#8194e4"))
-							   .decoration(TextDecoration.UNDERLINED, true).build())
-          .character('&').hexColors().useUnusualXRepeatedCharacterHexFormat().build();
+          .extractUrls().character('&').hexColors().useUnusualXRepeatedCharacterHexFormat().build();
 
 	public static final PlainTextComponentSerializer plainSerializer = PlainTextComponentSerializer.plainText();
 	public static final PlainTextComponentSerializer plainStripMarkdownSerializer = PlainTextComponentSerializer
@@ -104,6 +101,8 @@ public class Util {
 					Collections.singletonList(new CustomMinecraftRenderer()),
 					false
 			));
+
+	public static final MiniMessage miniMessage = MiniMessage.miniMessage();
 
 	/**
 	 * Tries its best to escape markdown formatting and strip Minecraft formatting from the given message.
@@ -135,16 +134,6 @@ public class Util {
 	}
 
 	/**
-	 * Removes any section-character or &-based formatting from the given string
-	 * @param message The message
-	 * @return the message with any section-character formatting removed
-	 */
-	public static String stripFormatting(String message) {
-		return sectionPattern.matcher(plainSerializer.serialize(legacySerializer.deserialize(message)))
-				.replaceAll("");
-	}
-
-	/**
 	 * Formats the given {@link LogEntry} into a string using the given format
 	 * A standard set of replacements are applied to the format, in addition to any replacements defined in the log entry
 	 * @param format The format to use
@@ -170,21 +159,21 @@ public class Util {
         String serverName = entry.getServer().map(server -> server.getServerInfo().getName()).orElse("unknown");
 
         entry.getReplacements().forEach((String find, String replace) -> ref.message = ref.message
-				.replace(find, Util.formatEmotes(Util.escapeFormatting(replace))));
+				.replace("<" + find + ">", Util.formatEmotes(Util.escapeFormatting(replace))));
 
-        ref.message = ref.message.replace("[server]", Util.escapeFormatting(serverName));
-        ref.message = ref.message.replace("[player]", Util.escapeFormatting(entry.getPlayer().getUsername()));
-        ref.message = ref.message.replace("[uuid]", entry.getPlayer().getUniqueId().toString());
+        ref.message = ref.message.replace("<server>", Util.escapeFormatting(serverName));
+        ref.message = ref.message.replace("<player>", Util.escapeFormatting(entry.getPlayer().getUsername()));
+        ref.message = ref.message.replace("<uuid>", entry.getPlayer().getUniqueId().toString());
 
         if(discordId != null) {
-			ref.message = ref.message.replace("[discord_id]", String.valueOf(discordId));
-			ref.message = ref.message.replace("[discord_mention]", "<@!" + discordId + ">");
-			ref.message = ref.message.replace("[discord_username]", discordUser.map(
+			ref.message = ref.message.replace("<discord_id>", String.valueOf(discordId));
+			ref.message = ref.message.replace("<discord_mention>", "<@!" + discordId + ">");
+			ref.message = ref.message.replace("<discord_username>", discordUser.map(
 					org.javacord.api.entity.user.User::getDiscriminatedName).orElse("Unknown"));
 		} else {
-        	ref.message = ref.message.replace("[discord_id]", "Unlinked");
-			ref.message = ref.message.replace("[discord_mention]", "Unlinked");
-			ref.message = ref.message.replace("[discord_username]", "Unlinked");
+        	ref.message = ref.message.replace("<discord_id>", "Unlinked");
+			ref.message = ref.message.replace("<discord_mention>", "Unlinked");
+			ref.message = ref.message.replace("<discord_username>", "Unlinked");
 		}
 
         return ref.message;
@@ -229,13 +218,13 @@ public class Util {
         replacements.forEach((String find, String replace) -> ref.message = ref.message
 				.replace(find, replace));
 
-        ref.message = ref.message.replace("[server]", "Discord");
-        ref.message = ref.message.replace("[player]", user.getFriendlyName());
-        ref.message = ref.message.replace("[uuid]", user.getUniqueId().toString());
+        ref.message = ref.message.replace("<server>", "Discord");
+        ref.message = ref.message.replace("<player>", user.getFriendlyName());
+        ref.message = ref.message.replace("<uuid>", user.getUniqueId().toString());
 
-		ref.message = ref.message.replace("[discord_id]", author.getIdAsString());
-		ref.message = ref.message.replace("[discord_mention]", "<@!" + author.getIdAsString() + ">");
-		ref.message = ref.message.replace("[discord_username]", author.getDiscriminatedName());
+		ref.message = ref.message.replace("<discord_id>", author.getIdAsString());
+		ref.message = ref.message.replace("<discord_mention>", "<@!" + author.getIdAsString() + ">");
+		ref.message = ref.message.replace("<discord_username>", author.getDiscriminatedName());
 
         return ref.message;
 	}
@@ -249,11 +238,21 @@ public class Util {
             interaction.createImmediateResponder()
 					.setFlags(InteractionCallbackDataFlag.EPHEMERAL)
                     .setContent(Messages.get("slash-command-wrong-channel",
-											 Map.of("[channel]", String.valueOf(channelId))))
+											 Map.of("channel", String.valueOf(channelId))))
                     .respond();
             return false;
         }
 
 		return true;
+	}
+
+	/**
+	 * Removes any section-character formatting from the given string then deserializes it into a
+	 * component with formatted extracted URLs
+	 * @param message The message
+	 * @return The prepared message
+	 */
+	public static Component prepareDiscordMessage(String message) {
+		return markdownSerializer.serialize(sectionPattern.matcher(message).replaceAll(""));
 	}
 }

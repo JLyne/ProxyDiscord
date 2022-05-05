@@ -32,12 +32,11 @@ import com.velocitypowered.api.proxy.ServerConnection;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextComponent;
-import net.kyori.adventure.text.format.NamedTextColor;
 import uk.co.notnull.proxydiscord.Messages;
 import uk.co.notnull.proxydiscord.ProxyDiscord;
 import uk.co.notnull.proxydiscord.api.events.PlayerVerifyStateChangeEvent;
 
+import java.util.Collections;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -83,9 +82,9 @@ public class RedirectManager {
 
             case LINKED_NOT_VERIFIED:
                 if(event.getPreviousState().isVerified()) {
-                    sendToLinkingServer(player, Messages.get("verification-lost-role"));
+                    sendToLinkingServer(player, Messages.getComponent("verification-lost-role"));
                 } else if(!verificationManager.isPublicServer(currentServer)) {
-                    sendToLinkingServer(player, Messages.get("server-change-linked-not-verified"));
+                    sendToLinkingServer(player, Messages.getComponent("server-change-linked-not-verified"));
                 } else {
                     destinations.computeIfPresent(player.getUniqueId(), (UUID uuid, RegisteredServer server) -> {
                         if(verificationManager.isPublicServer(server)) {
@@ -99,21 +98,17 @@ public class RedirectManager {
                 break;
             case NOT_LINKED:
                 if(event.getPreviousState().isVerified()) {
-                    sendToLinkingServer(player, Messages.get("verification-lost-unlinked"));
+                    sendToLinkingServer(player, Messages.getComponent("verification-lost-unlinked"));
                 } else if(!verificationManager.isPublicServer(currentServer)) {
-                    sendToLinkingServer(player, Messages.get("server-change-linked-not-verified"));
+                    sendToLinkingServer(player, Messages.getComponent("server-change-linked-not-verified"));
                 }
         }
     }
 
-    private void sendToLinkingServer(Player player, String message) {
-        TextComponent.Builder component = Component.text();
-
-        component.color(NamedTextColor.RED).content(message);
-
+    private void sendToLinkingServer(Player player, Component message) {
         if(verificationManager.getPublicServers().isEmpty()) {
             plugin.getDebugLogger().info("No public servers defined. Kicking " + player.getUsername());
-            player.disconnect(component.build());
+            player.disconnect(message);
 
             return;
         }
@@ -128,18 +123,19 @@ public class RedirectManager {
 
             player.createConnectionRequest(linkingServer).connect().thenAccept(result -> {
                 if(result.isSuccessful()) {
-                    String text = Messages.get("verification-lost-moved");
-                    TextComponent extra = Component.text(" " + text.replace("[server]", linkingServer.getServerInfo().getName()));
-                    component.append(extra);
+                    Component extra = Messages.getComponent(
+                            "verification-lost-moved",
+                            Collections.singletonMap("server", linkingServer.getServerInfo().getName()),
+                            Collections.emptyMap());
 
-                    player.sendMessage(Identity.nil(), component.build());
+                    player.sendMessage(Identity.nil(), message.append(Component.newline()).append(extra));
                 } else {
                     plugin.getDebugLogger().info("Failed to move " + player.getUsername() + " to " + linkingServer.getServerInfo().getName() + ". Kicking.");
-                    player.disconnect(component.build());
+                    player.disconnect(message);
                 }
             });
         } else {
-            player.sendMessage(Identity.nil(), component.build());
+            player.sendMessage(Identity.nil(), message);
         }
     }
 

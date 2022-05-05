@@ -68,30 +68,33 @@ logging:
     # Not used by default, but other plugins using the API may avoid logging sensitive information in public channels
     public: true
 
+    # Whether to use minmessage for parsing player prefixes and suffixes
+    use-minimessage: false
+
     # Formats for logging various events
     formats:
-      date: '<dd-MM-yy HH:mm:ss>' # Used for [date] in other formats
+      date: '<dd-MM-yy HH:mm:ss>' # Used for <date> in other formats
       # In-game chat
       chat: |-
         ```md
-        [date] [[server]][[player]]([discord_mention]) [message]```
+        <date> [<server>][<player>](<discord_mention>) <message>```
       # Messages sent in the discord logging channel. Useful for keeping the appearance of messages consistent
       discord-chat: |-
         ```md
-        [DISCORD] [date] [[server]][[player]]([discord_mention]) [message]```
-      discord-chat-ingame: '&a&lDISCORD> &r[prefix][player][suffix]&r: [message]'
+        [DISCORD] <date> [<server>][<player>](<discord_mention>) <message>```
+      discord-chat-ingame: '<green><bold>DISCORD> <reset><prefix><player><suffix><reset>: <message>'
       # Players joining the server
       join: |-
         ```md
-        [date] [[server]][[player]]([discord_mention]) has joined the network```
+        <date> [<server>][<player>](<discord_mention>) has joined the network```
       # Players leaving the server
       leave: |-
         ```md
-        [date] [[server]][[player]]([discord_mention]) has left the network```
+        <date> [<server>][<player>](<discord_mention>) has left the network```
       # Commands run by players
       command: |-
         ```md
-        [COMMAND] [date] [[server]][[player]]([discord_mention]) [command]```
+        [COMMAND] <date> [<server>][<player>](<discord_mention>) <command>```
   # 'channelid':
   #   events:
   #     - 'chat'

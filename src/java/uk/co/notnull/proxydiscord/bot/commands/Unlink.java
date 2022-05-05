@@ -107,13 +107,13 @@ public class Unlink implements MessageCreateListener, SlashCommandCreateListener
     }
 
     private CompletableFuture<EmbedBuilder> getResponse(long userId, UUID linked) {
-        Map<String, String> replacements = new HashMap<>(Map.of("[discord]", "<@!" + userId + ">"));
+        Map<String, String> replacements = new HashMap<>(Map.of("discord", "<@!" + userId + ">"));
 
         //User was linked
         if(linked != null) {
             return CompletableFuture.supplyAsync(() -> {
                 String username = userManager.lookupUsername(linked).join();
-                replacements.put("[minecraft]", (username != null) ? username : "Unknown account (" + linked + ")");
+                replacements.put("minecraft", (username != null) ? username : "Unknown account (" + linked + ")");
 
                 return Messages.getEmbed("embed-unlink-success", replacements);
             });

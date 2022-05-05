@@ -141,7 +141,7 @@ public class Link implements MessageCreateListener, SlashCommandCreateListener {
         CompletableFuture<EmbedBuilder> embed = null;
         UUID linked = linkingManager.getLinked(userId);
 
-        Map<String, String> replacements = new HashMap<>(Map.of("[discord]", "<@!" + userId + ">"));
+        Map<String, String> replacements = new HashMap<>(Map.of("discord", "<@!" + userId + ">"));
 
         switch(result) {
             case UNKNOWN_ERROR:
@@ -159,7 +159,7 @@ public class Link implements MessageCreateListener, SlashCommandCreateListener {
             case ALREADY_LINKED:
                 embed = CompletableFuture.supplyAsync(() -> {
                     String username = userManager.lookupUsername(linked).join();
-                    replacements.put("[minecraft]", (username != null) ? username : "Unknown account (" + linked + ")");
+                    replacements.put("minecraft", (username != null) ? username : "Unknown account (" + linked + ")");
 
                     VerificationResult verificationResult = verificationManager.checkVerificationStatus(userId);
 
@@ -174,7 +174,7 @@ public class Link implements MessageCreateListener, SlashCommandCreateListener {
             case SUCCESS:
                 embed = CompletableFuture.supplyAsync(() -> {
                     String username = userManager.lookupUsername(linked).join();
-                    replacements.put("[minecraft]", (username != null) ? username : "Unknown account (" + linked + ")");
+                    replacements.put("minecraft", (username != null) ? username : "Unknown account (" + linked + ")");
 
                     VerificationResult verificationResult = verificationManager.checkVerificationStatus(userId);
 

@@ -24,11 +24,13 @@
 package uk.co.notnull.proxydiscord;
 
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
+import net.kyori.adventure.text.ComponentLike;
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
+import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import ninja.leaping.configurate.ConfigurationNode;
-import org.javacord.api.entity.Nameable;
 import org.javacord.api.entity.message.embed.EmbedBuilder;
 import org.javacord.api.entity.permission.Role;
+import org.jetbrains.annotations.NotNull;
 
 import java.awt.Color;
 import java.util.Collections;
@@ -39,7 +41,6 @@ import java.util.stream.Collectors;
 
 public class Messages {
     private static ConfigurationNode messages;
-    private static final LegacyComponentSerializer legacyComponentSerializer = LegacyComponentSerializer.legacyAmpersand();
 
     public static void set(ConfigurationNode messages) {
         Messages.messages = messages;
@@ -50,23 +51,12 @@ public class Messages {
     }
 
     public static String get(String id, Map<String, String> replacements) {
-        Set<Role> verifiedRoles = ProxyDiscord.inst().getVerificationManager().getVerifiedRoles();
-
         if(messages == null) {
             return "";
         }
 
         String message = messages.getNode((Object[]) id.split("\\."))
                 .getString("Message " + id + " does not exist");
-        String roleNames;
-
-        if(verifiedRoles.size() > 1) {
-            roleNames = verifiedRoles.stream().map(Nameable::getName).collect(Collectors.joining());
-        } else {
-            roleNames = !verifiedRoles.isEmpty() ? verifiedRoles.iterator().next().getName() : "Unknown Role";
-        }
-
-        message = message.replace("[role]", roleNames);
 
         for (Map.Entry<String, String> entry : replacements.entrySet()) {
             message = message.replace(entry.getKey(), entry.getValue());
@@ -76,10 +66,10 @@ public class Messages {
     }
 
     public static Component getComponent(String id) {
-        return getComponent(id, Collections.emptyMap());
+        return getComponent(id, Collections.emptyMap(), Collections.emptyMap());
     }
 
-    public static Component getComponent(String id, Map<String, String> replacements) {
+    public static Component getComponent(String id, Map<String, String> stringReplacements, Map<String, ComponentLike> componentReplacmenets) {
         if(messages == null) {
             return Component.empty();
         }
@@ -87,11 +77,17 @@ public class Messages {
         String message = messages.getNode((Object[]) id.split("\\."))
                 .getString("Message " + id + " does not exist");
 
-        for (Map.Entry<String, String> entry : replacements.entrySet()) {
-            message = message.replace(entry.getKey(), entry.getValue());
+        TagResolver.@NotNull Builder placeholders = TagResolver.builder();
+
+        for (Map.Entry<String, String> entry : stringReplacements.entrySet()) {
+            placeholders.resolver(Placeholder.parsed(entry.getKey(), entry.getValue()));
         }
 
-        return legacyComponentSerializer.deserialize(message);
+        for (Map.Entry<String, ComponentLike> entry : componentReplacmenets.entrySet()) {
+            placeholders.resolver(Placeholder.component(entry.getKey(), entry.getValue()));
+        }
+
+        return Util.miniMessage.deserialize(message, placeholders.build());
     }
 
     public static EmbedBuilder getEmbed(String id) {
@@ -123,20 +119,20 @@ public class Messages {
         EmbedBuilder embed = new EmbedBuilder();
 
         if(messageContent.containsKey("title")) {
-            String title = messageContent.get("title").getString("").replace("[role]", roleLink);
+            String title = messageContent.get("title").getString("").replace("<role>", roleLink);
 
             for (Map.Entry<String, String> entry : replacements.entrySet()) {
-                title = title.replace(entry.getKey(), entry.getValue());
+                title = title.replace("<" + entry.getKey() + ">", entry.getValue());
             }
 
             embed.setTitle(title);
         }
 
         if(messageContent.containsKey("description")) {
-            String description = messageContent.get("description").getString("").replace("[role]", roleLink);
+            String description = messageContent.get("description").getString("").replace("<role>", roleLink);
 
             for (Map.Entry<String, String> entry : replacements.entrySet()) {
-                description = description.replace(entry.getKey(), entry.getValue());
+                description = description.replace("<" + entry.getKey() + ">", entry.getValue());
             }
 
             embed.setDescription(description);
@@ -159,13 +155,13 @@ public class Messages {
 
                 if(name != null) {
                     for (Map.Entry<String, String> entry : replacements.entrySet()) {
-                        name = name.replace(entry.getKey(), entry.getValue());
+                        name = name.replace("<" + entry.getKey() + ">", entry.getValue());
                     }
                 }
 
                 if(value != null) {
                     for (Map.Entry<String, String> entry : replacements.entrySet()) {
-                        value = value.replace(entry.getKey(), entry.getValue());
+                        value = value.replace("<" + entry.getKey() + ">", entry.getValue());
                     }
                 }
 

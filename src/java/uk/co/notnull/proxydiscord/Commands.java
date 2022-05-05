@@ -35,7 +35,6 @@ import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
 import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.luckperms.api.model.user.UserManager;
 import org.javacord.api.entity.user.User;
@@ -44,6 +43,9 @@ import uk.co.notnull.proxydiscord.api.VerificationResult;
 import uk.co.notnull.proxydiscord.manager.LinkingManager;
 import uk.co.notnull.proxydiscord.manager.VerificationManager;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 public class Commands {
@@ -78,12 +80,9 @@ public class Commands {
 
         userManager.lookupUniqueId(target).thenAccept((UUID uuid) -> {
             if (uuid == null) {
-                TextComponent.Builder playerMessage = Component.text()
-                        .content(Messages.get("link-not-found")
-                                         .replace("[player]", target))
-                        .color(NamedTextColor.GREEN);
-
-                sender.sendMessage(Identity.nil(), playerMessage.build());
+                sender.sendMessage(Identity.nil(), Messages.getComponent("link-other-not-found",
+                                                                         Collections.singletonMap("player", target),
+                                                                         Collections.emptyMap()));
 
                 return;
             }
@@ -95,22 +94,22 @@ public class Commands {
             if (linkedDiscord != null) {
                 //Player has linked the same account
                 if (linkedDiscord.equals(discordId)) {
-                    String message = Messages.get("link-other-already-linked-same")
-                            .replace("[player]", target);
-                    sender.sendMessage(Identity.nil(), Component.text(message).color(NamedTextColor.RED));
+                    sender.sendMessage(Identity.nil(), Messages.getComponent("link-other-already-linked-same",
+                                                                              Collections.singletonMap("player", target),
+                                                                              Collections.emptyMap()));
                 } else {
                     //Attempt to get username of linked discord account
                     plugin.getDiscord().getApi().getUserById(linkedDiscord).thenAcceptAsync(user -> {
-                        String message = Messages.get("link-other-already-linked-known")
-                                .replace("[player]", target)
-                                .replace("[discord]", user.getDiscriminatedName());
-
-                        sender.sendMessage(Identity.nil(), Component.text(message).color(NamedTextColor.RED));
+                        sender.sendMessage(Identity.nil(),
+                                           Messages.getComponent("link-other-already-linked-known",
+                                                                 Map.of(
+                                                                         "player", target,
+                                                                         "discord", user.getDiscriminatedName()),
+                                                                 Collections.emptyMap()));
                     }).exceptionally(error -> {
-                        String message = Messages.get("link-other-already-linked-unknown")
-                                .replace("[player]", target);
-
-                        sender.sendMessage(Identity.nil(), Component.text(message).color(NamedTextColor.RED));
+                        sender.sendMessage(Identity.nil(), Messages.getComponent("link-other-already-linked-unknown",
+                                                                              Collections.singletonMap("player", target),
+                                                                              Collections.emptyMap()));
 
                         return null;
                     });
@@ -131,18 +130,20 @@ public class Commands {
                         .thenAcceptAsync(minecraftUsername -> {
                             String discordUsername = discordUser[0] != null ? discordUser[0].getDiscriminatedName() : String.valueOf(
                                     discordId);
-                            String message;
+
+                            String key;
+                            Map<String, String> replacements = new HashMap<>();
+                            replacements.put("discord", discordUsername);
 
                             if (minecraftUsername != null) {
-                                message = Messages.get("link-other-discord-already-linked-known")
-                                        .replace("[player]", minecraftUsername);
+                                key = "link-other-discord-already-linked-known";
+                                replacements.put("player", minecraftUsername);
                             } else {
-                                message = Messages.get("link-other-discord-already-linked-unknown");
+                                key = "link-other-discord-already-linked-unknown";
                             }
 
-                            message = message.replace("[discord]", discordUsername);
-
-                            sender.sendMessage(Identity.nil(), Component.text(message).color(NamedTextColor.RED));
+                            sender.sendMessage(Identity.nil(),
+                                               Messages.getComponent(key, replacements, Collections.emptyMap()));
                         }).exceptionally(error -> {
                     sender.sendMessage(Identity.nil(), Component.text(error.toString()).color(NamedTextColor.RED));
                     return null;
@@ -159,20 +160,17 @@ public class Commands {
 
                 if (result == LinkResult.SUCCESS) {
                     VerificationResult verificationResult = verificationManager.checkVerificationStatus(discordId);
+                    String key;
 
                     if (verificationResult.isVerified()) {
-                        String message = Messages.get("link-other-success")
-                                .replace("[discord]", user.getDiscriminatedName())
-                                .replace("[player]", target);
-
-                        sender.sendMessage(Identity.nil(), Component.text(message).color(NamedTextColor.GREEN));
+                        key = "link-other-success";
                     } else {
-                        String message = Messages.get("link-other-not-verified")
-                                .replace("[discord]", user.getDiscriminatedName())
-                                .replace("[player]", target);
-
-                        sender.sendMessage(Identity.nil(), Component.text(message).color(NamedTextColor.YELLOW));
+                        key = "link-other-not-verified";
                     }
+
+                    sender.sendMessage(Identity.nil(), Messages.getComponent(key, Map.of(
+                            "discord", user.getDiscriminatedName(),
+                            "player", target), Collections.emptyMap()));
                 }
             }).exceptionally(error -> {
                 sender.sendMessage(Identity.nil(), Component.text(error.toString()).color(NamedTextColor.RED));
@@ -205,28 +203,21 @@ public class Commands {
                     Player onlinePlayer = plugin.getProxy().getPlayer(uuid).orElse(null);
                     linkingManager.unlink(discordId);
 
-                    TextComponent.Builder playerMessage = Component.text()
-                           .content(Messages.get("unlink-other-discord-success")
-                                            .replace("[player]", target))
-                           .color(NamedTextColor.GREEN);
-
-                    sender.sendMessage(Identity.nil(), playerMessage.build());
+                    sender.sendMessage(Identity.nil(), Messages.getComponent("unlink-other-discord-success",
+                                                                             Collections.singletonMap("player", target),
+                                                                             Collections.emptyMap()));
 
                     if(onlinePlayer != null) {
-                        TextComponent.Builder targetMessage = Component.text()
-                           .content(Messages.get("unlink-by-other-success")
-                                            .replace("[player]", sender.getUsername()))
-                           .color(NamedTextColor.YELLOW);
-
-                        onlinePlayer.sendMessage(Identity.nil(), targetMessage.build());
+                        onlinePlayer.sendMessage(
+                                Identity.nil(),
+                                Messages.getComponent("unlink-by-other-success",
+                                                      Collections.singletonMap("player", sender.getUsername()),
+                                                      Collections.emptyMap()));
                     }
                 } else {
-                    TextComponent.Builder playerMessage = Component.text()
-                           .content(Messages.get("unlink-other-discord-not-linked")
-                                            .replace("[player]", target))
-                           .color(NamedTextColor.RED);
-
-                    sender.sendMessage(Identity.nil(), playerMessage.build());
+                    sender.sendMessage(Identity.nil(), Messages.getComponent("unlink-other-discord-not-linked",
+                                                                             Collections.singletonMap("player", target),
+                                                                             Collections.emptyMap()));
                 }
 
                 return;
@@ -234,12 +225,9 @@ public class Commands {
 
             userManager.lookupUniqueId(target).thenAccept((UUID uuid) -> {
                 if(uuid == null) {
-                    TextComponent.Builder playerMessage = Component.text()
-                           .content(Messages.get("unlink-other-not-found")
-                                            .replace("[player]", target))
-                           .color(NamedTextColor.GREEN);
-
-                    sender.sendMessage(Identity.nil(), playerMessage.build());
+                    sender.sendMessage(Identity.nil(), Messages.getComponent("unlink-other-not-found",
+                                                             Collections.singletonMap("player", target),
+                                                             Collections.emptyMap()));
 
                     return;
                 }
@@ -249,35 +237,26 @@ public class Commands {
                 if(linkingManager.isLinked(uuid)) {
                     linkingManager.unlink(uuid);
 
-                    TextComponent.Builder playerMessage = Component.text()
-                           .content(Messages.get("unlink-other-success")
-                                            .replace("[player]", target))
-                           .color(NamedTextColor.GREEN);
-
-                    sender.sendMessage(Identity.nil(), playerMessage.build());
+                    sender.sendMessage(Identity.nil(),
+                                       Messages.getComponent("unlink-other-success",
+                                                             Collections.singletonMap("player", target),
+                                                             Collections.emptyMap()));
 
                     if(onlinePlayer != null) {
-                        TextComponent.Builder targetMessage = Component.text()
-                           .content(Messages.get("unlink-by-other-success")
-                                            .replace("[player]", sender.getUsername()))
-                           .color(NamedTextColor.YELLOW);
-
-                        onlinePlayer.sendMessage(Identity.nil(), targetMessage.build());
+                        onlinePlayer.sendMessage(Identity.nil(), Messages.getComponent("unlink-by-other-success",
+                                                             Collections.singletonMap("player", sender.getUsername()),
+                                                             Collections.emptyMap()));
                     }
                 } else {
-                    TextComponent.Builder playerMessage = Component.text()
-                           .content(Messages.get("unlink-other-not-linked")
-                                            .replace("[player]", target))
-                           .color(NamedTextColor.RED);
-
-                    sender.sendMessage(Identity.nil(), playerMessage.build());
+                    sender.sendMessage(Identity.nil(), Messages.getComponent("unlink-other-not-linked",
+                                                             Collections.singletonMap("player", target),
+                                                             Collections.emptyMap()));
                 }
             });
         } else if(linkingManager.isLinked(sender)) { //Unlinking self
             linkingManager.unlink(sender);
         } else {
-            sender.sendMessage(Identity.nil(), Component.text(
-                    Messages.get("unlink-not-linked")).color(NamedTextColor.RED));
+            sender.sendMessage(Identity.nil(), Messages.getComponent("unlink-not-linked"));
         }
     }
 
@@ -285,13 +264,13 @@ public class Commands {
     @CommandPermission("discord.save")
     public void save(CommandSource sender) {
         linkingManager.saveLinks();
-        sender.sendMessage(Identity.nil(), Component.text(Messages.get("save-success")));
+        sender.sendMessage(Identity.nil(), Messages.getComponent("save-success"));
     }
 
     @CommandMethod("discord reload")
     @CommandPermission("discord.reload")
     public void reload(CommandSource sender) {
         plugin.reload();
-        sender.sendMessage(Identity.nil(), Component.text(Messages.get("reload-success")));
+        sender.sendMessage(Identity.nil(), Messages.getComponent("reload-success"));
     }
 }
