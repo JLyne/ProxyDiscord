@@ -99,17 +99,19 @@ public class Commands {
                                                                               Collections.emptyMap()));
                 } else {
                     //Attempt to get username of linked discord account
-                    plugin.getDiscord().getApi().getUserById(linkedDiscord).thenAcceptAsync(user -> {
-                        sender.sendMessage(Identity.nil(),
-                                           Messages.getComponent("link-other-already-linked-known",
-                                                                 Map.of(
-                                                                         "player", target,
-                                                                         "discord", user.getDiscriminatedName()),
-                                                                 Collections.emptyMap()));
-                    }).exceptionally(error -> {
-                        sender.sendMessage(Identity.nil(), Messages.getComponent("link-other-already-linked-unknown",
-                                                                              Collections.singletonMap("player", target),
-                                                                              Collections.emptyMap()));
+                    plugin.getDiscord().getApi().getUserById(linkedDiscord)
+                            .thenAcceptAsync(user -> sender.sendMessage(
+                                    Identity.nil(),
+                                    Messages.getComponent("link-other-already-linked-known",
+                                                          Map.of(
+                                                                  "player", target,
+                                                                  "discord", user.getDiscriminatedName()),
+                                                          Collections.emptyMap())))
+                            .exceptionally(error -> {
+                                sender.sendMessage(Identity.nil(),
+                                                   Messages.getComponent("link-other-already-linked-unknown",
+                                                                         Collections.singletonMap("player", target),
+                                                                         Collections.emptyMap()));
 
                         return null;
                     });

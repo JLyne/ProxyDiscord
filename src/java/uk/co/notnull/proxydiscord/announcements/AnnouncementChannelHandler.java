@@ -188,9 +188,10 @@ public class AnnouncementChannelHandler {
         } else if(servers != null) {
         	sentLatestMessage.clear();
 
-        	List<Player> recipients = proxy.getAllPlayers().stream().filter(p -> {
-        		return p.getCurrentServer().isPresent() && servers.contains(p.getCurrentServer().get().getServer());
-			}).collect(Collectors.toList());
+        	List<Player> recipients = proxy.getAllPlayers().stream()
+					.filter(p -> p.getCurrentServer().isPresent()
+							&& servers.contains(p.getCurrentServer().get().getServer()))
+					.collect(Collectors.toList());
 
             recipients.forEach(p ->{
             	sentLatestMessage.add(p.getUniqueId());
@@ -200,10 +201,10 @@ public class AnnouncementChannelHandler {
         	sentLatestMessage.clear();
         	RegisteredServer linkingServer = plugin.getVerificationManager().getLinkingServer();
 
-        	List<Player> recipients = proxy.getAllPlayers().stream().filter(p -> {
-        		return p.getCurrentServer().isPresent()
-						&& (linkingServer == null || !p.getCurrentServer().get().getServer().equals(linkingServer));
-			}).collect(Collectors.toList());
+        	List<Player> recipients = proxy.getAllPlayers().stream()
+					.filter(p -> p.getCurrentServer().isPresent()
+							&& (linkingServer == null || !p.getCurrentServer().get().getServer().equals(linkingServer)))
+					.collect(Collectors.toList());
 
         	recipients.forEach(p -> {
             	sentLatestMessage.add(p.getUniqueId());

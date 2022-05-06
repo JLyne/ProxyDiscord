@@ -61,7 +61,7 @@ import java.util.regex.Pattern;
 public class Util {
 	private static final Pattern markdownPattern = Pattern.compile("([*_|`~])");
 	private static final Pattern emotePattern = Pattern.compile(":([\\w\\\\]{2,}):");
-	private static final Pattern sectionPattern = Pattern.compile("\\u00A7[0-9a-gA-Gk-oK-OrR]");
+	private static final Pattern sectionPattern = Pattern.compile("\\u00A7[\\da-gA-Gk-oK-OrR]");
 
 	/**
 	 * Component flattener which escapes markdown syntax present in any components that aren't clickable links

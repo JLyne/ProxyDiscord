@@ -34,13 +34,15 @@ import com.velocitypowered.api.proxy.ProxyServer;
 import ninja.leaping.configurate.ConfigurationNode;
 import org.slf4j.Logger;
 import uk.co.notnull.proxydiscord.ProxyDiscord;
-import uk.co.notnull.proxydiscord.Util;
 import uk.co.notnull.proxydiscord.api.events.DiscordLogEvent;
 import uk.co.notnull.proxydiscord.api.logging.LogEntry;
 import uk.co.notnull.proxydiscord.api.logging.LogType;
 import uk.co.notnull.proxydiscord.logging.LoggingChannelHandler;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
@@ -61,10 +63,12 @@ public class LoggingManager implements uk.co.notnull.proxydiscord.api.manager.Lo
     }
 
     public void init() {
-		//Can't scheduled tasks until ProxyInitializeEvent
-        proxy.getScheduler().buildTask(plugin, () -> {
-            handlers.forEach((id, handler) -> handler.updateLogsPerMessage());
-        }).repeat(5, TimeUnit.SECONDS).delay(5, TimeUnit.SECONDS).schedule();
+		//Can't schedule tasks until ProxyInitializeEvent
+        proxy.getScheduler().buildTask(plugin, () ->
+				handlers.forEach((id, handler) -> handler.updateLogsPerMessage()))
+				.repeat(5, TimeUnit.SECONDS)
+				.delay(5, TimeUnit.SECONDS)
+				.schedule();
 
         handlers.forEach((id, handler) -> handler.init());
 	}

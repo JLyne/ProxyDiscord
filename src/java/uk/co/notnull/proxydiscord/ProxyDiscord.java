@@ -71,7 +71,13 @@ import org.slf4j.Logger;
 
 import javax.inject.Inject;
 import ninja.leaping.configurate.yaml.YAMLConfigurationLoader;
-import uk.co.notnull.proxydiscord.manager.*;
+import uk.co.notnull.proxydiscord.manager.AnnouncementManager;
+import uk.co.notnull.proxydiscord.manager.GroupSyncManager;
+import uk.co.notnull.proxydiscord.manager.LinkingManager;
+import uk.co.notnull.proxydiscord.manager.LoggingManager;
+import uk.co.notnull.proxydiscord.manager.LuckPermsManager;
+import uk.co.notnull.proxydiscord.manager.RedirectManager;
+import uk.co.notnull.proxydiscord.manager.VerificationManager;
 
 public class ProxyDiscord implements uk.co.notnull.proxydiscord.api.ProxyDiscord {
 	private static MinecraftChannelIdentifier statusIdentifier;
@@ -88,7 +94,6 @@ public class ProxyDiscord implements uk.co.notnull.proxydiscord.api.ProxyDiscord
 	private static LinkingManager linkingManager;
 	private static VerificationManager verificationManager;
 	private static AnnouncementManager announcementManager;
-	@SuppressWarnings("FieldCanBeLocal")
 	private static RedirectManager redirectManager;
 	private static LoggingManager loggingManager;
 	private static LuckPermsManager luckPermsManager;

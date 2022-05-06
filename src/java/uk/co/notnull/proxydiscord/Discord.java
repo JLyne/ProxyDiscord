@@ -35,7 +35,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 
 import org.javacord.api.DiscordApi;
-import org.javacord.api.interaction.*;
+import org.javacord.api.interaction.SlashCommand;
+import org.javacord.api.interaction.SlashCommandBuilder;
 import org.slf4j.Logger;
 
 public class Discord {
