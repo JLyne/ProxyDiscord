@@ -37,7 +37,6 @@ import org.javacord.api.listener.interaction.SlashCommandCreateListener;
 import org.javacord.api.listener.message.MessageCreateListener;
 import org.javacord.api.util.event.ListenerManager;
 import uk.co.notnull.proxydiscord.Messages;
-import uk.co.notnull.proxydiscord.Util;
 import uk.co.notnull.proxydiscord.api.LinkResult;
 import uk.co.notnull.proxydiscord.manager.LinkingManager;
 import uk.co.notnull.proxydiscord.ProxyDiscord;
@@ -84,6 +83,10 @@ public class Link implements MessageCreateListener, SlashCommandCreateListener {
             return;
         }
 
+        if(event.getChannel().getId() != linkingChannelId) {
+            return;
+        }
+
         MessageAuthor author = event.getMessageAuthor();
         Long id = author.getId();
         String token = content.replace("!link ", "")
@@ -110,10 +113,6 @@ public class Link implements MessageCreateListener, SlashCommandCreateListener {
     public void onSlashCommandCreate(SlashCommandCreateEvent event) {
         SlashCommandInteraction interaction = event.getSlashCommandInteraction();
         LinkResult result;
-
-        if(!Util.validateSlashCommand(interaction, slashCommand.getId(), linkingChannelId)) {
-            return;
-        }
 
         try {
             String token = interaction.getOptionStringValueByIndex(0).orElse("").toUpperCase();

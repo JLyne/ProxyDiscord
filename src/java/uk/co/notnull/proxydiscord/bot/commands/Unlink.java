@@ -35,7 +35,6 @@ import org.javacord.api.listener.message.MessageCreateListener;
 import org.javacord.api.util.event.ListenerManager;
 import uk.co.notnull.proxydiscord.Messages;
 import uk.co.notnull.proxydiscord.ProxyDiscord;
-import uk.co.notnull.proxydiscord.Util;
 import uk.co.notnull.proxydiscord.manager.LinkingManager;
 
 import java.util.HashMap;
@@ -71,6 +70,10 @@ public class Unlink implements MessageCreateListener, SlashCommandCreateListener
             return;
         }
 
+        if(event.getChannel().getId() != linkingChannelId) {
+            return;
+        }
+
         long userId = event.getMessageAuthor().getId();
         UUID linked = linkingManager.unlink(userId);
 
@@ -85,10 +88,6 @@ public class Unlink implements MessageCreateListener, SlashCommandCreateListener
     @Override
     public void onSlashCommandCreate(SlashCommandCreateEvent event) {
         SlashCommandInteraction interaction = event.getSlashCommandInteraction();
-
-        if(!Util.validateSlashCommand(interaction, slashCommand.getId(), linkingChannelId)) {
-            return;
-        }
 
         long userId = interaction.getUser().getId();
         UUID linked = linkingManager.unlink(userId);

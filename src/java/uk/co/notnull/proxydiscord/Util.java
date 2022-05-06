@@ -43,8 +43,6 @@ import org.javacord.api.entity.emoji.KnownCustomEmoji;
 import org.javacord.api.entity.message.Message;
 import org.javacord.api.entity.message.MessageAttachment;
 import org.javacord.api.entity.message.MessageAuthor;
-import org.javacord.api.interaction.SlashCommandInteraction;
-import org.javacord.api.interaction.callback.InteractionCallbackDataFlag;
 import org.jetbrains.annotations.NotNull;
 import uk.co.notnull.proxydiscord.api.logging.LogEntry;
 import uk.co.notnull.proxydiscord.renderer.CustomMinecraftRenderer;
@@ -255,23 +253,6 @@ public class Util {
 				.replace("<" + find + ">", replace));
 
         return codeBlock ? "```" + ref.message.replace("```", "") + " ```" : ref.message;
-	}
-
-	public static boolean validateSlashCommand(SlashCommandInteraction interaction, long slashCommandId, long channelId) {
-		if(interaction.getCommandId() != slashCommandId) {
-            return false;
-        }
-
-        if(interaction.getChannel().isEmpty() || interaction.getChannel().get().getId() != channelId) {
-            interaction.createImmediateResponder()
-					.setFlags(InteractionCallbackDataFlag.EPHEMERAL)
-                    .setContent(Messages.get("slash-command-wrong-channel",
-											 Map.of("channel", String.valueOf(channelId))))
-                    .respond();
-            return false;
-        }
-
-		return true;
 	}
 
 	/**
