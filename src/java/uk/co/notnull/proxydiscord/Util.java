@@ -51,8 +51,11 @@ import uk.co.notnull.proxydiscord.renderer.CustomMinecraftRenderer;
 
 import java.util.Collections;
 import java.util.List;
+import java.text.DateFormat;
+import java.util.Date;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.BiFunction;
 import java.util.regex.Pattern;
 
 public class Util {
@@ -105,15 +108,6 @@ public class Util {
 	public static final MiniMessage miniMessage = MiniMessage.miniMessage();
 
 	/**
-	 * Tries its best to escape markdown formatting and strip Minecraft formatting from the given message.
-	 * @param message The message
-	 * @return the escaped message
-	 */
-	public static String escapeFormatting(String message) {
-		return plainStripMarkdownSerializer.serialize(legacySerializer.deserialize(message));
-	}
-
-	/**
 	 * Gets the content of the given Discord message.
 	 * The URLs of any present attachments will be appended to the content.
 	 * @param message The message
@@ -140,7 +134,7 @@ public class Util {
 	 * @param entry The log entry to format
 	 * @return the formatted string
 	 */
-	public static String formatLogEntry(@NotNull String format, @NonNull LogEntry entry) {
+	public static String formatLogEntry(@NotNull String format, DateFormat dateFormat, boolean codeBlock, @NonNull LogEntry entry) {
 		var ref = new Object() {
 			String message = format;
 		};
@@ -149,6 +143,20 @@ public class Util {
 			return null;
 		}
 
+		BiFunction<String, String, Void> replace = (String f, String r) -> {
+			ref.message = ref.message.replace("<" + f + ">", r);
+			return null;
+		};
+
+		BiFunction<String, String, Void> safeReplace = (String f, String r) -> {
+			if (!codeBlock) {
+				r = Util.formatEmotes(r);
+			}
+
+			ref.message = ref.message.replace("<" + f + ">", Util.prepareLogMessage(r, codeBlock));
+			return null;
+		};
+
         Long discordId = ProxyDiscord.inst().getLinkingManager().getLinked(entry.getPlayer());
 		Optional<org.javacord.api.entity.user.User> discordUser = Optional.empty();
 
@@ -156,27 +164,43 @@ public class Util {
 			discordUser = ProxyDiscord.inst().getDiscord().getApi().getCachedUserById(discordId);
 		}
 
-        String serverName = entry.getServer().map(server -> server.getServerInfo().getName()).orElse("unknown");
+        replace.apply("date", dateFormat != null ? dateFormat.format(new Date()) : "");
+		replace.apply("uuid", entry.getPlayer().getUniqueId().toString());
 
-        entry.getReplacements().forEach((String find, String replace) -> ref.message = ref.message
-				.replace("<" + find + ">", Util.formatEmotes(Util.escapeFormatting(replace))));
+		safeReplace.apply("server", entry.getServer()
+				.map(server -> server.getServerInfo().getName())
+				.orElse("unknown"));
+		safeReplace.apply("player", entry.getPlayer().getUsername());
 
-        ref.message = ref.message.replace("<server>", Util.escapeFormatting(serverName));
-        ref.message = ref.message.replace("<player>", Util.escapeFormatting(entry.getPlayer().getUsername()));
-        ref.message = ref.message.replace("<uuid>", entry.getPlayer().getUniqueId().toString());
-
-        if(discordId != null) {
-			ref.message = ref.message.replace("<discord_id>", String.valueOf(discordId));
-			ref.message = ref.message.replace("<discord_mention>", "<@!" + discordId + ">");
-			ref.message = ref.message.replace("<discord_username>", discordUser.map(
+		if (discordId != null) {
+			replace.apply("discord_id", String.valueOf(discordId));
+			replace.apply("discord_mention", "<@!" + discordId + ">");
+			replace.apply("discord_username", discordUser.map(
 					org.javacord.api.entity.user.User::getDiscriminatedName).orElse("Unknown"));
 		} else {
-        	ref.message = ref.message.replace("<discord_id>", "Unlinked");
-			ref.message = ref.message.replace("<discord_mention>", "Unlinked");
-			ref.message = ref.message.replace("<discord_username>", "Unlinked");
+			replace.apply("discord_id", "Unlinked");
+			replace.apply("discord_mention", "Unlinked");
+			replace.apply("discord_username", "Unlinked");
 		}
 
-        return ref.message;
+		entry.getReplacements().forEach(safeReplace::apply);
+
+		return codeBlock ? "```" + ref.message + " ```" : ref.message;
+	}
+
+	/**
+	 * Escapes markdown formatting (if necessary) and strips Minecraft formatting from the given message.
+	 * @param message The message
+	 * @param codeBlock Whether the log message will be sent within a code block, meaning that markdown
+	 *                    escaping shouldn't occur
+	 * @return The prepared message
+	 */
+	public static String prepareLogMessage(String message, boolean codeBlock) {
+		if(codeBlock) {
+			return plainSerializer.serialize(legacySerializer.deserialize(message)).replace("```", "");
+		} else {
+			return plainStripMarkdownSerializer.serialize(legacySerializer.deserialize(message));
+		}
 	}
 
 	/**
@@ -185,7 +209,7 @@ public class Util {
 	 * @param message The message
 	 * @return the message with emote mentions added
 	 */
-	private static String formatEmotes(String message) {
+	public static String formatEmotes(String message) {
 		DiscordApi api = ProxyDiscord.inst().getDiscord().getApi();
 
 		return emotePattern.matcher(message).replaceAll(result -> {
@@ -204,9 +228,10 @@ public class Util {
 	 * @param replacements Additional replacements to apply
 	 * @return the formatted string
 	 */
-	public static String formatDiscordMessage(@NonNull String format, @NonNull User user,
-											  @NonNull MessageAuthor author,
-											  @NonNull Map<String, String> replacements) {
+	public static String formatDiscordMessage(
+			@NonNull String format, DateFormat dateFormat, boolean codeBlock, @NonNull User user,
+			@NonNull MessageAuthor author,
+			@NonNull Map<String, String> replacements) {
 		var ref = new Object() {
 			String message = format;
 		};
@@ -215,18 +240,21 @@ public class Util {
 			return null;
 		}
 
-        replacements.forEach((String find, String replace) -> ref.message = ref.message
-				.replace(find, replace));
+		String date = dateFormat != null ? dateFormat.format(new Date()) : "";
+        ref.message = ref.message.replace("<date>", date);
 
-        ref.message = ref.message.replace("<server>", "Discord");
-        ref.message = ref.message.replace("<player>", user.getFriendlyName());
-        ref.message = ref.message.replace("<uuid>", user.getUniqueId().toString());
+		ref.message = ref.message.replace("<server>", "Discord");
+		ref.message = ref.message.replace("<player>", user.getFriendlyName());
+		ref.message = ref.message.replace("<uuid>", user.getUniqueId().toString());
 
 		ref.message = ref.message.replace("<discord_id>", author.getIdAsString());
 		ref.message = ref.message.replace("<discord_mention>", "<@!" + author.getIdAsString() + ">");
 		ref.message = ref.message.replace("<discord_username>", author.getDiscriminatedName());
 
-        return ref.message;
+		replacements.forEach((String find, String replace) -> ref.message = ref.message
+				.replace("<" + find + ">", replace));
+
+        return codeBlock ? "```" + ref.message.replace("```", "") + " ```" : ref.message;
 	}
 
 	public static boolean validateSlashCommand(SlashCommandInteraction interaction, long slashCommandId, long channelId) {

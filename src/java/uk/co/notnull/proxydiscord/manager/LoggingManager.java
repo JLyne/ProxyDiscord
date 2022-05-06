@@ -137,9 +137,8 @@ public class LoggingManager implements uk.co.notnull.proxydiscord.api.manager.Lo
             return;
         }
 
-		String message = Util.escapeFormatting(event.getMessage());
-        LogEntry chatLog = LogEntry.builder().type(LogType.CHAT).player(event.getPlayer())
-				.replacements(Map.of("message", message)).build();
+        LogEntry chatLog = LogEntry.builder().type(LogType.CHAT).player(event.getPlayer()).replacements(
+				Map.of("message", event.getMessage())).build();
 
         logEvent(chatLog);
     }
@@ -150,9 +149,8 @@ public class LoggingManager implements uk.co.notnull.proxydiscord.api.manager.Lo
             return;
         }
 
-		String command = Util.escapeFormatting(event.getCommand());
         LogEntry commandLog = LogEntry.builder().type(LogType.COMMAND).player((Player) event.getCommandSource())
-				.replacements(Map.of("command", command)).build();
+				.replacements(Map.of("command", event.getCommand())).build();
 
         logEvent(commandLog);
     }

@@ -76,6 +76,7 @@ public class LoggingChannelHandler {
 	private final AtomicReference<Integer> lockDummy = new AtomicReference<>(0);
 
 	private SimpleDateFormat dateFormat;
+	private boolean codeBlock;
 	private boolean useMiniMessage;
 	private String ingameChatFormat;
     private final Set<LogType> events = new HashSet<>();
@@ -155,6 +156,7 @@ public class LoggingChannelHandler {
 
         if(logFormats.isMap() || defaultLogFormats.isMap()) {
             ConfigurationNode dateFormat = logFormats.getNode("date");
+            ConfigurationNode codeBlock = logFormats.getNode("code-block");
            	ConfigurationNode minimessage = logFormats.getNode("use-minimessage");
             ConfigurationNode chatFormat = logFormats.getNode("chat");
             ConfigurationNode discordChatFormat = logFormats.getNode("discord-chat");
@@ -164,6 +166,7 @@ public class LoggingChannelHandler {
             ConfigurationNode ingameChatFormat = logFormats.getNode("discord-chat-ingame");
 
             ConfigurationNode defaultDateFormat = defaultLogFormats.getNode("date");
+            ConfigurationNode defaultCodeBlock = defaultLogFormats.getNode("code-block");
             ConfigurationNode defaultMiniMessage = defaultLogFormats.getNode("use-minimessage");
             ConfigurationNode defaultChatFormat = defaultLogFormats.getNode("chat");
             ConfigurationNode defaultDiscordChatFormat = defaultLogFormats.getNode("discord-chat");
@@ -178,6 +181,7 @@ public class LoggingChannelHandler {
                 logger.warn("Invalid logging date format: " + e.getMessage());
             }
 
+			this.codeBlock = codeBlock.getBoolean(defaultCodeBlock.getBoolean(false));
 			this.useMiniMessage = minimessage.getBoolean(defaultMiniMessage.getBoolean(false));
 
             this.formats.put(LogType.CHAT, chatFormat.getString(defaultChatFormat.getString("")));
@@ -253,14 +257,11 @@ public class LoggingChannelHandler {
 
     public void logEvent(LogEntry entry) {
 		if(shouldLogEvent(entry)) {
-			queueLogMessage(Util.formatLogEntry(formats.get(entry.getType()), entry));
+			queueLogMessage(Util.formatLogEntry(formats.get(entry.getType()), dateFormat, codeBlock, entry));
 		}
 	}
 
     private void queueLogMessage(String message) {
-        message = message.replace("<date>", dateFormat != null ?
-				Util.escapeFormatting(dateFormat.format(new Date())) : "");
-
         Optional <TextChannel> loggingChannel = plugin.getDiscord().getApi().getTextChannelById(channelId);
 
         if(loggingChannel.isEmpty() || message.isEmpty()) {
@@ -273,7 +274,7 @@ public class LoggingChannelHandler {
         	if(message.length() > 2000) {
         		message = message.substring(0, 1991) + "[...]";
 
-        		if(message.startsWith("```")) {
+        		if(codeBlock) {
         			message = message + "```";
 				}
 			}
@@ -282,7 +283,7 @@ public class LoggingChannelHandler {
             	sendLogMessage(loggingChannel.get());
             }
 
-            if(currentLength == 0) {
+            if(currentLength > 0 && !codeBlock) {
             	currentMessage.append("\n");
 			}
 
@@ -375,7 +376,7 @@ public class LoggingChannelHandler {
 		if(logSentMessages) {
 			try {
 				String sanitised = Util.plainSerializer.serialize(Util.plainSerializer.deserialize(message));
-				String formatted = Util.formatDiscordMessage(formats.get(LogType.DISCORD_CHAT),
+				String formatted = Util.formatDiscordMessage(formats.get(LogType.DISCORD_CHAT), dateFormat, codeBlock,
 															 user, author, Map.of("message", sanitised));
 				queueLogMessage(formatted);
 			} catch (IllegalStateException e) {

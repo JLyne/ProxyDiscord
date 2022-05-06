@@ -100,6 +100,33 @@ public class LogEntry {
 		return replacements;
 	}
 
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+		LogEntry logEntry = (LogEntry) o;
+		return getType() == logEntry.getType() && getVisibility() == logEntry.getVisibility() && getPlayer().equals(
+				logEntry.getPlayer()) && Objects.equals(getServer(),
+														logEntry.getServer()) && Objects.equals(
+				getReplacements(), logEntry.getReplacements());
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(getType(), getVisibility(), getPlayer(), getServer(), getReplacements());
+	}
+
+	@Override
+	public String toString() {
+		return "LogEntry{" +
+				"type=" + type +
+				", visibility=" + visibility +
+				", player=" + player +
+				", server=" + server +
+				", replacements=" + replacements +
+				'}';
+	}
+
 	/**
 	 * Create a {@link Builder} from the log entry
 	 * @return the builder

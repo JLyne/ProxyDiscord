@@ -73,6 +73,7 @@ logging:
 
     # Formats for logging various events
     formats:
+      code-block: true # If true, will surround all log messages with ``` code blocks
       date: '<dd-MM-yy HH:mm:ss>' # Used for <date> in other formats
       # In-game chat
       chat: |-
