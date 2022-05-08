@@ -318,7 +318,11 @@ public class LoggingChannelHandler {
 		String channelName = "#" + event.getServerTextChannel().map(ServerTextChannel::getName).orElse("Unknown channel");
 		String ignoreMessage = "Ignoring message from " + event.getMessageAuthor().getDiscriminatedName() + " in " + channelName + ": ";
 
-		if(event.getMessageAuthor().isYourself() || !event.getMessageAuthor().isRegularUser()) {
+		if(event.getMessageAuthor().isYourself()) {
+			return;
+		}
+
+		if(!event.getMessageAuthor().isRegularUser()) {
 			plugin.getDebugLogger().info(ignoreMessage + "sent by bot user");
 			return;
 		}
