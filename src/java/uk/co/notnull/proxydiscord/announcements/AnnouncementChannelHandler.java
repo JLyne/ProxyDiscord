@@ -33,6 +33,8 @@ import com.velocitypowered.api.proxy.server.RegisteredServer;
 import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.text.event.HoverEvent;
 import org.javacord.api.entity.channel.ServerTextChannel;
 import org.javacord.api.entity.channel.TextChannel;
 import org.javacord.api.entity.message.Message;
@@ -45,6 +47,7 @@ import uk.co.notnull.proxydiscord.Messages;
 import uk.co.notnull.proxydiscord.ProxyDiscord;
 import uk.co.notnull.proxydiscord.Util;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -63,6 +66,7 @@ public class AnnouncementChannelHandler {
 	private final Set<RegisteredServer> servers;
 
 	private String channelName;
+	private TextComponent channelComponent;
 
 	private ListenerManager<MessageCreateListener> createListener;
 	private ListenerManager<MessageDeleteListener> deleteListener;
@@ -116,6 +120,8 @@ public class AnnouncementChannelHandler {
 		}
 
 		channelName = "#" + announcementChannel.get().getName();
+		channelComponent = Component.text(channelName)
+				.clickEvent(ClickEvent.openUrl(Util.getDiscordChannelURL(announcementChannel.get())));
 
 		return announcementChannel.get();
 	}
@@ -165,20 +171,39 @@ public class AnnouncementChannelHandler {
         }
 
         lastMessage = message;
-        String content = message.getReadableContent();
+        String content = Util.getDiscordMessageContent(message);
         String headingKey = isNew ? "announcement-new" : "announcement-latest";
-        String text = content.length() > 250 ? content.subSequence(0, 250) + "..." : content;
+
+		var state = new Object() {
+			int length = 0;
+			boolean truncated = false;
+		};
+
+        String text = Arrays.stream(content.split(" ")).takeWhile(w -> {
+			if(state.length > 250) {
+				state.truncated = true;
+				return false;
+			}
+
+			state.length += w.length();
+			return true;
+		}).collect(Collectors.joining(" "));
 
 		TextComponent.Builder announcement = Component.text()
 				.append(Messages.getComponent(headingKey,
-											  Collections.singletonMap("channel", channelName),
-											  Collections.emptyMap()))
-				.append(Component.newline())
-				.append(Util.markdownSerializer.serialize(text));
+											  Collections.emptyMap(),
+											  Collections.singletonMap("channel", channelComponent)))
+				.append(Component.newline());
 
-		if(content.length() > 250) {
-            announcement.append(Component.newline()).append(Messages.getComponent("announcement-read-more"));
-        }
+		if(state.truncated) {
+			announcement.append(Util.prepareDiscordMessage(text + "..."));
+			announcement.append(Component.newline()).append(
+					Messages.getComponent("announcement-read-more")
+							.clickEvent(ClickEvent.openUrl(Util.getDiscordMessageURL(message)))
+							.hoverEvent(HoverEvent.showText(Messages.getComponent("announcement-read-more-tooltip"))));
+        } else {
+			announcement.append(Util.prepareDiscordMessage(text));
+		}
 
 		Component finalMessage = announcement.build();
 

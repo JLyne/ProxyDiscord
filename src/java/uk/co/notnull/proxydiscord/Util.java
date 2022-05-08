@@ -39,6 +39,7 @@ import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.luckperms.api.model.user.User;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.javacord.api.DiscordApi;
+import org.javacord.api.entity.channel.ServerChannel;
 import org.javacord.api.entity.emoji.CustomEmoji;
 import org.javacord.api.entity.emoji.KnownCustomEmoji;
 import org.javacord.api.entity.message.Message;
@@ -133,6 +134,35 @@ public class Util {
 		}
 
 		return text.toString();
+	}
+
+	/**
+	 * Returns a URL for the given discord server channel
+	 * @param channel The channel
+	 * @return The URL
+	 */
+	public static String getDiscordChannelURL(ServerChannel channel) {
+		return String.format("https://discord.com/channels/%s/%s",
+							 channel.getServer().getIdAsString(), channel.getIdAsString());
+	}
+
+	/**
+	 * Returns a URL for the given discord message
+	 * @param message The message
+	 * @return The URL
+	 */
+	public static String getDiscordMessageURL(Message message) {
+		Optional<ServerChannel> serverChannel = message.getChannel().asServerChannel();
+
+		if(serverChannel.isPresent()) {
+			return String.format("https://discord.com/channels/%s/%s/%s",
+								 serverChannel.get().getServer().getIdAsString(),
+								 serverChannel.get().getIdAsString(),
+								 message.getIdAsString());
+		} else {
+			return String.format("https://discord.com/channels/@me/%s/%s", message.getChannel().getIdAsString(),
+								 message.getIdAsString());
+		}
 	}
 
 	/**

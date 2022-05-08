@@ -198,7 +198,10 @@ announcement-latest: |-
   <dark_green>Latest announcement in <channel>:
 
 announcement-read-more: |-
-  <light_purple>Read the full message in Discord
+  <gold>[Read more]
+
+announcement-read-more-tooltip: |-
+  Click to view the full message in discord
 
 slash-command-link-description: Link your Discord and Minecraft accounts to play on the RTGame Minecraft Server.
 slash-command-unlink-description: Unlink your Discord and Minecraft accounts.
