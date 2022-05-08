@@ -45,6 +45,7 @@ import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.proxy.messages.MinecraftChannelIdentifier;
 import io.leangen.geantyref.TypeToken;
+import uk.co.notnull.proxydiscord.api.emote.EmoteProvider;
 import uk.co.notnull.proxydiscord.bot.listeners.Reconnect;
 import uk.co.notnull.proxydiscord.bot.listeners.ServerMemberBan;
 import uk.co.notnull.proxydiscord.bot.listeners.ServerMemberJoin;
@@ -90,6 +91,7 @@ public class ProxyDiscord implements uk.co.notnull.proxydiscord.api.ProxyDiscord
 	private ConfigurationNode configuration;
 	private DebugLogger debugLogger;
 	private Discord discord;
+	private EmoteProvider emoteProvider = Util.defaultEmoteProvider;
 
 	private static LinkingManager linkingManager;
 	private static VerificationManager verificationManager;
@@ -344,6 +346,18 @@ public class ProxyDiscord implements uk.co.notnull.proxydiscord.api.ProxyDiscord
 
 	public PlatformDetectionHandler getPlatformDetectionHandler() {
 		return platformDetectionHandler;
+	}
+
+	public void setEmoteProvider(EmoteProvider provider) {
+		emoteProvider = provider;
+	}
+
+	public void clearEmoteProvider() {
+		emoteProvider = Util.defaultEmoteProvider;
+	}
+
+	public EmoteProvider getEmoteProvider() {
+		return emoteProvider;
 	}
 
 	public void reload() {

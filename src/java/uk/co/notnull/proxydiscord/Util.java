@@ -30,6 +30,7 @@ import dev.vankka.simpleast.core.parser.Parser;
 import dev.vankka.simpleast.core.simple.SimpleMarkdownRules;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.TextReplacementConfig;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.flattener.ComponentFlattener;
 import net.kyori.adventure.text.minimessage.MiniMessage;
@@ -44,8 +45,10 @@ import org.javacord.api.entity.message.Message;
 import org.javacord.api.entity.message.MessageAttachment;
 import org.javacord.api.entity.message.MessageAuthor;
 import org.jetbrains.annotations.NotNull;
+import uk.co.notnull.proxydiscord.api.emote.EmoteProvider;
 import uk.co.notnull.proxydiscord.api.logging.LogEntry;
 import uk.co.notnull.proxydiscord.renderer.CustomMinecraftRenderer;
+import uk.co.notnull.proxydiscord.emote.DefaultEmoteProvider;
 
 import java.util.Collections;
 import java.util.List;
@@ -54,6 +57,7 @@ import java.util.Date;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiFunction;
+import java.util.regex.MatchResult;
 import java.util.regex.Pattern;
 
 public class Util {
@@ -104,6 +108,12 @@ public class Util {
 			));
 
 	public static final MiniMessage miniMessage = MiniMessage.miniMessage();
+	public static final EmoteProvider defaultEmoteProvider = new DefaultEmoteProvider();
+
+	public static final TextReplacementConfig emoteReplacement = TextReplacementConfig.builder()
+			.match(Util.emotePattern)
+			.replacement((MatchResult match, TextComponent.Builder builder) ->
+								 ProxyDiscord.inst().getEmoteProvider().provide(match.group(1), builder)).build();
 
 	/**
 	 * Gets the content of the given Discord message.
@@ -148,7 +158,7 @@ public class Util {
 
 		BiFunction<String, String, Void> safeReplace = (String f, String r) -> {
 			if (!codeBlock) {
-				r = Util.formatEmotes(r);
+				r = Util.formatDiscordEmotes(r);
 			}
 
 			ref.message = ref.message.replace("<" + f + ">", Util.prepareLogMessage(r, codeBlock));
@@ -207,7 +217,7 @@ public class Util {
 	 * @param message The message
 	 * @return the message with emote mentions added
 	 */
-	public static String formatEmotes(String message) {
+	public static String formatDiscordEmotes(String message) {
 		DiscordApi api = ProxyDiscord.inst().getDiscord().getApi();
 
 		return emotePattern.matcher(message).replaceAll(result -> {
@@ -262,6 +272,7 @@ public class Util {
 	 * @return The prepared message
 	 */
 	public static Component prepareDiscordMessage(String message) {
-		return markdownSerializer.serialize(sectionPattern.matcher(message).replaceAll(""));
+		return markdownSerializer.serialize(sectionPattern.matcher(message).replaceAll(""))
+				.replaceText(emoteReplacement);
 	}
 }

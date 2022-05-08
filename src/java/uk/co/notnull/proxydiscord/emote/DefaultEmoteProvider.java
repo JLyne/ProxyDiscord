@@ -1,6 +1,6 @@
 /*
  * ProxyDiscord, a Velocity Discord bot
- * Copyright (c) 2021 James Lyne
+ * Copyright (c) 2022 James Lyne
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,46 +21,15 @@
  * SOFTWARE.
  */
 
-package uk.co.notnull.proxydiscord.api;
+package uk.co.notnull.proxydiscord.emote;
 
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
 import uk.co.notnull.proxydiscord.api.emote.EmoteProvider;
-import uk.co.notnull.proxydiscord.api.manager.GroupSyncManager;
-import uk.co.notnull.proxydiscord.api.manager.LinkingManager;
-import uk.co.notnull.proxydiscord.api.manager.LoggingManager;
-import uk.co.notnull.proxydiscord.api.manager.VerificationManager;
 
-/**
- * The ProxyDiscord plugin instance
- */
-@SuppressWarnings("unused")
-public interface ProxyDiscord {
-	/**
-	 * Gets the {@link LinkingManager} instance
-	 * @return the linking manager
-	 */
-	LinkingManager getLinkingManager();
-
-	/**
-	 * Gets the {@link VerificationManager} instance
-	 * @return the verification manager
-	 */
-	VerificationManager getVerificationManager();
-
-	/**
-	 * Gets the {@link LoggingManager} instance
-	 * @return the logging manager
-	 */
-	LoggingManager getLoggingManager();
-
-	/**
-	 * Gets the {@link GroupSyncManager} instance
-	 * @return the group sync manager
-	 */
-	GroupSyncManager getGroupSyncManager();
-
-	EmoteProvider getEmoteProvider();
-
-	void clearEmoteProvider();
-
-	void setEmoteProvider(EmoteProvider provider);
+public class DefaultEmoteProvider implements EmoteProvider {
+	@Override
+	public Component provide(String emote, TextComponent.Builder builder) {
+		return builder.build();
+	}
 }
