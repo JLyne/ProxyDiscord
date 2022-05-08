@@ -174,6 +174,7 @@ public class Util {
 
         replace.apply("date", dateFormat != null ? dateFormat.format(new Date()) : "");
 		replace.apply("uuid", entry.getPlayer().getUniqueId().toString());
+		replace.apply("0x1b", new StringBuilder().appendCodePoint(0x1b).toString());
 
 		safeReplace.apply("server", entry.getServer()
 				.map(server -> server.getServerInfo().getName())
@@ -258,6 +259,7 @@ public class Util {
 		ref.message = ref.message.replace("<discord_id>", author.getIdAsString());
 		ref.message = ref.message.replace("<discord_mention>", "<@!" + author.getIdAsString() + ">");
 		ref.message = ref.message.replace("<discord_username>", author.getDiscriminatedName());
+		ref.message = ref.message.replace("<0x1b>", new StringBuilder().appendCodePoint(0x1b).toString());
 
 		replacements.forEach((String find, String replace) -> ref.message = ref.message
 				.replace("<" + find + ">", replace));
