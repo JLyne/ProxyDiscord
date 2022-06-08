@@ -33,6 +33,7 @@ import cloud.commandframework.annotations.specifier.Range;
 import cloud.commandframework.minecraft.extras.MinecraftHelp;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
+import net.kyori.adventure.audience.MessageType;
 import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -82,7 +83,7 @@ public class Commands {
             if (uuid == null) {
                 sender.sendMessage(Identity.nil(), Messages.getComponent("link-other-not-found",
                                                                          Collections.singletonMap("player", target),
-                                                                         Collections.emptyMap()));
+                                                                         Collections.emptyMap()), MessageType.SYSTEM);
 
                 return;
             }
@@ -96,7 +97,7 @@ public class Commands {
                 if (linkedDiscord.equals(discordId)) {
                     sender.sendMessage(Identity.nil(), Messages.getComponent("link-other-already-linked-same",
                                                                               Collections.singletonMap("player", target),
-                                                                              Collections.emptyMap()));
+                                                                              Collections.emptyMap()), MessageType.SYSTEM);
                 } else {
                     //Attempt to get username of linked discord account
                     plugin.getDiscord().getApi().getUserById(linkedDiscord)
@@ -106,12 +107,13 @@ public class Commands {
                                                           Map.of(
                                                                   "player", target,
                                                                   "discord", user.getDiscriminatedName()),
-                                                          Collections.emptyMap())))
+                                                          Collections.emptyMap()),
+                                    MessageType.SYSTEM))
                             .exceptionally(error -> {
                                 sender.sendMessage(Identity.nil(),
                                                    Messages.getComponent("link-other-already-linked-unknown",
                                                                          Collections.singletonMap("player", target),
-                                                                         Collections.emptyMap()));
+                                                                         Collections.emptyMap()), MessageType.SYSTEM);
 
                         return null;
                     });
@@ -145,9 +147,11 @@ public class Commands {
                             }
 
                             sender.sendMessage(Identity.nil(),
-                                               Messages.getComponent(key, replacements, Collections.emptyMap()));
+                                               Messages.getComponent(key, replacements, Collections.emptyMap()),
+                                               MessageType.SYSTEM);
                         }).exceptionally(error -> {
-                    sender.sendMessage(Identity.nil(), Component.text(error.toString()).color(NamedTextColor.RED));
+                    sender.sendMessage(Identity.nil(), Component.text(error.toString()).color(NamedTextColor.RED),
+                                       MessageType.SYSTEM);
                     return null;
                 });
 
@@ -172,10 +176,11 @@ public class Commands {
 
                     sender.sendMessage(Identity.nil(), Messages.getComponent(key, Map.of(
                             "discord", user.getDiscriminatedName(),
-                            "player", target), Collections.emptyMap()));
+                            "player", target), Collections.emptyMap()), MessageType.SYSTEM);
                 }
             }).exceptionally(error -> {
-                sender.sendMessage(Identity.nil(), Component.text(error.toString()).color(NamedTextColor.RED));
+                sender.sendMessage(Identity.nil(), Component.text(error.toString()).color(NamedTextColor.RED),
+                                   MessageType.SYSTEM);
                 return null;
             });
         });
@@ -207,19 +212,19 @@ public class Commands {
 
                     sender.sendMessage(Identity.nil(), Messages.getComponent("unlink-other-discord-success",
                                                                              Collections.singletonMap("player", target),
-                                                                             Collections.emptyMap()));
+                                                                             Collections.emptyMap()), MessageType.SYSTEM);
 
                     if(onlinePlayer != null) {
                         onlinePlayer.sendMessage(
                                 Identity.nil(),
                                 Messages.getComponent("unlink-by-other-success",
                                                       Collections.singletonMap("player", sender.getUsername()),
-                                                      Collections.emptyMap()));
+                                                      Collections.emptyMap()), MessageType.SYSTEM);
                     }
                 } else {
                     sender.sendMessage(Identity.nil(), Messages.getComponent("unlink-other-discord-not-linked",
                                                                              Collections.singletonMap("player", target),
-                                                                             Collections.emptyMap()));
+                                                                             Collections.emptyMap()), MessageType.SYSTEM);
                 }
 
                 return;
@@ -229,7 +234,7 @@ public class Commands {
                 if(uuid == null) {
                     sender.sendMessage(Identity.nil(), Messages.getComponent("unlink-other-not-found",
                                                              Collections.singletonMap("player", target),
-                                                             Collections.emptyMap()));
+                                                             Collections.emptyMap()), MessageType.SYSTEM);
 
                     return;
                 }
@@ -242,23 +247,23 @@ public class Commands {
                     sender.sendMessage(Identity.nil(),
                                        Messages.getComponent("unlink-other-success",
                                                              Collections.singletonMap("player", target),
-                                                             Collections.emptyMap()));
+                                                             Collections.emptyMap()), MessageType.SYSTEM);
 
                     if(onlinePlayer != null) {
                         onlinePlayer.sendMessage(Identity.nil(), Messages.getComponent("unlink-by-other-success",
                                                              Collections.singletonMap("player", sender.getUsername()),
-                                                             Collections.emptyMap()));
+                                                             Collections.emptyMap()), MessageType.SYSTEM);
                     }
                 } else {
                     sender.sendMessage(Identity.nil(), Messages.getComponent("unlink-other-not-linked",
                                                              Collections.singletonMap("player", target),
-                                                             Collections.emptyMap()));
+                                                             Collections.emptyMap()), MessageType.SYSTEM);
                 }
             });
         } else if(linkingManager.isLinked(sender)) { //Unlinking self
             linkingManager.unlink(sender);
         } else {
-            sender.sendMessage(Identity.nil(), Messages.getComponent("unlink-not-linked"));
+            sender.sendMessage(Identity.nil(), Messages.getComponent("unlink-not-linked"), MessageType.SYSTEM);
         }
     }
 
@@ -266,13 +271,13 @@ public class Commands {
     @CommandPermission("discord.save")
     public void save(CommandSource sender) {
         linkingManager.saveLinks();
-        sender.sendMessage(Identity.nil(), Messages.getComponent("save-success"));
+        sender.sendMessage(Identity.nil(), Messages.getComponent("save-success"), MessageType.SYSTEM);
     }
 
     @CommandMethod("discord reload")
     @CommandPermission("discord.reload")
     public void reload(CommandSource sender) {
         plugin.reload();
-        sender.sendMessage(Identity.nil(), Messages.getComponent("reload-success"));
+        sender.sendMessage(Identity.nil(), Messages.getComponent("reload-success"), MessageType.SYSTEM);
     }
 }
