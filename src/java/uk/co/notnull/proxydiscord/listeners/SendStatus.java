@@ -29,8 +29,6 @@ import com.velocitypowered.api.event.PostOrder;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.player.ServerPostConnectEvent;
 import com.velocitypowered.api.proxy.Player;
-import net.kyori.adventure.audience.MessageType;
-import net.kyori.adventure.identity.Identity;
 import uk.co.notnull.proxydiscord.Messages;
 import uk.co.notnull.proxydiscord.manager.LinkingManager;
 import uk.co.notnull.proxydiscord.ProxyDiscord;
@@ -65,7 +63,7 @@ public class SendStatus {
     public void onPlayerVerifyStatusChange(PlayerVerifyStateChangeEvent e) {
 		if(e.getState() == VerificationResult.VERIFIED && !e.getPreviousState().isVerified()
 				&& e.getPreviousState() != VerificationResult.UNKNOWN) {
-			e.getPlayer().sendMessage(Identity.nil(), Messages.getComponent("link-success"), MessageType.SYSTEM);
+			Messages.sendComponent(e.getPlayer(), "link-success");
 		} else if(!e.getState().isVerified()) {
 			sendStatusPacket(e.getPlayer(), e.getState());
 		}

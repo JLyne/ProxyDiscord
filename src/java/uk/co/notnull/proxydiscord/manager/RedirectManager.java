@@ -129,7 +129,7 @@ public class RedirectManager {
                             Collections.singletonMap("server", linkingServer.getServerInfo().getName()),
                             Collections.emptyMap());
 
-                    player.sendMessage(Identity.nil(), message.append(Component.newline()).append(extra),
+                    player.sendMessage(message.append(Component.newline()).append(extra),
                                        MessageType.SYSTEM);
                 } else {
                     plugin.getDebugLogger().info("Failed to move " + player.getUsername() + " to " + linkingServer.getServerInfo().getName() + ". Kicking.");
@@ -137,7 +137,7 @@ public class RedirectManager {
                 }
             });
         } else {
-            player.sendMessage(Identity.nil(), message, MessageType.SYSTEM);
+            player.sendMessage(message, MessageType.SYSTEM);
         }
     }
 

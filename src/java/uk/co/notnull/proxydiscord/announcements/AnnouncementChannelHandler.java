@@ -210,7 +210,7 @@ public class AnnouncementChannelHandler {
 
         if(player != null) {
 			sentLatestMessage.add(player.getUniqueId());
-            player.sendMessage(Identity.nil(), finalMessage, MessageType.SYSTEM);
+            player.sendMessage(finalMessage, MessageType.SYSTEM);
         } else if(servers != null) {
         	sentLatestMessage.clear();
 
@@ -221,7 +221,7 @@ public class AnnouncementChannelHandler {
 
             recipients.forEach(p ->{
             	sentLatestMessage.add(p.getUniqueId());
-            	p.sendMessage(Identity.nil(), finalMessage, MessageType.SYSTEM);
+            	p.sendMessage(finalMessage, MessageType.SYSTEM);
 			});
         } else {
         	sentLatestMessage.clear();
@@ -234,7 +234,7 @@ public class AnnouncementChannelHandler {
 
         	recipients.forEach(p -> {
             	sentLatestMessage.add(p.getUniqueId());
-        		p.sendMessage(Identity.nil(), finalMessage, MessageType.SYSTEM);
+        		p.sendMessage(finalMessage, MessageType.SYSTEM);
 			});
 		}
     }

@@ -31,8 +31,6 @@ import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.connection.DisconnectEvent;
 import com.velocitypowered.api.event.player.PlayerChooseInitialServerEvent;
 import com.velocitypowered.api.proxy.Player;
-import net.kyori.adventure.audience.MessageType;
-import net.kyori.adventure.identity.Identity;
 import org.slf4j.Logger;
 import uk.co.notnull.proxydiscord.Messages;
 import uk.co.notnull.proxydiscord.manager.GroupSyncManager;
@@ -62,10 +60,10 @@ public class JoinLeave {
 	public void onChooseInitialServer(PlayerChooseInitialServerEvent event) {
 		Player player = event.getPlayer();
 
-		player.sendMessage(Identity.nil(), Messages.getComponent("join-welcome"), MessageType.SYSTEM);
+		Messages.sendComponent(player, "join-welcome");
 
 		if(!plugin.getDiscord().isConnected()) {
-			player.sendMessage(Identity.nil(), Messages.getComponent("discord-issues"), MessageType.SYSTEM);
+			Messages.sendComponent(player, "discord-issues");
 		}
 
 		groupSyncManager.syncPlayer(player).thenRun(() -> {
