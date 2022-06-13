@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="Gradle: net.kyori:adventure-text-minimessage:4.10.1">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/net/kyori/adventure-text-minimessage/4.10.1/adventure-text-minimessage-4.10.1.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

@@ -30,16 +30,16 @@
     <orderEntry type="library" name="Gradle: cloud.commandframework:cloud-annotations:1.6.2" level="project" />
     <orderEntry type="library" name="Gradle: dev.vankka:mcdiscordreserializer:4.3.0" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Gradle: com.moandjiezana.toml:toml4j:0.7.2" level="project" />
-    <orderEntry type="library" scope="PROVIDED" name="Gradle: net.kyori:adventure-text-serializer-gson:4.10.0" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Gradle: net.kyori:adventure-text-serializer-gson:4.10.1" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Gradle: com.google.code.gson:gson:2.8.8" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Gradle: com.google.inject:guice:5.0.1" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Gradle: org.spongepowered:configurate-hocon:3.7.2" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Gradle: org.spongepowered:configurate-yaml:3.7.2" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Gradle: org.spongepowered:configurate-gson:3.7.2" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Gradle: com.google.guava:guava:30.1-jre" level="project" />
-    <orderEntry type="library" scope="PROVIDED" name="Gradle: net.kyori:adventure-text-serializer-legacy:4.10.0" level="project" />
-    <orderEntry type="library" scope="PROVIDED" name="Gradle: net.kyori:adventure-text-serializer-plain:4.10.0" level="project" />
-    <orderEntry type="library" scope="PROVIDED" name="Gradle: net.kyori:adventure-text-minimessage:4.10.0" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Gradle: net.kyori:adventure-text-minimessage:4.10.1" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Gradle: net.kyori:adventure-text-serializer-legacy:4.10.1" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Gradle: net.kyori:adventure-text-serializer-plain:4.10.1" level="project" />
     <orderEntry type="library" name="Gradle: net.kyori:adventure-api:4.10.1" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Gradle: org.slf4j:slf4j-api:1.7.30" level="project" />
     <orderEntry type="library" name="Gradle: org.checkerframework:checker-qual:3.21.0" level="project" />
