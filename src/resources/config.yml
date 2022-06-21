@@ -87,11 +87,11 @@ logging:
       # Players joining the server
       join: |-
         ```md
-        <date> [<server>][<player>](<discord_mention>) has joined the network```
+        <date> [<server>][<player>](<discord_mention>) has joined <server>```
       # Players leaving the server
       leave: |-
         ```md
-        <date> [<server>][<player>](<discord_mention>) has left the network```
+        <date> [<server>][<player>](<discord_mention>) has left <server>```
       # Commands run by players
       command: |-
         ```md
