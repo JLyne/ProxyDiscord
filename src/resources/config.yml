@@ -47,6 +47,14 @@ synced-roles: {}
   #   - 'group1'
   #   - 'group2'
 
+# Whether to use velocity's events for logging.
+# These can be disabled to avoid double-logging if you have another plugin using the API to log the same events.
+events:
+  use-command-event: true
+  use-chat-event: true
+  use-post-connect-event: true
+  use-disconnect-event: true
+
 # Settings for chat and event logging
 logging:
   default: # Default settings which can be overridden for an individual log channel

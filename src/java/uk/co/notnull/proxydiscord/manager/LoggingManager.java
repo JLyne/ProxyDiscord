@@ -52,6 +52,11 @@ public class LoggingManager implements uk.co.notnull.proxydiscord.api.manager.Lo
     private final Logger logger;
     private final Map<Long, LoggingChannelHandler> handlers;
 
+	private boolean useChatEvent = true;
+	private boolean useCommandEvent = true;
+	private boolean useConnectEvent = true;
+	private boolean useDisconnectEvent = true;
+
 	public LoggingManager(ProxyDiscord plugin, ConfigurationNode config) {
         this.plugin = plugin;
         this.proxy = plugin.getProxy();
@@ -75,6 +80,11 @@ public class LoggingManager implements uk.co.notnull.proxydiscord.api.manager.Lo
 
     private void parseConfig(ConfigurationNode config, boolean reload) {
         Set<Long> existing = new HashSet<>(handlers.keySet());
+
+		useChatEvent = config.getNode("events", "use-chat-event").getBoolean(true);
+		useCommandEvent = config.getNode("events", "use-command-event").getBoolean(true);
+		useConnectEvent = config.getNode("events", "use-connect-event").getBoolean(true);
+		useDisconnectEvent = config.getNode("events", "use-disconnect-event").getBoolean(true);
 
         LoggingChannelHandler.defaultConfig = config.getNode("logging", "default");
 
@@ -114,6 +124,10 @@ public class LoggingManager implements uk.co.notnull.proxydiscord.api.manager.Lo
     @SuppressWarnings("UnstableApiUsage")
 	@Subscribe(order = PostOrder.LAST)
 	public void onServerPostConnect(ServerPostConnectEvent event) {
+		if(!useConnectEvent) {
+			return;
+		}
+
 		Player player = event.getPlayer();
 		LogEntry joinLog = LogEntry.builder().type(LogType.JOIN).player(player).build();
 
@@ -129,6 +143,10 @@ public class LoggingManager implements uk.co.notnull.proxydiscord.api.manager.Lo
 
 	@Subscribe(order = PostOrder.LAST)
 	public void onDisconnect(DisconnectEvent event) {
+		if(!useDisconnectEvent) {
+			return;
+		}
+
 		Player player = event.getPlayer();
 		LogEntry leaveLog = LogEntry.builder().type(LogType.LEAVE).player(player).build();
 
@@ -137,7 +155,7 @@ public class LoggingManager implements uk.co.notnull.proxydiscord.api.manager.Lo
 
     @Subscribe(order = PostOrder.LAST)
     public void onPlayerChat(PlayerChatEvent event) {
-        if(!event.getResult().isAllowed()) {
+        if(!useChatEvent || !event.getResult().isAllowed()) {
             return;
         }
 
@@ -149,7 +167,7 @@ public class LoggingManager implements uk.co.notnull.proxydiscord.api.manager.Lo
 
     @Subscribe(order = PostOrder.LATE)
     public void onPlayerCommand(CommandExecuteEvent event) {
-		if(!event.getResult().isAllowed() || !(event.getCommandSource() instanceof Player)) {
+		if(!useCommandEvent || !event.getResult().isAllowed() || !(event.getCommandSource() instanceof Player)) {
             return;
         }
 
