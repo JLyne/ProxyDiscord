@@ -64,9 +64,6 @@ public class Link implements MessageCreateListener, SlashCommandCreateListener {
     public void onMessageCreate(MessageCreateEvent event) {
         String content = event.getMessageContent();
 
-        ProxyDiscord.inst().getDebugLogger().info("Here");
-        ProxyDiscord.inst().getDebugLogger().info(content);
-
         //Ignore random messages
         if(!event.getMessageAuthor().isRegularUser() || (!content.startsWith("!link") && !content.startsWith("/link"))) {
             return;
