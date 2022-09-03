@@ -24,7 +24,7 @@
     <orderEntry type="library" name="Gradle: org.javacord:javacord-api:3.5.0" level="project" />
     <orderEntry type="library" name="Gradle: cloud.commandframework:cloud-core:1.6.2" level="project" />
     <orderEntry type="library" name="Gradle: cloud.commandframework:cloud-brigadier:1.6.2" level="project" />
-    <orderEntry type="library" scope="PROVIDED" name="Gradle: org.checkerframework:checker-qual:3.21.0" level="project" />
+    <orderEntry type="library" name="Gradle: org.checkerframework:checker-qual:3.21.0" level="project" />
     <orderEntry type="library" name="Gradle: net.kyori:adventure-text-serializer-plain:4.10.1" level="project" />
     <orderEntry type="library" name="Gradle: net.kyori:adventure-api:4.10.1" level="project" />
     <orderEntry type="library" name="Gradle: dev.vankka:SimpleAST:2.2.8" level="project" />
@@ -49,9 +49,9 @@
     <orderEntry type="library" scope="RUNTIME" name="Gradle: com.fasterxml.jackson.core:jackson-core:2.12.6" level="project" />
     <orderEntry type="library" scope="RUNTIME" name="Gradle: org.bouncycastle:bcprov-jdk15on:1.60" level="project" />
     <orderEntry type="library" scope="RUNTIME" name="Gradle: io.vavr:vavr-match:0.10.4" level="project" />
+    <orderEntry type="library" scope="RUNTIME" name="Gradle: org.jetbrains:annotations:22.0.0" level="project" />
     <orderEntry type="library" scope="RUNTIME" name="Gradle: org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.4.10" level="project" />
     <orderEntry type="library" scope="RUNTIME" name="Gradle: org.jetbrains.kotlin:kotlin-stdlib-common:1.4.10" level="project" />
-    <orderEntry type="library" scope="RUNTIME" name="Gradle: org.jetbrains:annotations:13.0" level="project" />
   </component>
   <component name="TestModuleProperties" production-module="ProxyDiscord.main" />
 </module>

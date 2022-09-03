@@ -62,8 +62,8 @@ allprojects {
     version = '1.1-SNAPSHOT'
     description = 'Velocity Discord integration solution'
 
-    java.sourceCompatibility = JavaVersion.VERSION_11
-    java.targetCompatibility = JavaVersion.VERSION_11
+    java.sourceCompatibility = JavaVersion.VERSION_17
+    java.targetCompatibility = JavaVersion.VERSION_17
 
     compileJava {
         options.compilerArgs += ["-Xlint:all", "-Xlint:-processing"]
