@@ -49,16 +49,12 @@ public class Discord {
 
 	private final Logger logger;
 
-	private final boolean slashCommandsAllowed;
-
 	/**
 	 * Class
 	 * @param config configuration
 	 */
 	public Discord(ProxyDiscord plugin, ConfigurationNode config) {
 		this.logger = plugin.getLogger();
-
-		slashCommandsAllowed = config.getNode("bot", "slash-commands").getBoolean(false);
 
 		String token = config.getNode("bot", "token").getString(null);
 
@@ -74,10 +70,6 @@ public class Discord {
 					.setWaitForServersOnStartup(true)
 					.setShutdownHookRegistrationEnabled(false)
 					.login().join();
-
-			if(!slashCommandsAllowed) {
-				api.getGlobalSlashCommands().join().forEach(slashCommand -> slashCommand.deleteGlobal().join());
-			}
 
 			connected = true;
 		} catch (CompletionException e) {
@@ -157,10 +149,6 @@ public class Discord {
 	}
 
 	public SlashCommand createSlashCommand(SlashCommandBuilder slashCommand) {
-		if(!slashCommandsAllowed) {
-			return null;
-		}
-
 		return slashCommand.createGlobal(api).join();
 	}
 
