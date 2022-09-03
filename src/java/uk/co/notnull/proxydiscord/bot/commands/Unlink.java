@@ -28,7 +28,6 @@ import org.javacord.api.entity.channel.ServerTextChannel;
 import org.javacord.api.entity.message.embed.EmbedBuilder;
 import org.javacord.api.event.interaction.SlashCommandCreateEvent;
 import org.javacord.api.event.message.MessageCreateEvent;
-import org.javacord.api.interaction.SlashCommand;
 import org.javacord.api.interaction.SlashCommandInteraction;
 import org.javacord.api.listener.interaction.SlashCommandCreateListener;
 import org.javacord.api.listener.message.MessageCreateListener;
@@ -48,15 +47,11 @@ public class Unlink implements MessageCreateListener, SlashCommandCreateListener
 
     private ListenerManager<MessageCreateListener> messageListener;
     private ListenerManager<SlashCommandCreateListener> slashCommandListener;
-    private final SlashCommand slashCommand;
     private long linkingChannelId;
 
     public Unlink(LinkingManager linkingManager, ServerTextChannel linkingChannel) {
 	    this.linkingManager = linkingManager;
 	    this.userManager = ProxyDiscord.inst().getLuckpermsManager().getUserManager();
-
-        slashCommand = ProxyDiscord.inst().getDiscord()
-                .createSlashCommand(SlashCommand.with("unlink", Messages.get("slash-command-unlink-description")));
 
 	    setLinkingChannel(linkingChannel);
 	}
@@ -122,18 +117,11 @@ public class Unlink implements MessageCreateListener, SlashCommandCreateListener
     }
 
     public void setLinkingChannel(ServerTextChannel linkingChannel) {
-        if(messageListener != null) {
-            messageListener.remove();
-        }
+        remove();
 
-        if(slashCommandListener != null) {
-            slashCommandListener.remove();
-        }
-
-        linkingChannelId = linkingChannel.getId();
-        messageListener = linkingChannel.addMessageCreateListener(this);
-
-        if(slashCommand != null) {
+        if(linkingChannel != null) {
+            linkingChannelId = linkingChannel.getId();
+            messageListener = linkingChannel.addMessageCreateListener(this);
             slashCommandListener = linkingChannel.getApi().addSlashCommandCreateListener(this);
         }
     }

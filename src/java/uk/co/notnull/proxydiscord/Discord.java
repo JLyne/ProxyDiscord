@@ -31,12 +31,16 @@ import org.javacord.api.entity.activity.ActivityType;
 import org.javacord.api.entity.intent.Intent;
 import org.javacord.api.DiscordApiBuilder;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 
 import org.javacord.api.DiscordApi;
 import org.javacord.api.interaction.SlashCommand;
 import org.javacord.api.interaction.SlashCommandBuilder;
+import org.javacord.api.interaction.SlashCommandOption;
+import org.javacord.api.interaction.SlashCommandOptionType;
 import org.slf4j.Logger;
 
 public class Discord {
@@ -80,10 +84,11 @@ public class Discord {
 
         logger.info("Bot Invite Link: " + api.createBotInvite());
 
-		//Dont cache any messages by default
+		//Don't cache any messages by default
 		api.setMessageCacheSize(0, 0);
 
 		updateActivity(config);
+		createSlashCommands();
 
 		//Handle disconnects/reconnects
         api.addLostConnectionListener(event -> {
@@ -148,8 +153,22 @@ public class Discord {
 		}
 	}
 
-	public SlashCommand createSlashCommand(SlashCommandBuilder slashCommand) {
-		return slashCommand.createGlobal(api).join();
+	public void createSlashCommands() {
+		List<SlashCommandBuilder> commands = new ArrayList<>();
+
+		commands.add(
+				SlashCommand.with("link", Messages.get("slash-command-link-description"))
+						.addOption(SlashCommandOption.create(
+								SlashCommandOptionType.STRING, "token",
+								Messages.get("slash-command-token-description"),
+								true))
+						.setDefaultEnabledForEveryone());
+
+		commands.add(
+				SlashCommand.with("unlink", Messages.get("slash-command-unlink-description"))
+						.setDefaultDisabled());
+
+		api.bulkOverwriteGlobalApplicationCommands(commands);
 	}
 
 	public void reload(ConfigurationNode config) {
