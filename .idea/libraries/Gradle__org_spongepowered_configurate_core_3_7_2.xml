@@ -1,9 +1,11 @@
 <component name="libraryTable">
   <library name="Gradle: org.spongepowered:configurate-core:3.7.2">
     <CLASSES>
-      <root url="jar://$MAVEN_REPOSITORY$/org/spongepowered/configurate-core/3.7.2/configurate-core-3.7.2.jar!/" />
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.spongepowered/configurate-core/3.7.2/985223b13c7da64116a7e20203b2904023eeb1db/configurate-core-3.7.2.jar!/" />
     </CLASSES>
     <JAVADOC />
-    <SOURCES />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.spongepowered/configurate-core/3.7.2/400e1205278f6768e2cdb5a4e763de41eab09c33/configurate-core-3.7.2-sources.jar!/" />
+    </SOURCES>
   </library>
 </component>

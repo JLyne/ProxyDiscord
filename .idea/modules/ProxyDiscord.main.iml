@@ -15,6 +15,7 @@
     <exclude-output />
     <content url="file://$MODULE_DIR$/../../src/java">
       <sourceFolder url="file://$MODULE_DIR$/../../src/java" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/../../src/java/generated" isTestSource="false" generated="true" />
     </content>
     <content url="file://$MODULE_DIR$/../../src/resources">
       <sourceFolder url="file://$MODULE_DIR$/../../src/resources" type="java-resource" />
@@ -30,25 +31,28 @@
     <orderEntry type="library" name="Gradle: cloud.commandframework:cloud-annotations:1.6.2" level="project" />
     <orderEntry type="library" name="Gradle: dev.vankka:mcdiscordreserializer:4.3.0" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Gradle: com.moandjiezana.toml:toml4j:0.7.2" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Gradle: net.kyori:adventure-text-minimessage:4.10.1" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Gradle: net.kyori:adventure-text-serializer-legacy:4.10.1" level="project" />
+    <orderEntry type="library" name="Gradle: net.kyori:adventure-text-serializer-plain:4.10.1" level="project" />
+    <orderEntry type="library" name="Gradle: net.kyori:adventure-api:4.10.1" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Gradle: net.kyori:adventure-text-serializer-gson:4.10.1" level="project" />
-    <orderEntry type="library" scope="PROVIDED" name="Gradle: com.google.code.gson:gson:2.8.8" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Gradle: com.google.code.gson:gson:2.9.0" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Gradle: com.google.inject:guice:5.0.1" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Gradle: org.spongepowered:configurate-hocon:3.7.2" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Gradle: org.spongepowered:configurate-yaml:3.7.2" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Gradle: org.spongepowered:configurate-gson:3.7.2" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Gradle: com.google.guava:guava:30.1-jre" level="project" />
-    <orderEntry type="library" scope="PROVIDED" name="Gradle: net.kyori:adventure-text-minimessage:4.10.1" level="project" />
-    <orderEntry type="library" scope="PROVIDED" name="Gradle: net.kyori:adventure-text-serializer-legacy:4.10.1" level="project" />
-    <orderEntry type="library" scope="PROVIDED" name="Gradle: net.kyori:adventure-text-serializer-plain:4.10.1" level="project" />
-    <orderEntry type="library" name="Gradle: net.kyori:adventure-api:4.10.1" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Gradle: org.slf4j:slf4j-api:1.7.30" level="project" />
-    <orderEntry type="library" name="Gradle: org.checkerframework:checker-qual:3.21.0" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Gradle: org.checkerframework:checker-qual:3.21.0" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Gradle: com.velocitypowered:velocity-brigadier:1.0.0-SNAPSHOT" level="project" />
-    <orderEntry type="library" name="Gradle: org.javacord:javacord-api:3.4.0" level="project" />
+    <orderEntry type="library" name="Gradle: org.javacord:javacord-api:3.5.0" level="project" />
     <orderEntry type="library" name="Gradle: cloud.commandframework:cloud-core:1.6.2" level="project" />
     <orderEntry type="library" name="Gradle: cloud.commandframework:cloud-brigadier:1.6.2" level="project" />
     <orderEntry type="library" name="Gradle: dev.vankka:SimpleAST:2.2.8" level="project" />
-    <orderEntry type="library" name="Gradle: org.jetbrains:annotations:23.0.0" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Gradle: org.jetbrains:annotations:23.0.0" level="project" />
+    <orderEntry type="library" name="Gradle: net.kyori:adventure-key:4.10.1" level="project" />
+    <orderEntry type="library" name="Gradle: net.kyori:examination-string:1.3.0" level="project" />
+    <orderEntry type="library" name="Gradle: net.kyori:examination-api:1.3.0" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Gradle: javax.inject:javax.inject:1" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Gradle: aopalliance:aopalliance:1.0" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Gradle: org.spongepowered:configurate-core:3.7.2" level="project" />
@@ -59,24 +63,25 @@
     <orderEntry type="library" scope="PROVIDED" name="Gradle: com.google.j2objc:j2objc-annotations:1.3" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Gradle: com.google.guava:failureaccess:1.0.1" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Gradle: com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava" level="project" />
-    <orderEntry type="library" name="Gradle: net.kyori:adventure-key:4.10.1" level="project" />
-    <orderEntry type="library" name="Gradle: net.kyori:examination-string:1.3.0" level="project" />
-    <orderEntry type="library" name="Gradle: net.kyori:examination-api:1.3.0" level="project" />
     <orderEntry type="library" name="Gradle: cloud.commandframework:cloud-services:1.6.2" level="project" />
     <orderEntry type="library" name="Gradle: io.leangen.geantyref:geantyref:1.3.13" level="project" />
-    <orderEntry type="library" scope="RUNTIME" name="Gradle: org.javacord:javacord-core:3.4.0" level="project" />
-    <orderEntry type="library" scope="RUNTIME" name="Gradle: net.kyori:adventure-text-serializer-plain:4.9.3" level="project" />
-    <orderEntry type="library" scope="RUNTIME" name="Gradle: com.squareup.okhttp3:logging-interceptor:3.9.1" level="project" />
-    <orderEntry type="library" scope="RUNTIME" name="Gradle: com.squareup.okhttp3:okhttp:3.9.1" level="project" />
-    <orderEntry type="library" scope="RUNTIME" name="Gradle: com.fasterxml.jackson.core:jackson-databind:2.9.3" level="project" />
-    <orderEntry type="library" scope="RUNTIME" name="Gradle: com.neovisionaries:nv-websocket-client:2.6" level="project" />
-    <orderEntry type="library" scope="RUNTIME" name="Gradle: com.codahale:xsalsa20poly1305:0.10.1" level="project" />
-    <orderEntry type="library" scope="RUNTIME" name="Gradle: org.apache.logging.log4j:log4j-api:2.17.1" level="project" />
-    <orderEntry type="library" scope="RUNTIME" name="Gradle: io.vavr:vavr:0.10.1" level="project" />
-    <orderEntry type="library" scope="RUNTIME" name="Gradle: com.squareup.okio:okio:1.14.0" level="project" />
-    <orderEntry type="library" scope="RUNTIME" name="Gradle: com.fasterxml.jackson.core:jackson-annotations:2.9.0" level="project" />
-    <orderEntry type="library" scope="RUNTIME" name="Gradle: com.fasterxml.jackson.core:jackson-core:2.9.3" level="project" />
-    <orderEntry type="library" scope="RUNTIME" name="Gradle: org.bouncycastle:bcprov-jdk15on:1.59" level="project" />
-    <orderEntry type="library" scope="RUNTIME" name="Gradle: io.vavr:vavr-match:0.10.1" level="project" />
+    <orderEntry type="library" scope="RUNTIME" name="Gradle: org.javacord:javacord-core:3.5.0" level="project" />
+    <orderEntry type="library" scope="RUNTIME" name="Gradle: com.squareup.okhttp3:logging-interceptor:4.9.3" level="project" />
+    <orderEntry type="library" scope="RUNTIME" name="Gradle: com.squareup.okhttp3:okhttp:4.9.3" level="project" />
+    <orderEntry type="library" scope="RUNTIME" name="Gradle: com.fasterxml.jackson.core:jackson-databind:2.12.6" level="project" />
+    <orderEntry type="library" scope="RUNTIME" name="Gradle: com.neovisionaries:nv-websocket-client:2.14" level="project" />
+    <orderEntry type="library" scope="RUNTIME" name="Gradle: com.codahale:xsalsa20poly1305:0.11.0" level="project" />
+    <orderEntry type="library" scope="RUNTIME" name="Gradle: org.apache.logging.log4j:log4j-api:2.17.2" level="project" />
+    <orderEntry type="library" scope="RUNTIME" name="Gradle: io.vavr:vavr:0.10.4" level="project" />
+    <orderEntry type="library" scope="RUNTIME" name="Gradle: org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.4.10" level="project" />
+    <orderEntry type="library" scope="RUNTIME" name="Gradle: com.squareup.okio:okio:2.8.0" level="project" />
+    <orderEntry type="library" scope="RUNTIME" name="Gradle: org.jetbrains.kotlin:kotlin-stdlib:1.4.10" level="project" />
+    <orderEntry type="library" scope="RUNTIME" name="Gradle: com.fasterxml.jackson.core:jackson-annotations:2.12.6" level="project" />
+    <orderEntry type="library" scope="RUNTIME" name="Gradle: com.fasterxml.jackson.core:jackson-core:2.12.6" level="project" />
+    <orderEntry type="library" scope="RUNTIME" name="Gradle: org.bouncycastle:bcprov-jdk15on:1.60" level="project" />
+    <orderEntry type="library" scope="RUNTIME" name="Gradle: io.vavr:vavr-match:0.10.4" level="project" />
+    <orderEntry type="library" scope="RUNTIME" name="Gradle: org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.4.10" level="project" />
+    <orderEntry type="library" scope="RUNTIME" name="Gradle: org.jetbrains.kotlin:kotlin-stdlib-common:1.4.10" level="project" />
+    <orderEntry type="library" scope="RUNTIME" name="Gradle: org.jetbrains:annotations:13.0" level="project" />
   </component>
 </module>

@@ -1,9 +1,11 @@
 <component name="libraryTable">
   <library name="Gradle: org.checkerframework:checker-qual:3.6.1">
     <CLASSES>
-      <root url="jar://$MAVEN_REPOSITORY$/org/checkerframework/checker-qual/3.6.1/checker-qual-3.6.1.jar!/" />
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.checkerframework/checker-qual/3.6.1/52ca62b41f68584c4d2de39d6176758e9383d0b6/checker-qual-3.6.1.jar!/" />
     </CLASSES>
     <JAVADOC />
-    <SOURCES />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.checkerframework/checker-qual/3.6.1/88446eb206380965b2e859de651a034cb62c5d68/checker-qual-3.6.1-sources.jar!/" />
+    </SOURCES>
   </library>
 </component>
