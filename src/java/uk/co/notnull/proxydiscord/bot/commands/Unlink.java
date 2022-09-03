@@ -84,6 +84,10 @@ public class Unlink implements MessageCreateListener, SlashCommandCreateListener
     public void onSlashCommandCreate(SlashCommandCreateEvent event) {
         SlashCommandInteraction interaction = event.getSlashCommandInteraction();
 
+        if(!interaction.getCommandName().equals("unlink")) {
+            return;
+        }
+
         long userId = interaction.getUser().getId();
         UUID linked = linkingManager.unlink(userId);
 

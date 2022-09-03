@@ -100,6 +100,10 @@ public class Link implements MessageCreateListener, SlashCommandCreateListener {
         SlashCommandInteraction interaction = event.getSlashCommandInteraction();
         LinkResult result;
 
+        if(!interaction.getCommandName().equals("link")) {
+            return;
+        }
+
         try {
             String token = interaction.getOptionStringValueByIndex(0).orElse("").toUpperCase();
             result = linkingManager.completeLink(token, interaction.getUser().getId());
