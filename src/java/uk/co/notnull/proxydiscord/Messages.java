@@ -147,27 +147,23 @@ public class Messages {
         if(messageContent.containsKey("fields")) {
             List<? extends ConfigurationNode> fields = messageContent.get("fields").getChildrenList();
 
-            for(int i = 0; i < fields.size(); i += 2) {
-                String name = fields.get(i).getString();
-                String value = "";
+            for (ConfigurationNode field : fields) {
+                String name = field.getNode("name").getString(null);
+                String value = field.getNode("value").getString(null);
 
-                if(i + 1 < fields.size()) {
-                    value = fields.get(i + 1).getString();
-                }
-
-                if(name != null) {
+                if (name != null) {
                     for (Map.Entry<String, String> entry : replacements.entrySet()) {
                         name = name.replace("<" + entry.getKey() + ">", entry.getValue());
                     }
                 }
 
-                if(value != null) {
+                if (value != null) {
                     for (Map.Entry<String, String> entry : replacements.entrySet()) {
                         value = value.replace("<" + entry.getKey() + ">", entry.getValue());
                     }
                 }
 
-                embed.addField(name, value);
+                embed.addField(name, value, field.getNode("inline").getBoolean(false));
             }
         }
 

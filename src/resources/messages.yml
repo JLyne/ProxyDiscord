@@ -99,36 +99,36 @@ embed-link-no-token:
   description: |-
     You didn't provide a token in your message.
   fields:
-    - |-
-      What's my token?
-    - |-
-      You can get your token by connecting to the server, and following the instructions.
-    - 'Will my Minecraft username work instead?'
-    - |-
-      No. Only tokens generated via the above method will work.
-      This is to help prevent typos, and prove that you have access to the account you are trying to link.
-    - 'Still Stuck?'
-    - |-
-      If you still need help, ask a mod.
+    - name: |-
+        What's my token?
+      value: |-
+        You can get your token by connecting to the server, and following the instructions.
+    - name: Will my Minecraft username work instead?
+      value: |-
+        No. Only tokens generated via the above method will work.
+        This is to help prevent typos, and prove that you have access to the account you are trying to link.
+    - name: Still Stuck?
+      value: |-
+        If you still need help, ask a mod.
   thumbnail: 'https://cdn.discordapp.com/attachments/457984159458000908/608397931678007317/error_3.png'
   colour: '#d52a18'
 
 embed-link-invalid-token:
-  title: 'Invalid token'
+  title: Invalid token
   description: |-
     The token you provided is invalid, please double check it.
   fields:
-    - |-
-      What's my token?
-    - |-
-      You can get your token by connecting to the server, and following the instructions.
-    - 'Will my Minecraft username work instead?'
-    - |-
-      No. Only tokens generated via the above method will work.
-      This is to help prevent typos, and prove that you have access to the account you are trying to link.
-    - 'Still Stuck?'
-    - |-
-      If you still need help, ask a mod.
+    - name: |-
+        What's my token?
+      value: |-
+        You can get your token by connecting to the server, and following the instructions.
+    - name: Will my Minecraft username work instead?
+      value: |-
+        No. Only tokens generated via the above method will work.
+        This is to help prevent typos, and prove that you have access to the account you are trying to link.
+    - name: Still Stuck?
+      value: |-
+        If you still need help, ask a mod.
   thumbnail: 'https://cdn.discordapp.com/attachments/457984159458000908/608397931678007317/error_3.png'
   colour: '#d52a18'
 
@@ -150,14 +150,14 @@ embed-link-success-not-verified:
   description: |-
     Your accounts <discord> and **<minecraft>** have been linked, but you do not have any of the roles required to play on the server (<role>).
   fields:
-    - 'Things to try'
-    - |-
-      **1)** Thing 1
-      **2)** Thing 2
-    - 'Still Stuck?'
-    - |-
-      Please ensure you have **tried the above suggestions** before asking for help, they are likely to solve your problem.
-      If you have tried the above and still need help, ask a mod for assistance.
+    - name: Things to try
+      value: |-
+        **1)** Thing 1
+        **2)** Thing 2
+    - name: Still Stuck?
+      value: |-
+        Please ensure you have **tried the above suggestions** before asking for help, they are likely to solve your problem.
+        If you have tried the above and still need help, ask a mod for assistance.
   thumbnail: 'https://cdn.discordapp.com/attachments/457984159458000908/608397930151542785/alert_3.png'
   colour: '#ffac22'
 
