@@ -83,11 +83,11 @@ public class Info implements SlashCommandCreateListener, UserContextMenuCommandL
 
 			case "player" -> //noinspection OptionalGetWithoutIsPresent
 					handleMinecraftInfoRequest(interaction.getArguments().get(0).getStringValue().get(), event);
-
-			case "server" -> event.getInteraction()
-					.createImmediateResponder()
-					.setContent("TODO")
-					.respond();
+//
+//			case "server" -> event.getInteraction()
+//					.createImmediateResponder()
+//					.setContent("TODO")
+//					.respond();
 		}
     }
 

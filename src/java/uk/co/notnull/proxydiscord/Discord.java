@@ -167,11 +167,11 @@ public class Discord {
 						SlashCommandOption.create(SlashCommandOptionType.STRING, "username",
 												  "The player's Minecraft username", true))));
 
-		infoSubcommands.add(SlashCommandOption.createWithOptions(
-				SlashCommandOptionType.SUB_COMMAND, "server", "Returns information for a server",
-				Collections.singletonList(
-						SlashCommandOption.create(SlashCommandOptionType.STRING, "servername",
-												  "The server name", true))));
+//		infoSubcommands.add(SlashCommandOption.createWithOptions(
+//				SlashCommandOptionType.SUB_COMMAND, "server", "Returns information for a server",
+//				Collections.singletonList(
+//						SlashCommandOption.createStringOption("servername", "The server name",
+//															  true, true))));
 
 		infoSubcommands.add(SlashCommandOption.createWithOptions(
 				SlashCommandOptionType.SUB_COMMAND, "discord",
