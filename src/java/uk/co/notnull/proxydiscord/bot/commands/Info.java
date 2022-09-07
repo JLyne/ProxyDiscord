@@ -104,14 +104,19 @@ public class Info implements SlashCommandCreateListener, UserContextMenuCommandL
 		}
 	}
 
-	private void handleMinecraftInfoRequest(String username, ApplicationCommandEvent event) {
-		userManager.lookupUniqueId(username).thenAccept(uuid -> {
-			if(uuid == null) {
-				respondWithEmbed(event, Messages.getEmbed("embed-info-player-not-found"));
-			} else {
-				respondWithPlayerInfo(event, uuid, linkingManager.getLinked(uuid));
-			}
-		});
+	private void handleMinecraftInfoRequest(String usernameOrUUID, ApplicationCommandEvent event) {
+		if(Util.isValidUUID(usernameOrUUID)) {
+			UUID uuid = UUID.fromString(usernameOrUUID);
+			respondWithPlayerInfo(event, uuid, linkingManager.getLinked(uuid));
+		} else {
+			userManager.lookupUniqueId(usernameOrUUID).thenAccept(uuid -> {
+				if(uuid == null) {
+					respondWithEmbed(event, Messages.getEmbed("embed-info-player-not-found"));
+				} else {
+					respondWithPlayerInfo(event, uuid, linkingManager.getLinked(uuid));
+				}
+			});
+		}
 	}
 
 	private void respondWithPlayerInfo(@NotNull ApplicationCommandEvent event, @NotNull UUID uuid, @Nullable Long discordId) {

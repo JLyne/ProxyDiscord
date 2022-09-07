@@ -66,6 +66,9 @@ public class Util {
 	private static final Pattern emotePattern = Pattern.compile(":([\\w\\\\]{2,}):");
 	private static final Pattern sectionPattern = Pattern.compile("\\u00A7[\\da-gA-Gk-oK-OrR]");
 
+	private final static Pattern validUUIDPattern =
+			Pattern.compile("^[{]?[0-9a-fA-F]{8}-([0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}[}]?$");
+
 	/**
 	 * Component flattener which escapes markdown syntax present in any components that aren't clickable links
 	 */
@@ -306,5 +309,9 @@ public class Util {
 	public static Component prepareDiscordMessage(String message) {
 		return markdownSerializer.serialize(sectionPattern.matcher(message).replaceAll(""))
 				.replaceText(emoteReplacement);
+	}
+
+	public static boolean isValidUUID(String uuid) {
+		return validUUIDPattern.asMatchPredicate().test(uuid);
 	}
 }
