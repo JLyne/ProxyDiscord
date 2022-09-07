@@ -115,25 +115,13 @@ public class Discord {
 	private void updateActivity(ConfigurationNode config) {
 		String activity = config.getNode("bot", "activity").getString(null);
 		String activityType = config.getNode("bot", "activity-type").getString("");
-		ActivityType type = ActivityType.PLAYING;
-
-		switch (activityType.toLowerCase()) {
-			case "streaming":
-				type = ActivityType.STREAMING;
-				break;
-
-			case "listening":
-				type = ActivityType.LISTENING;
-				break;
-
-			case "watching":
-				type = ActivityType.WATCHING;
-				break;
-
-			case "competing":
-				type = ActivityType.COMPETING;
-				break;
-		}
+		ActivityType type = switch (activityType.toLowerCase()) {
+			case "streaming" -> ActivityType.STREAMING;
+			case "listening" -> ActivityType.LISTENING;
+			case "watching" -> ActivityType.WATCHING;
+			case "competing" -> ActivityType.COMPETING;
+			default -> ActivityType.PLAYING;
+		};
 
 		if(activity != null && !activity.isEmpty()) {
         	api.updateActivity(type, activity);
