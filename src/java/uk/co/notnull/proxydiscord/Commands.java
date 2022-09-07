@@ -266,9 +266,21 @@ public class Commands {
     }
 
     @CommandMethod("discord reload")
-    @CommandPermission("discord.reload")
+    @CommandPermission("discord.admin")
     public void reload(CommandSource sender) {
         plugin.reload();
         Messages.sendComponent(sender, "reload-success");
+    }
+
+    @CommandMethod("discord refreshcommands")
+    @CommandPermission("discord.admin")
+    public void recreateCommands(CommandSource sender) {
+        plugin.getDiscord().createSlashCommands(true)
+                .thenAccept((unused) -> Messages.sendComponent(sender, "refresh-commands-success"))
+                .exceptionally(e -> {
+                    e.printStackTrace();
+                    Messages.sendComponent(sender, "refresh-commands-error");
+                    return null;
+                });
     }
 }

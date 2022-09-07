@@ -39,11 +39,7 @@ import java.util.concurrent.CompletionException;
 
 import org.javacord.api.DiscordApi;
 import org.javacord.api.entity.permission.PermissionType;
-import org.javacord.api.interaction.ApplicationCommandBuilder;
-import org.javacord.api.interaction.SlashCommand;
-import org.javacord.api.interaction.SlashCommandOption;
-import org.javacord.api.interaction.SlashCommandOptionType;
-import org.javacord.api.interaction.UserContextMenu;
+import org.javacord.api.interaction.*;
 import org.slf4j.Logger;
 
 public class Discord {
@@ -91,7 +87,7 @@ public class Discord {
 		api.setMessageCacheSize(0, 0);
 
 		updateActivity(config);
-		createSlashCommands();
+		createSlashCommands(false).join();
 
 		//Handle disconnects/reconnects
         api.addLostConnectionListener(event -> {
@@ -144,7 +140,23 @@ public class Discord {
 		}
 	}
 
-	public void createSlashCommands() {
+	public CompletableFuture<Void> createSlashCommands(boolean clean) {
+		if(clean) {
+			return api.getGlobalSlashCommands().thenCompose(commands -> {
+				List<CompletableFuture<Void>> futures = commands.stream()
+						.map(ApplicationCommand::deleteGlobal).toList();
+
+				return CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).exceptionally(e -> {
+					if(e != null) {
+						logger.warn("An error occurred while removing slash command. Changes may not be fully applied.");
+						e.printStackTrace();
+					}
+
+					return null;
+				}).thenCompose((unused) -> createSlashCommands(false));
+			});
+		}
+
 		List<ApplicationCommandBuilder<?, ?, ?>> commands = new ArrayList<>();
 
 		commands.add(
@@ -192,7 +204,11 @@ public class Discord {
 						.with(Messages.get("context-menu-info-label"), "")
 						.setDefaultEnabledForPermissions(PermissionType.MANAGE_ROLES));
 
-		api.bulkOverwriteGlobalApplicationCommands(commands);
+		return api.bulkOverwriteGlobalApplicationCommands(commands).thenAccept((result) -> {}).exceptionally(e -> {
+			logger.warn("An error occurred while registering slash commands. Commands may not function correctly.");
+			e.printStackTrace();
+			return null;
+		});
 	}
 
 	public void reload(ConfigurationNode config) {
@@ -202,6 +218,9 @@ public class Discord {
 
 		if(connected) {
 			updateActivity(config);
+			createSlashCommands(false);
 		}
+
+		logger.warn("If you have made changes to application command messages, you may also need to run /discord refreshcommands, or restart the proxy");
 	}
 }

@@ -84,7 +84,12 @@ save-success: |-
   <green>Linked accounts have been saved.
 
 reload-success: |-
-  <green>Configuration has been reloaded
+  <green>Configuration has been reloaded.
+  <yellow>If you have made changes to application command messages, you may also need to run /discord refreshcommands, or restart the proxy.
+
+refresh-commands-success: '<green>Bot application commands have been recreated'
+
+refresh-commands-error: '<red>An error occurred while recreating commands. Check the console for details.'
 
 embed-link-success:
   title: 'Accounts linked successfully'

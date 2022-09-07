@@ -363,6 +363,8 @@ public class ProxyDiscord implements uk.co.notnull.proxydiscord.api.ProxyDiscord
 	}
 
 	public void reload() {
+		logger.info("Reloading configuration...");
+
 		if(loadConfig()) {
 			debugLogger.reload(configuration);
 			luckPermsManager.reload(configuration);
