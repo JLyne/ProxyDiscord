@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="Gradle: cloud.commandframework:cloud-services:1.7.1">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/cloud.commandframework/cloud-services/1.7.1/b622a3ce7cfb72ce29fbae1961550299c3c57090/cloud-services-1.7.1.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/cloud.commandframework/cloud-services/1.7.1/f89b7ce18a7ab9fe68527ea5c59558b60100e7b2/cloud-services-1.7.1-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

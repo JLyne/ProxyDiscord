@@ -209,14 +209,14 @@ public class ProxyDiscord implements uk.co.notnull.proxydiscord.api.ProxyDiscord
             .withDecorator(message -> message)
             .apply(manager, p -> p);
 
-        manager.getParserRegistry().registerSuggestionProvider("players", (
+        manager.parserRegistry().registerSuggestionProvider("players", (
         		CommandContext<CommandSource> commandContext,
                 String input
         ) -> commandContext.<ProxyServer>get("ProxyServer").getAllPlayers()
 				.stream().map(Player::getUsername).collect(Collectors.toList()));
 
         //Custom LongParser for now as the built in one doesn't work properly
-        manager.getParserRegistry().registerParserSupplier(TypeToken.get(Long.class), options ->
+        manager.parserRegistry().registerParserSupplier(TypeToken.get(Long.class), options ->
                 new LongArgument.LongParser<>(
                         (long) options.get(StandardParameters.RANGE_MIN, Long.MIN_VALUE),
                         (long) options.get(StandardParameters.RANGE_MAX, Long.MAX_VALUE)

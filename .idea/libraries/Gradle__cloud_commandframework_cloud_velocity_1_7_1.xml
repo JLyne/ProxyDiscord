@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="Gradle: cloud.commandframework:cloud-velocity:1.7.1">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/cloud.commandframework/cloud-velocity/1.7.1/9090f51700a85e2db0b4950dd768b82ec3458bfc/cloud-velocity-1.7.1.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/cloud.commandframework/cloud-velocity/1.7.1/c649ce2fa4c04198d5202a4f89af3e047720d3d1/cloud-velocity-1.7.1-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>
