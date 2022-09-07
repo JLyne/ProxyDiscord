@@ -45,9 +45,10 @@ public class PlayerInfo {
 		this.username = username;
 	}
 
-	public record QueueInfo(@NotNull RegisteredServer server, int position) {
+	public record QueueInfo(@NotNull RegisteredServer server, String position) {
 		public QueueInfo {
 			java.util.Objects.requireNonNull(server);
+			java.util.Objects.requireNonNull(position);
 		}
 	}
 

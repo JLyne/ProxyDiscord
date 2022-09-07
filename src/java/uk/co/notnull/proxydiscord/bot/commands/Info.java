@@ -230,7 +230,7 @@ public class Info implements SlashCommandCreateListener, UserContextMenuCommandL
 			if(info.getQueueInfo() != null) {
 				status = Messages.get("info-status-queueing", Map.of(
 						"<server>", info.getQueueInfo().server().getServerInfo().getName(),
-						"<position>", String.valueOf(info.getQueueInfo().position())));
+						"<position>", info.getQueueInfo().position()));
 			} else if (info.getCurrentServer() != null) {
 				status = Messages.get("info-status-online-server", Collections.singletonMap(
 						"<server>", info.getCurrentServer().getServerInfo().getName()));
