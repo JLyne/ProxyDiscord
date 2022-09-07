@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="Gradle: cloud.commandframework:cloud-core:1.7.1">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/cloud.commandframework/cloud-core/1.7.1/d98654c6af97f88397d69745db6ae53baf131ec1/cloud-core-1.7.1.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/cloud.commandframework/cloud-core/1.7.1/1c4e3cd4dd2b74f353f8f2ccff3467c86235eec5/cloud-core-1.7.1-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="Gradle: cloud.commandframework:cloud-brigadier:1.7.1">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/cloud.commandframework/cloud-brigadier/1.7.1/113237bf2c3b29715dedff91cabac45cec837303/cloud-brigadier-1.7.1.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/cloud.commandframework/cloud-brigadier/1.7.1/bd1fe659f66ecdf4933f331af114ab009e62c649/cloud-brigadier-1.7.1-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>
