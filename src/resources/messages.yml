@@ -231,6 +231,7 @@ info-status-offline: ':red_circle: **Offline**'
 info-status-offline-last-seen: ':red_circle: **Offline**, last seen <last_seen>'
 info-status-online: ':green_circle: **Online**'
 info-status-online-server: ':green_circle: **Online**, playing on <server>'
+info-status-queueing: ':yellow_circle: **Online**, queueing for <server> (<position>)'
 
 info-discord-not-linked: 'Not linked'
 info-discord-linked: 'Linked to <discord>'
