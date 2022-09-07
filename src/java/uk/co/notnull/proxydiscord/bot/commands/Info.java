@@ -55,7 +55,7 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
-public class Info implements SlashCommandCreateListener, UserContextMenuCommandListener {
+public class Info implements SlashCommandCreateListener, UserContextMenuCommandListener, AutocompleteCreateListener {
 	private final ProxyDiscord plugin;
 	private final UserManager userManager;
 	private final LinkingManager linkingManager;
@@ -95,6 +95,43 @@ public class Info implements SlashCommandCreateListener, UserContextMenuCommandL
 		handleDiscordInfoRequest(event.getUserContextMenuInteraction().getTarget(), event);
 	}
 
+	public void onAutocompleteCreate(AutocompleteCreateEvent event) {
+		AutocompleteInteraction interaction = event.getAutocompleteInteraction();
+
+		if(!interaction.getCommandName().equals("info")) {
+			return;
+		}
+
+		String subcommand = interaction.getOptions().get(0).getName();
+
+		switch (subcommand) {
+			case "player" -> {
+				String query = interaction.getFocusedOption().getStringValue().orElse("").toLowerCase();
+				List<SlashCommandOptionChoice> choices = plugin.getProxy().getAllPlayers().stream()
+						.filter(player -> player.getUsername().toLowerCase().startsWith(query))
+						.map(player -> SlashCommandOptionChoice.create(player.getUsername(),
+																	   player.getUniqueId().toString()))
+						.toList();
+				interaction.respondWithChoices(choices);
+			}
+//
+//			case "server" -> {
+//				String query = interaction.getFocusedOption().getStringValue().orElse("").toLowerCase();
+//				List<SlashCommandOptionChoice> choices = plugin.getProxy().getAllServers().stream()
+//						.filter(server -> server.getServerInfo().getName().toLowerCase().startsWith(query))
+//						.map(server -> SlashCommandOptionChoice.create(server.getServerInfo().getName(),
+//																	   server.getServerInfo().getName()))
+//						.toList();
+//				interaction.respondWithChoices(choices);
+//			}
+		}
+	}
+
+	/**
+	 * Handles a command invocation requesting information for the given Discord user
+	 * @param user - The user to return information for
+	 * @param event - The command event to respond to
+	 */
 	private void handleDiscordInfoRequest(User user, ApplicationCommandEvent event) {
 		UUID uuid = linkingManager.getLinked(user.getId());
 
