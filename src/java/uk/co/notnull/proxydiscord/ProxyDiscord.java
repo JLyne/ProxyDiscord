@@ -46,6 +46,7 @@ import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.proxy.messages.MinecraftChannelIdentifier;
 import io.leangen.geantyref.TypeToken;
 import uk.co.notnull.proxydiscord.api.emote.EmoteProvider;
+import uk.co.notnull.proxydiscord.bot.commands.Info;
 import uk.co.notnull.proxydiscord.bot.listeners.Reconnect;
 import uk.co.notnull.proxydiscord.bot.listeners.ServerMemberBan;
 import uk.co.notnull.proxydiscord.bot.listeners.ServerMemberJoin;
@@ -247,6 +248,7 @@ public class ProxyDiscord implements uk.co.notnull.proxydiscord.api.ProxyDiscord
 		discord.getApi().addServerMemberJoinListener(new ServerMemberJoin(this));
 		discord.getApi().addServerMemberLeaveListener(new ServerMemberLeave(this));
 		discord.getApi().addReconnectListener(new Reconnect(this));
+		discord.getApi().addListener(new Info(this));
 	}
 
 	private void loadResource(String resource) {

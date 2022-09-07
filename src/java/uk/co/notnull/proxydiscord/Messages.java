@@ -30,6 +30,8 @@ import net.kyori.adventure.text.ComponentLike;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import ninja.leaping.configurate.ConfigurationNode;
+import org.javacord.api.entity.message.component.ActionRowBuilder;
+import org.javacord.api.entity.message.component.Button;
 import org.javacord.api.entity.message.embed.EmbedBuilder;
 import org.javacord.api.entity.permission.Role;
 import org.jetbrains.annotations.NotNull;
@@ -141,7 +143,15 @@ public class Messages {
         }
 
         if(messageContent.containsKey("thumbnail")) {
-            embed.setThumbnail(messageContent.get("thumbnail").getString());
+            String thumbnail = messageContent.get("thumbnail").getString(null);
+
+            if(thumbnail != null) {
+                for (Map.Entry<String, String> entry : replacements.entrySet()) {
+                    thumbnail = thumbnail.replace("<" + entry.getKey() + ">", entry.getValue());
+                }
+
+                embed.setThumbnail(thumbnail);
+            }
         }
 
         if(messageContent.containsKey("fields")) {
@@ -180,6 +190,46 @@ public class Messages {
         }
 
         return embed;
+    }
+
+    public static @NotNull ActionRowBuilder getMessageActionRow(String id) {
+        return getMessageActionRow(id, Collections.emptyMap());
+    }
+
+    public static @NotNull ActionRowBuilder getMessageActionRow(String id, Map<String, String> replacements) {
+        if(messages == null) {
+            return new ActionRowBuilder();
+        }
+
+        ConfigurationNode node = messages.getNode(id);
+
+        if(node.isVirtual()) {
+            return new ActionRowBuilder();
+        }
+
+        List<? extends ConfigurationNode> components = node.getChildrenList();
+        ActionRowBuilder row = new ActionRowBuilder();
+
+        for (ConfigurationNode component : components) {
+            String label = component.getNode("label").getString(null);
+            String url = component.getNode("url").getString(null);
+
+            if (label != null) {
+                for (Map.Entry<String, String> entry : replacements.entrySet()) {
+                    label = label.replace("<" + entry.getKey() + ">", entry.getValue());
+                }
+            }
+
+            if (url != null) {
+                for (Map.Entry<String, String> entry : replacements.entrySet()) {
+                    url = url.replace("<" + entry.getKey() + ">", entry.getValue());
+                }
+            }
+
+            row.addComponents(Button.link(url, label));
+        }
+
+        return row;
     }
 
     public static void sendComponent(CommandSource recipient, String messageId) {

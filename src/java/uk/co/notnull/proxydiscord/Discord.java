@@ -32,15 +32,18 @@ import org.javacord.api.entity.intent.Intent;
 import org.javacord.api.DiscordApiBuilder;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 
 import org.javacord.api.DiscordApi;
+import org.javacord.api.entity.permission.PermissionType;
+import org.javacord.api.interaction.ApplicationCommandBuilder;
 import org.javacord.api.interaction.SlashCommand;
-import org.javacord.api.interaction.SlashCommandBuilder;
 import org.javacord.api.interaction.SlashCommandOption;
 import org.javacord.api.interaction.SlashCommandOptionType;
+import org.javacord.api.interaction.UserContextMenu;
 import org.slf4j.Logger;
 
 public class Discord {
@@ -154,7 +157,7 @@ public class Discord {
 	}
 
 	public void createSlashCommands() {
-		List<SlashCommandBuilder> commands = new ArrayList<>();
+		List<ApplicationCommandBuilder<?, ?, ?>> commands = new ArrayList<>();
 
 		commands.add(
 				SlashCommand.with("link", Messages.get("slash-command-link-description"))
@@ -167,6 +170,40 @@ public class Discord {
 		commands.add(
 				SlashCommand.with("unlink", Messages.get("slash-command-unlink-description"))
 						.setDefaultDisabled());
+
+		List<SlashCommandOption> infoSubcommands = new ArrayList<>();
+
+		infoSubcommands.add(SlashCommandOption.createWithOptions(
+				SlashCommandOptionType.SUB_COMMAND, "player", "Returns information for a Minecraft account",
+				Collections.singletonList(
+						SlashCommandOption.create(SlashCommandOptionType.STRING, "username",
+												  "The player's Minecraft username", true))));
+
+		infoSubcommands.add(SlashCommandOption.createWithOptions(
+				SlashCommandOptionType.SUB_COMMAND, "server", "Returns information for a server",
+				Collections.singletonList(
+						SlashCommandOption.create(SlashCommandOptionType.STRING, "servername",
+												  "The server name", true))));
+
+		infoSubcommands.add(SlashCommandOption.createWithOptions(
+				SlashCommandOptionType.SUB_COMMAND, "discord",
+				"Returns information for a Discord user's linked Minecraft account",
+				Collections.singletonList(
+						SlashCommandOption.create(SlashCommandOptionType.USER, "user",
+												  "The user", true))));
+
+		infoSubcommands.add(SlashCommandOption.createWithOptions(
+				SlashCommandOptionType.SUB_COMMAND, "summary",
+				"General information"));
+
+        commands.add(
+				SlashCommand.with("info", "Get information on a player or server", infoSubcommands)
+						.setDefaultEnabledForPermissions(PermissionType.MANAGE_ROLES));
+
+		commands.add(
+				UserContextMenu
+						.with("Minecraft Info", "")
+						.setDefaultEnabledForPermissions(PermissionType.MANAGE_ROLES));
 
 		api.bulkOverwriteGlobalApplicationCommands(commands);
 	}

@@ -191,6 +191,72 @@ embed-unlink-error:
   thumbnail: 'https://cdn.discordapp.com/attachments/457984159458000908/608397934773665852/misc_3.png'
   colour: '#335bc6'
 
+embed-info-error:
+  title: 'An error occurred'
+  description: |-
+    An unexpected error occurred while handling this command.
+    Please try again later. If problems persist, ask a mod for help.
+  thumbnail: 'https://cdn.discordapp.com/attachments/457984159458000908/608397931678007317/error_3.png'
+  colour: '#335bc6'
+
+embed-info-player-not-found:
+  title: 'Player not found'
+  description: 'This player has never joined the server.'
+  colour: '#d52a18'
+
+embed-info-discord-not-linked:
+  title: 'No linked account'
+  description: <discord> has not linked a Minecraft account
+  colour: '#d52a18'
+
+embed-info-discord:
+  title: 'Info for <minecraft>'
+  description: '<online_status>'
+  fields:
+    - name: 'Username'
+      value: '<minecraft>'
+      inline: true
+    - name: 'Discord'
+      value:  '<discord_status>'
+      inline: true
+    - name: 'UUID'
+      value: '<uuid>'
+    - name: 'Server Access'
+      value: '<access>'
+
+  thumbnail: 'https://crafatar.com/avatars/<uuid>'
+  colour: '#d52a18'
+
+info-status-offline: ':red_circle: **Offline**'
+info-status-offline-last-seen: ':red_circle: **Offline**, last seen <last_seen>'
+info-status-online: ':green_circle: **Online**'
+info-status-online-server: ':green_circle: **Online**, playing on <server>'
+
+info-discord-not-linked: 'Not linked'
+info-discord-linked: 'Linked to <discord>'
+
+info-access-not-linked: |-
+  :negative_squared_cross_mark: Limited access
+   ∟ No Discord account linked.
+info-access-linked-missing-roles: |-
+  :negative_squared_cross_mark: Limited access
+   ∟ Discord account missing required role(s).
+info-access-linked-roles: |-
+  :white_check_mark: Full access
+   ∟ Discord account has <roles>.
+info-access-linked-bypassed: |-
+  :white_check_mark: Full access
+   ∟ Discord role check bypassed.
+info-access-not-configured: |-
+  :white_check_mark: Full access
+   ∟ No role requirements have been configured.
+
+info-actions:
+  - label: 'Stats'
+    url: 'https://minecraft.rtgame.co.uk/stats/player/<uuid>'
+  - label: 'Punishments'
+    url: 'https://minecraft.rtgame.co.uk/bans/history.php?uuid=<uuid>'
+
 announcement-new: |-
   <dark_green>New announcement in <channel>:
 
