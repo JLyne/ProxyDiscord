@@ -151,7 +151,7 @@ public class Discord {
 				SlashCommand.with("link", Messages.get("slash-command-link-description"))
 						.addOption(SlashCommandOption.create(
 								SlashCommandOptionType.STRING, "token",
-								Messages.get("slash-command-token-description"),
+								Messages.get("slash-command-link-token-argument-description"),
 								true))
 						.setDefaultEnabledForEveryone());
 
@@ -162,10 +162,12 @@ public class Discord {
 		List<SlashCommandOption> infoSubcommands = new ArrayList<>();
 
 		infoSubcommands.add(SlashCommandOption.createWithOptions(
-				SlashCommandOptionType.SUB_COMMAND, "player", "Returns information for a Minecraft account",
-				Collections.singletonList(
-						SlashCommandOption.create(SlashCommandOptionType.STRING, "username",
-												  "The player's Minecraft username", true))));
+				SlashCommandOptionType.SUB_COMMAND, "player",
+				Messages.get("slash-command-info-player-description"),
+				Collections.singletonList(SlashCommandOption.createStringOption(
+						"username_or_uuid",
+						Messages.get("slash-command-info-username-argument-description"),
+						true, true))));
 
 //		infoSubcommands.add(SlashCommandOption.createWithOptions(
 //				SlashCommandOptionType.SUB_COMMAND, "server", "Returns information for a server",
@@ -175,22 +177,19 @@ public class Discord {
 
 		infoSubcommands.add(SlashCommandOption.createWithOptions(
 				SlashCommandOptionType.SUB_COMMAND, "discord",
-				"Returns information for a Discord user's linked Minecraft account",
+				Messages.get("slash-command-info-discord-description"),
 				Collections.singletonList(
 						SlashCommandOption.create(SlashCommandOptionType.USER, "user",
-												  "The user", true))));
-
-		infoSubcommands.add(SlashCommandOption.createWithOptions(
-				SlashCommandOptionType.SUB_COMMAND, "summary",
-				"General information"));
+												  Messages.get("slash-command-info-user-argument-description"),
+												  true))));
 
         commands.add(
-				SlashCommand.with("info", "Get information on a player or server", infoSubcommands)
+				SlashCommand.with("info", Messages.get("slash-command-info-description"), infoSubcommands)
 						.setDefaultEnabledForPermissions(PermissionType.MANAGE_ROLES));
 
 		commands.add(
 				UserContextMenu
-						.with("Minecraft Info", "")
+						.with(Messages.get("context-menu-info-label"), "")
 						.setDefaultEnabledForPermissions(PermissionType.MANAGE_ROLES));
 
 		api.bulkOverwriteGlobalApplicationCommands(commands);

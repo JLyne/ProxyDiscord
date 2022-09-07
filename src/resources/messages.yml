@@ -272,5 +272,11 @@ announcement-read-more-tooltip: |-
 
 slash-command-link-description: Link your Discord and Minecraft accounts to play on the RTGame Minecraft Server.
 slash-command-unlink-description: Unlink your Discord and Minecraft accounts.
+slash-command-link-token-argument-description: Your linking token. Connect to the server and follow the instructions to obtain this.
 
-slash-command-token-description: Your linking token. Connect to the server and follow the instructions to obtain this.
+slash-command-info-description: Get information on a player or server
+slash-command-info-player-description: Get information on a Minecraft account
+slash-command-info-discord-description: Get information on a Discord user's linked Minecraft account
+slash-command-info-user-argument-description: The Discord user
+slash-command-info-username-argument-description: The player's Minecraft username or UUID
+context-menu-info-label: Minecraft Info
