@@ -50,11 +50,11 @@ public class Messages {
         Messages.messages = messages;
     }
 
-    public static String get(String id) {
+    public static @NotNull String get(String id) {
         return get(id, Collections.emptyMap());
     }
 
-    public static String get(String id, Map<String, String> replacements) {
+    public static @NotNull String get(String id, Map<String, String> replacements) {
         if(messages == null) {
             return "";
         }
@@ -69,11 +69,11 @@ public class Messages {
         return message;
     }
 
-    public static Component getComponent(String id) {
+    public static @NotNull Component getComponent(String id) {
         return getComponent(id, Collections.emptyMap(), Collections.emptyMap());
     }
 
-    public static Component getComponent(String id, Map<String, String> stringReplacements, Map<String, ComponentLike> componentReplacmenets) {
+    public static @NotNull Component getComponent(String id, Map<String, String> stringReplacements, Map<String, ComponentLike> componentReplacmenets) {
         if(messages == null) {
             return Component.empty();
         }
@@ -94,11 +94,11 @@ public class Messages {
         return Util.miniMessage.deserialize(message, placeholders.build());
     }
 
-    public static EmbedBuilder getEmbed(String id) {
+    public static @NotNull EmbedBuilder getEmbed(String id) {
         return getEmbed(id, Collections.emptyMap());
     }
 
-    public static EmbedBuilder getEmbed(String id, Map<String, String> replacements) {
+    public static @NotNull EmbedBuilder getEmbed(String id, Map<String, String> replacements) {
         Set<Role> verifiedRoles = ProxyDiscord.inst().getVerificationManager().getVerifiedRoles();
         String roleLink;
 
@@ -109,14 +109,18 @@ public class Messages {
             roleLink = !verifiedRoles.isEmpty() ? "<@&" + verifiedRoles.iterator().next().getIdAsString() + ">" : "Unknown Role";
         }
 
-        if(messages == null || !id.startsWith("embed")) {
-            return null;
+        if(messages == null) {
+            return new EmbedBuilder().setTitle("Failed to load messages configuration file");
+        }
+
+        if(!id.startsWith("embed")) {
+            return new EmbedBuilder().setTitle("Invalid embed id " + id);
         }
 
         ConfigurationNode message = messages.getNode(id);
 
         if(message.isVirtual()) {
-            return null;
+            return new EmbedBuilder().setTitle("Embed " + id + " does not exist");
         }
 
         Map<Object, ? extends ConfigurationNode> messageContent = message.getChildrenMap();
