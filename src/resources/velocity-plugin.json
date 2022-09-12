@@ -11,6 +11,10 @@
     {
       "id": "platform-detection",
       "optional": true
+    },
+    {
+      "id": "supervanishbridge",
+      "optional": true
     }
   ],
   "main": "uk.co.notnull.proxydiscord.ProxyDiscord"

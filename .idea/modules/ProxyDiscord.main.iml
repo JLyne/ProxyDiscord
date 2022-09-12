@@ -25,6 +25,7 @@
     <orderEntry type="library" scope="PROVIDED" name="Gradle: net.luckperms:api:5.4" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Gradle: com.velocitypowered:velocity-api:3.1.2-SNAPSHOT" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Gradle: uk.co.notnull:PlatformDetection-velocity:2.0" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Gradle: uk.co.notnull:SuperVanishBridge-api:1.0-SNAPSHOT" level="project" />
     <orderEntry type="module" module-name="ProxyDiscord.ProxyDiscordAPI.main" />
     <orderEntry type="library" name="Gradle: cloud.commandframework:cloud-velocity:1.7.1" level="project" />
     <orderEntry type="library" name="Gradle: cloud.commandframework:cloud-minecraft-extras:1.7.1" level="project" />

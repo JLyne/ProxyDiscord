@@ -103,7 +103,9 @@ public class ProxyDiscord implements uk.co.notnull.proxydiscord.api.ProxyDiscord
 	private GroupSyncManager groupSyncManager;
 
 	private boolean platformDetectionEnabled = false;
+	private boolean superVanishBridgeEnabled;
 	private PlatformDetectionHandler platformDetectionHandler;
+	private SuperVanishBridgeHandler superVanishBridgeHandler;
 
 	@Inject
     public ProxyDiscord(ProxyServer proxy, Logger logger, @DataDirectory Path dataDirectory) {
@@ -145,10 +147,17 @@ public class ProxyDiscord implements uk.co.notnull.proxydiscord.api.ProxyDiscord
 
         Optional<PluginContainer> platformDetection = proxy.getPluginManager()
                 .getPlugin("platform-detection");
+		Optional<PluginContainer> superVanishBridge = proxy.getPluginManager()
+                .getPlugin("supervanishbridge");
         platformDetectionEnabled = platformDetection.isPresent();
+        superVanishBridgeEnabled = superVanishBridge.isPresent();
 
         if(platformDetectionEnabled) {
             this.platformDetectionHandler = new PlatformDetectionHandler(this);
+        }
+
+		if(superVanishBridgeEnabled) {
+            this.superVanishBridgeHandler = new SuperVanishBridgeHandler(this);
         }
 	}
 
@@ -212,8 +221,10 @@ public class ProxyDiscord implements uk.co.notnull.proxydiscord.api.ProxyDiscord
         manager.parserRegistry().registerSuggestionProvider("players", (
         		CommandContext<CommandSource> commandContext,
                 String input
-        ) -> commandContext.<ProxyServer>get("ProxyServer").getAllPlayers()
-				.stream().map(Player::getUsername).collect(Collectors.toList()));
+        ) -> commandContext.<ProxyServer>get("ProxyServer").getAllPlayers().stream()
+				.filter(player -> !superVanishBridgeEnabled
+						|| !superVanishBridgeHandler.canSee(commandContext.getSender(), player))
+				.map(Player::getUsername).collect(Collectors.toList()));
 
         //Custom LongParser for now as the built in one doesn't work properly
         manager.parserRegistry().registerParserSupplier(TypeToken.get(Long.class), options ->

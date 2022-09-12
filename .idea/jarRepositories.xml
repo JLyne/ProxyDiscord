@@ -126,5 +126,10 @@
       <option name="name" value="MavenLocal" />
       <option name="url" value="file:$MAVEN_REPOSITORY$/" />
     </remote-repository>
+    <remote-repository>
+      <option name="id" value="maven2" />
+      <option name="name" value="maven2" />
+      <option name="url" value="https://repo.not-null.co.uk/snapshots/" />
+    </remote-repository>
   </component>
 </project>
