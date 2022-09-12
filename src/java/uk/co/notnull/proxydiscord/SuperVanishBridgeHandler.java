@@ -47,7 +47,6 @@ public class SuperVanishBridgeHandler {
 	@Subscribe
 	public void onPlayerInfo(PlayerInfoEvent event) {
 		if(superVanishBridgeAPI.isVanished(event.getPlayerInfo().getUuid())) {
-			plugin.getDebugLogger().info("Hiding " + event.getPlayerInfo().getUsername() + " in PlayerInfoEvent");
 			event.getPlayerInfo().setVanished(true);
 		}
 	}
@@ -66,8 +65,11 @@ public class SuperVanishBridgeHandler {
 	}
 
 	public boolean canSee(CommandSource source, Player player) {
-		plugin.getDebugLogger().info("Checking if " + player.asHoverEvent() + " is vanished for tabcomplete");
 		return !(source instanceof Player) || superVanishBridgeAPI.canSee((Player) source, player);
+	}
+
+	public boolean isVanished(Player player) {
+		return superVanishBridgeAPI.isVanished(player);
 	}
 
 	//TODO: Adjust serverinfo player count

@@ -23,6 +23,7 @@
 
 package uk.co.notnull.proxydiscord;
 
+import com.velocitypowered.api.proxy.Player;
 import dev.vankka.mcdiscordreserializer.minecraft.MinecraftSerializer;
 import dev.vankka.mcdiscordreserializer.minecraft.MinecraftSerializerOptions;
 import dev.vankka.mcdiscordreserializer.rules.DiscordMarkdownRules;
@@ -60,6 +61,7 @@ import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.regex.MatchResult;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 public class Util {
 	private static final Pattern markdownPattern = Pattern.compile("([*_|`~])");
@@ -313,5 +315,12 @@ public class Util {
 
 	public static boolean isValidUUID(String uuid) {
 		return validUUIDPattern.asMatchPredicate().test(uuid);
+	}
+
+	public static Stream<Player> getPlayerSuggestions(String query) {
+		SuperVanishBridgeHandler superVanishBridgeHandler = ProxyDiscord.inst().getSuperVanishBridgeHandler();
+
+		return ProxyDiscord.inst().getProxy().matchPlayer(query).stream()
+				.filter(player -> superVanishBridgeHandler == null || !superVanishBridgeHandler.isVanished(player));
 	}
 }

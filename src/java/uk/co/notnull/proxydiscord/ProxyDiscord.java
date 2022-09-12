@@ -361,6 +361,10 @@ public class ProxyDiscord implements uk.co.notnull.proxydiscord.api.ProxyDiscord
 		return platformDetectionHandler;
 	}
 
+	public SuperVanishBridgeHandler getSuperVanishBridgeHandler() {
+		return superVanishBridgeHandler;
+	}
+
 	public void setEmoteProvider(EmoteProvider provider) {
 		emoteProvider = provider;
 	}
