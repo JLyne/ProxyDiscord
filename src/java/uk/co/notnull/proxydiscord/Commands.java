@@ -34,7 +34,6 @@ import cloud.commandframework.minecraft.extras.MinecraftHelp;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
 import net.kyori.adventure.audience.MessageType;
-import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.luckperms.api.model.user.UserManager;
@@ -76,7 +75,7 @@ public class Commands {
 	@CommandMethod("discord link <player> <discordId>")
     @ProxiedBy("link")
     @CommandPermission("discord.link")
-    public void link(CommandSource sender, @Argument(value = "player", suggestions = "players") String target,
+    public void link(CommandSource sender, @Argument(value = "player", suggestions = "visibleplayers") String target,
                      @Argument(value = "discordId") @Range(min = "0") Long discordId) {
 
         userManager.lookupUniqueId(target).thenAccept((UUID uuid) -> {
@@ -183,7 +182,7 @@ public class Commands {
 	@CommandMethod("discord unlink [player]")
     @ProxiedBy("unlink")
     @CommandPermission("discord.unlink")
-    public void unlink(Player sender, @Argument(value = "player", suggestions = "players") String target) {
+    public void unlink(Player sender, @Argument(value = "player", suggestions = "visibleplayers") String target) {
         //Unlinking another player
         if(target != null) {
             if(!sender.hasPermission("discord.unlink.others")) {

@@ -23,7 +23,6 @@
 
 package uk.co.notnull.proxydiscord;
 
-import com.velocitypowered.api.proxy.Player;
 import dev.vankka.mcdiscordreserializer.minecraft.MinecraftSerializer;
 import dev.vankka.mcdiscordreserializer.minecraft.MinecraftSerializerOptions;
 import dev.vankka.mcdiscordreserializer.rules.DiscordMarkdownRules;
@@ -53,7 +52,6 @@ import uk.co.notnull.proxydiscord.renderer.CustomMinecraftRenderer;
 import uk.co.notnull.proxydiscord.emote.DefaultEmoteProvider;
 
 import java.text.DateFormat;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -315,15 +313,5 @@ public class Util {
 
 	public static boolean isValidUUID(String uuid) {
 		return validUUIDPattern.asMatchPredicate().test(uuid);
-	}
-
-	public static List<Player> getPlayerSuggestions(String query) {
-		SuperVanishBridgeHandler superVanishBridgeHandler = ProxyDiscord.inst().getSuperVanishBridgeHandler();
-
-		if(superVanishBridgeHandler != null) {
-			return superVanishBridgeHandler.getPlayerSuggestions(query, null);
-		} else {
-			return new ArrayList<>(ProxyDiscord.inst().getProxy().matchPlayer(query));
-		}
 	}
 }

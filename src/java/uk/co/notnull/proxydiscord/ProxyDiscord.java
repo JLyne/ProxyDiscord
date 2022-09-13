@@ -41,7 +41,6 @@ import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
 import com.velocitypowered.api.event.proxy.ProxyShutdownEvent;
 import com.velocitypowered.api.plugin.PluginContainer;
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
-import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.proxy.messages.MinecraftChannelIdentifier;
 import io.leangen.geantyref.TypeToken;
@@ -65,7 +64,6 @@ import java.io.OutputStream;
 import java.nio.file.Path;
 import java.util.Optional;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import com.google.common.io.ByteStreams;
 import ninja.leaping.configurate.ConfigurationNode;
@@ -80,6 +78,8 @@ import uk.co.notnull.proxydiscord.manager.LoggingManager;
 import uk.co.notnull.proxydiscord.manager.LuckPermsManager;
 import uk.co.notnull.proxydiscord.manager.RedirectManager;
 import uk.co.notnull.proxydiscord.manager.VerificationManager;
+import uk.co.notnull.supervanishbridge.helper.CloudHelper;
+import uk.co.notnull.supervanishbridge.helper.SuperVanishBridgeHelper;
 
 public class ProxyDiscord implements uk.co.notnull.proxydiscord.api.ProxyDiscord {
 	private static MinecraftChannelIdentifier statusIdentifier;
@@ -103,9 +103,8 @@ public class ProxyDiscord implements uk.co.notnull.proxydiscord.api.ProxyDiscord
 	private GroupSyncManager groupSyncManager;
 
 	private boolean platformDetectionEnabled = false;
-	private boolean superVanishBridgeEnabled;
 	private PlatformDetectionHandler platformDetectionHandler;
-	private SuperVanishBridgeHandler superVanishBridgeHandler;
+	private SuperVanishBridgeHelper superVanishBridgeHelper;
 
 	@Inject
     public ProxyDiscord(ProxyServer proxy, Logger logger, @DataDirectory Path dataDirectory) {
@@ -147,18 +146,14 @@ public class ProxyDiscord implements uk.co.notnull.proxydiscord.api.ProxyDiscord
 
         Optional<PluginContainer> platformDetection = proxy.getPluginManager()
                 .getPlugin("platform-detection");
-		Optional<PluginContainer> superVanishBridge = proxy.getPluginManager()
-                .getPlugin("supervanishbridge");
+
         platformDetectionEnabled = platformDetection.isPresent();
-        superVanishBridgeEnabled = superVanishBridge.isPresent();
 
         if(platformDetectionEnabled) {
             this.platformDetectionHandler = new PlatformDetectionHandler(this);
         }
 
-		if(superVanishBridgeEnabled) {
-            this.superVanishBridgeHandler = new SuperVanishBridgeHandler(this);
-        }
+		this.superVanishBridgeHelper = new SuperVanishBridgeHelper(proxy);
 	}
 
 	@Subscribe
@@ -218,17 +213,7 @@ public class ProxyDiscord implements uk.co.notnull.proxydiscord.api.ProxyDiscord
             .withDecorator(message -> message)
             .apply(manager, p -> p);
 
-        manager.parserRegistry().registerSuggestionProvider("players", (
-        		CommandContext<CommandSource> commandContext,
-                String input
-        ) -> {
-			if(superVanishBridgeEnabled) {
-				return superVanishBridgeHandler.getUsernameSuggestions(input, commandContext.getSender());
-			} else {
-				return commandContext.<ProxyServer>get("ProxyServer").getAllPlayers().stream()
-					.map(Player::getUsername).collect(Collectors.toList());
-			}
-		});
+		CloudHelper.registerVisiblePlayerArgument(manager);
 
         //Custom LongParser for now as the built in one doesn't work properly
         manager.parserRegistry().registerParserSupplier(TypeToken.get(Long.class), options ->
@@ -365,8 +350,8 @@ public class ProxyDiscord implements uk.co.notnull.proxydiscord.api.ProxyDiscord
 		return platformDetectionHandler;
 	}
 
-	public SuperVanishBridgeHandler getSuperVanishBridgeHandler() {
-		return superVanishBridgeHandler;
+	public SuperVanishBridgeHelper getSuperVanishBridgeHelper() {
+		return superVanishBridgeHelper;
 	}
 
 	public void setEmoteProvider(EmoteProvider provider) {

@@ -79,11 +79,11 @@ dependencies {
     implementation 'cloud.commandframework:cloud-minecraft-extras:1.7.1'
     implementation 'cloud.commandframework:cloud-annotations:1.7.1'
     implementation 'dev.vankka:mcdiscordreserializer:4.3.0'
+    implementation 'uk.co.notnull:SuperVanishBridge-helper:1.0-SNAPSHOT'
 
     compileOnly 'net.luckperms:api:5.4'
     compileOnly 'com.velocitypowered:velocity-api:3.1.2-SNAPSHOT'
     compileOnly 'uk.co.notnull:PlatformDetection-velocity:2.0'
-    compileOnly 'uk.co.notnull:SuperVanishBridge-api:1.0-SNAPSHOT'
 
     annotationProcessor 'com.velocitypowered:velocity-api:3.1.2-SNAPSHOT'
 }
@@ -109,5 +109,6 @@ tasks {
         archiveClassifier.set('')
         relocate 'cloud.commandframework', 'uk.co.notnull.proxydiscord.shaded.cloud'
         relocate 'io.leangen.geantyref', 'uk.co.notnull.proxydiscord.shaded.typetoken'
+        relocate 'uk.co.notnull.SuperVanishBridge', 'uk.co.notnull.proxyqueues.shaded.supervanishbridge'
     }
 }
