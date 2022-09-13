@@ -32,6 +32,8 @@ import uk.co.notnull.proxydiscord.api.logging.LogEntry;
 import uk.co.notnull.proxydiscord.api.logging.LogType;
 import uk.co.notnull.supervanishbridge.api.SuperVanishBridgeAPI;
 
+import java.util.List;
+
 public class SuperVanishBridgeHandler {
 	private final SuperVanishBridgeAPI superVanishBridgeAPI;
 
@@ -66,6 +68,14 @@ public class SuperVanishBridgeHandler {
 
 	public boolean canSee(CommandSource source, Player player) {
 		return !(source instanceof Player) || superVanishBridgeAPI.canSee((Player) source, player);
+	}
+
+	public List<String> getUsernameSuggestions(String query, CommandSource source) {
+		return superVanishBridgeAPI.getUsernameSuggestions(query, source);
+	}
+
+	public List<Player> getPlayerSuggestions(String query, CommandSource source) {
+		return superVanishBridgeAPI.getPlayerSuggestions(query, source);
 	}
 
 	public boolean isVanished(Player player) {

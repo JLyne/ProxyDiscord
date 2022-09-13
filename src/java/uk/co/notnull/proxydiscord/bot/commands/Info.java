@@ -107,7 +107,7 @@ public class Info implements SlashCommandCreateListener, UserContextMenuCommandL
 		switch (subcommand) {
 			case "player" -> {
 				String query = interaction.getFocusedOption().getStringValue().orElse("").toLowerCase();
-				List<SlashCommandOptionChoice> choices = Util.getPlayerSuggestions(query)
+				List<SlashCommandOptionChoice> choices = Util.getPlayerSuggestions(query).stream()
 						.map(player -> SlashCommandOptionChoice.create(player.getUsername(),
 																	   player.getUniqueId().toString()))
 						.toList();

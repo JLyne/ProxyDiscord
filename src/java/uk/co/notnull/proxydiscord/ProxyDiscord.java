@@ -221,10 +221,14 @@ public class ProxyDiscord implements uk.co.notnull.proxydiscord.api.ProxyDiscord
         manager.parserRegistry().registerSuggestionProvider("players", (
         		CommandContext<CommandSource> commandContext,
                 String input
-        ) -> commandContext.<ProxyServer>get("ProxyServer").getAllPlayers().stream()
-				.filter(player -> !superVanishBridgeEnabled
-						|| !superVanishBridgeHandler.canSee(commandContext.getSender(), player))
-				.map(Player::getUsername).collect(Collectors.toList()));
+        ) -> {
+			if(superVanishBridgeEnabled) {
+				return superVanishBridgeHandler.getUsernameSuggestions(input, commandContext.getSender());
+			} else {
+				return commandContext.<ProxyServer>get("ProxyServer").getAllPlayers().stream()
+					.map(Player::getUsername).collect(Collectors.toList());
+			}
+		});
 
         //Custom LongParser for now as the built in one doesn't work properly
         manager.parserRegistry().registerParserSupplier(TypeToken.get(Long.class), options ->

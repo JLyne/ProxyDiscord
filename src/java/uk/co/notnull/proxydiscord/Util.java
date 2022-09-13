@@ -52,16 +52,16 @@ import uk.co.notnull.proxydiscord.api.logging.LogEntry;
 import uk.co.notnull.proxydiscord.renderer.CustomMinecraftRenderer;
 import uk.co.notnull.proxydiscord.emote.DefaultEmoteProvider;
 
-import java.util.Collections;
-import java.util.List;
 import java.text.DateFormat;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.regex.MatchResult;
 import java.util.regex.Pattern;
-import java.util.stream.Stream;
 
 public class Util {
 	private static final Pattern markdownPattern = Pattern.compile("([*_|`~])");
@@ -317,10 +317,13 @@ public class Util {
 		return validUUIDPattern.asMatchPredicate().test(uuid);
 	}
 
-	public static Stream<Player> getPlayerSuggestions(String query) {
+	public static List<Player> getPlayerSuggestions(String query) {
 		SuperVanishBridgeHandler superVanishBridgeHandler = ProxyDiscord.inst().getSuperVanishBridgeHandler();
 
-		return ProxyDiscord.inst().getProxy().matchPlayer(query).stream()
-				.filter(player -> superVanishBridgeHandler == null || !superVanishBridgeHandler.isVanished(player));
+		if(superVanishBridgeHandler != null) {
+			return superVanishBridgeHandler.getPlayerSuggestions(query, null);
+		} else {
+			return new ArrayList<>(ProxyDiscord.inst().getProxy().matchPlayer(query));
+		}
 	}
 }
