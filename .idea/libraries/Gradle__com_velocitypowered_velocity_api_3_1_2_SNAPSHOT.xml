@@ -1,11 +1,11 @@
 <component name="libraryTable">
   <library name="Gradle: com.velocitypowered:velocity-api:3.1.2-SNAPSHOT">
     <CLASSES>
-      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.velocitypowered/velocity-api/3.1.2-SNAPSHOT/35c3aaa596fcefc1e827b6ef7bf85d5da777a124/velocity-api-3.1.2-SNAPSHOT.jar!/" />
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.velocitypowered/velocity-api/3.1.2-SNAPSHOT/790dbbb370627919e03a4d6b5ae0a78d1f1b0426/velocity-api-3.1.2-SNAPSHOT.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES>
-      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.velocitypowered/velocity-api/3.1.2-SNAPSHOT/4e7d55c4168e4202478b71c6161a7db740ed3592/velocity-api-3.1.2-SNAPSHOT-sources.jar!/" />
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.velocitypowered/velocity-api/3.1.2-SNAPSHOT/965759345972ef4307f20ed5d58428d1866e325d/velocity-api-3.1.2-SNAPSHOT-sources.jar!/" />
     </SOURCES>
   </library>
 </component>

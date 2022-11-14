@@ -135,8 +135,8 @@ public class AnnouncementChannelHandler {
 																sendAnnouncement(messageCreateEvent.getMessage()));
 
 		editListener = channel.addMessageEditListener(messageEditEvent -> {
-			if(messageEditEvent.getMessageId() == lastMessage.getId() && messageEditEvent.getMessage().isPresent()) {
-				lastMessage = messageEditEvent.getMessage().get();
+			if(messageEditEvent.getMessageId() == lastMessage.getId()) {
+				lastMessage = messageEditEvent.getMessage();
 			}
 		});
 

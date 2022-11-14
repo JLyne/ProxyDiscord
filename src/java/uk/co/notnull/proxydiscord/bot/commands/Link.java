@@ -105,7 +105,7 @@ public class Link implements MessageCreateListener, SlashCommandCreateListener {
         }
 
         try {
-            String token = interaction.getOptionStringValueByIndex(0).orElse("").toUpperCase();
+            String token = interaction.getArgumentStringValueByIndex(0).orElse("").toUpperCase();
             result = linkingManager.completeLink(token, interaction.getUser().getId());
         } catch (Exception e) {
             e.printStackTrace();

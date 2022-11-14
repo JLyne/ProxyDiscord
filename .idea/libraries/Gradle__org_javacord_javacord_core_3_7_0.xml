@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="Gradle: org.javacord:javacord-core:3.7.0">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.javacord/javacord-core/3.7.0/92f44fd3a18bd7ef09cd622caf0245c00be874ed/javacord-core-3.7.0.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.javacord/javacord-core/3.7.0/a429916a28f53264296d964e414e6e1c6641c1b4/javacord-core-3.7.0-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

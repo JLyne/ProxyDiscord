@@ -33,7 +33,9 @@ import org.javacord.api.DiscordApiBuilder;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 
@@ -144,7 +146,7 @@ public class Discord {
 		if(clean) {
 			return api.getGlobalSlashCommands().thenCompose(commands -> {
 				List<CompletableFuture<Void>> futures = commands.stream()
-						.map(ApplicationCommand::deleteGlobal).toList();
+						.map(ApplicationCommand::delete).toList();
 
 				return CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).exceptionally(e -> {
 					if(e != null) {
@@ -157,7 +159,7 @@ public class Discord {
 			});
 		}
 
-		List<ApplicationCommandBuilder<?, ?, ?>> commands = new ArrayList<>();
+		Set<ApplicationCommandBuilder<?, ?, ?>> commands = new HashSet<>();
 
 		commands.add(
 				SlashCommand.with("link", Messages.get("slash-command-link-description"))
@@ -201,7 +203,7 @@ public class Discord {
 
 		commands.add(
 				UserContextMenu
-						.with(Messages.get("context-menu-info-label"), "")
+						.with(Messages.get("context-menu-info-label"))
 						.setDefaultEnabledForPermissions(PermissionType.MANAGE_ROLES));
 
 		return api.bulkOverwriteGlobalApplicationCommands(commands).thenAccept((result) -> {}).exceptionally(e -> {

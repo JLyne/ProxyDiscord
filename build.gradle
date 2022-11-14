@@ -74,7 +74,7 @@ allprojects {
 
 dependencies {
     implementation project(":ProxyDiscordAPI")
-    implementation 'org.javacord:javacord:3.5.0'
+    implementation 'org.javacord:javacord:3.7.0'
     implementation 'cloud.commandframework:cloud-velocity:1.7.1'
     implementation 'cloud.commandframework:cloud-minecraft-extras:1.7.1'
     implementation 'cloud.commandframework:cloud-annotations:1.7.1'
