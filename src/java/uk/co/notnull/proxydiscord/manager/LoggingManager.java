@@ -123,7 +123,7 @@ public class LoggingManager implements uk.co.notnull.proxydiscord.api.manager.Lo
     }
 
     @SuppressWarnings("UnstableApiUsage")
-	@Subscribe(order = PostOrder.LAST)
+	@Subscribe
 	public void onServerPostConnect(ServerPostConnectEvent event) {
 		if(!useConnectEvent) {
 			return;
@@ -138,13 +138,13 @@ public class LoggingManager implements uk.co.notnull.proxydiscord.api.manager.Lo
 
 		if(event.getPreviousServer() != null) {
 			joinLog = LogEntry.builder().type(LogType.LEAVE).player(player).server(event.getPreviousServer())
-					.build();
+					.visibility(privateLog ? LogVisibility.PRIVATE_ONLY : LogVisibility.UNSPECIFIED).build();
 
 			logEvent(joinLog);
 		}
 	}
 
-	@Subscribe(order = PostOrder.LAST)
+	@Subscribe
 	public void onDisconnect(DisconnectEvent event) {
 		if(!useDisconnectEvent) {
 			return;
