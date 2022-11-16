@@ -70,7 +70,8 @@ public class Discord {
 		try {
 			logger.info("Connecting to Discord...");
 			api = new DiscordApiBuilder().setToken(token)
-					.setIntents(Intent.GUILDS, Intent.GUILD_EMOJIS, Intent.GUILD_MEMBERS, Intent.GUILD_MESSAGES)
+					.setIntents(Intent.GUILDS, Intent.GUILD_EMOJIS, Intent.GUILD_MEMBERS,
+								Intent.GUILD_MESSAGES, Intent.MESSAGE_CONTENT)
 					.setWaitForUsersOnStartup(true)
 					.setWaitForServersOnStartup(true)
 					.setShutdownHookRegistrationEnabled(false)
