@@ -30,8 +30,6 @@ import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.proxy.ServerConnection;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
-import net.kyori.adventure.audience.MessageType;
-import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
 import uk.co.notnull.proxydiscord.Messages;
 import uk.co.notnull.proxydiscord.ProxyDiscord;
@@ -129,15 +127,14 @@ public class RedirectManager {
                             Collections.singletonMap("server", linkingServer.getServerInfo().getName()),
                             Collections.emptyMap());
 
-                    player.sendMessage(message.append(Component.newline()).append(extra),
-                                       MessageType.SYSTEM);
+                    player.sendMessage(message.append(Component.newline()).append(extra));
                 } else {
                     plugin.getDebugLogger().info("Failed to move " + player.getUsername() + " to " + linkingServer.getServerInfo().getName() + ". Kicking.");
                     player.disconnect(message);
                 }
             });
         } else {
-            player.sendMessage(message, MessageType.SYSTEM);
+            player.sendMessage(message);
         }
     }
 

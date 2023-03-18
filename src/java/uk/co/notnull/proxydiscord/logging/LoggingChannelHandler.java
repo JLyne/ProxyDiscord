@@ -26,8 +26,6 @@ package uk.co.notnull.proxydiscord.logging;
 import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.proxy.ServerConnection;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
-import net.kyori.adventure.audience.MessageType;
-import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
@@ -416,7 +414,7 @@ public class LoggingChannelHandler {
 			RegisteredServer server = player.getCurrentServer().map(ServerConnection::getServer).orElse(null);
 
 			if (servers.isEmpty() || servers.contains(server)) {
-				player.sendMessage(Identity.identity(user.getUniqueId()), messageComponent, MessageType.SYSTEM);
+				player.sendMessage(messageComponent);
 			}
 		});
     }

@@ -143,8 +143,7 @@ public class Commands {
 
                             Messages.sendComponent(sender, key, replacements, Collections.emptyMap());
                         }).exceptionally(error -> {
-                    sender.sendMessage(Component.text(error.toString()).color(NamedTextColor.RED),
-                                       MessageType.SYSTEM);
+                    sender.sendMessage(Component.text(error.toString()).color(NamedTextColor.RED));
                     return null;
                 });
 
@@ -172,8 +171,7 @@ public class Commands {
                             "player", target), Collections.emptyMap());
                 }
             }).exceptionally(error -> {
-                sender.sendMessage(Component.text(error.toString()).color(NamedTextColor.RED),
-                                   MessageType.SYSTEM);
+                sender.sendMessage(Component.text(error.toString()).color(NamedTextColor.RED));
                 return null;
             });
         });

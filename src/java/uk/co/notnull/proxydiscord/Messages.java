@@ -237,10 +237,10 @@ public class Messages {
     }
 
     public static void sendComponent(CommandSource recipient, String messageId) {
-        recipient.sendMessage(getComponent(messageId), MessageType.SYSTEM);
+        recipient.sendMessage(getComponent(messageId));
     }
 
     public static void sendComponent(CommandSource recipient, String messageId, Map<String, String> stringReplacements, Map<String, ComponentLike> componentReplacmenets) {
-        recipient.sendMessage(getComponent(messageId, stringReplacements, componentReplacmenets), MessageType.SYSTEM);
+        recipient.sendMessage(getComponent(messageId, stringReplacements, componentReplacmenets));
     }
 }

@@ -30,8 +30,6 @@ import com.velocitypowered.api.event.player.ServerPostConnectEvent;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
-import net.kyori.adventure.audience.MessageType;
-import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.event.ClickEvent;
@@ -210,7 +208,7 @@ public class AnnouncementChannelHandler {
 
         if(player != null) {
 			sentLatestMessage.add(player.getUniqueId());
-            player.sendMessage(finalMessage, MessageType.SYSTEM);
+            player.sendMessage(finalMessage);
         } else if(servers != null) {
         	sentLatestMessage.clear();
 
@@ -221,7 +219,7 @@ public class AnnouncementChannelHandler {
 
             recipients.forEach(p ->{
             	sentLatestMessage.add(p.getUniqueId());
-            	p.sendMessage(finalMessage, MessageType.SYSTEM);
+            	p.sendMessage(finalMessage);
 			});
         } else {
         	sentLatestMessage.clear();
@@ -234,7 +232,7 @@ public class AnnouncementChannelHandler {
 
         	recipients.forEach(p -> {
             	sentLatestMessage.add(p.getUniqueId());
-        		p.sendMessage(finalMessage, MessageType.SYSTEM);
+        		p.sendMessage(finalMessage);
 			});
 		}
     }
