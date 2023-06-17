@@ -109,6 +109,6 @@ tasks {
         archiveClassifier.set('')
         relocate 'cloud.commandframework', 'uk.co.notnull.proxydiscord.shaded.cloud'
         relocate 'io.leangen.geantyref', 'uk.co.notnull.proxydiscord.shaded.typetoken'
-        relocate 'uk.co.notnull.SuperVanishBridge', 'uk.co.notnull.proxyqueues.shaded.supervanishbridge'
+        relocate 'uk.co.notnull.SuperVanishBridge', 'uk.co.notnull.proxydiscord.shaded.supervanishbridge'
     }
 }
