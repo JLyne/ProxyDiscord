@@ -4,8 +4,6 @@
       <root url="jar://$MAVEN_REPOSITORY$/com/typesafe/config/1.4.0/config-1.4.0.jar!/" />
     </CLASSES>
     <JAVADOC />
-    <SOURCES>
-      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.typesafe/config/1.4.0/e748b8348e1910b0935bf662e21e748290229e7f/config-1.4.0-sources.jar!/" />
-    </SOURCES>
+    <SOURCES />
   </library>
 </component>
