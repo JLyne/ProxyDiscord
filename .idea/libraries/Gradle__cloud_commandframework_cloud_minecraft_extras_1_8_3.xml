@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="Gradle: cloud.commandframework:cloud-minecraft-extras:1.8.3">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.local/share/gradle/caches/modules-2/files-2.1/cloud.commandframework/cloud-minecraft-extras/1.8.3/7bfc887aabe3bc3a3f1670272fff455d10fef89/cloud-minecraft-extras-1.8.3.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.local/share/gradle/caches/modules-2/files-2.1/cloud.commandframework/cloud-minecraft-extras/1.8.3/570d4a3cc26ab71d87751fa8e1d840be4a4c70b1/cloud-minecraft-extras-1.8.3-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

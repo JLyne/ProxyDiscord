@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="Gradle: net.kyori:adventure-key:4.13.1">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/net/kyori/adventure-key/4.13.1/adventure-key-4.13.1.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

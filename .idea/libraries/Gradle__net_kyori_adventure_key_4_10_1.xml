@@ -1,11 +1,11 @@
 <component name="libraryTable">
   <library name="Gradle: net.kyori:adventure-key:4.10.1">
     <CLASSES>
-      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/net.kyori/adventure-key/4.10.1/48d2ec889cb82dd79d7b1178001cfecc28ff3c1c/adventure-key-4.10.1.jar!/" />
+      <root url="jar://$USER_HOME$/.local/share/gradle/caches/modules-2/files-2.1/net.kyori/adventure-key/4.10.1/48d2ec889cb82dd79d7b1178001cfecc28ff3c1c/adventure-key-4.10.1.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES>
-      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/net.kyori/adventure-key/4.10.1/f62df2a6c6de6506ba22034175e503c700e7cc49/adventure-key-4.10.1-sources.jar!/" />
+      <root url="jar://$USER_HOME$/.local/share/gradle/caches/modules-2/files-2.1/net.kyori/adventure-key/4.10.1/f62df2a6c6de6506ba22034175e503c700e7cc49/adventure-key-4.10.1-sources.jar!/" />
     </SOURCES>
   </library>
 </component>

@@ -1,11 +1,11 @@
 <component name="libraryTable">
   <library name="Gradle: dev.vankka:SimpleAST:2.2.8">
     <CLASSES>
-      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/dev.vankka/SimpleAST/2.2.8/ae1b34fd7c3f76bec7709b198512026ea83ca968/SimpleAST-2.2.8.jar!/" />
+      <root url="jar://$USER_HOME$/.local/share/gradle/caches/modules-2/files-2.1/dev.vankka/SimpleAST/2.2.8/ae1b34fd7c3f76bec7709b198512026ea83ca968/SimpleAST-2.2.8.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES>
-      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/dev.vankka/SimpleAST/2.2.8/5ab501a705a0fc22b2138a24bbcbbbc3825ad0a1/SimpleAST-2.2.8-sources.jar!/" />
+      <root url="jar://$USER_HOME$/.local/share/gradle/caches/modules-2/files-2.1/dev.vankka/SimpleAST/2.2.8/5ab501a705a0fc22b2138a24bbcbbbc3825ad0a1/SimpleAST-2.2.8-sources.jar!/" />
     </SOURCES>
   </library>
 </component>

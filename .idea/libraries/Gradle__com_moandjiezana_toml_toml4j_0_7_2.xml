@@ -1,7 +1,7 @@
 <component name="libraryTable">
   <library name="Gradle: com.moandjiezana.toml:toml4j:0.7.2">
     <CLASSES>
-      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.moandjiezana.toml/toml4j/0.7.2/a03337911d0bd2c40932aca3946edb30d0e7d0c/toml4j-0.7.2.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/com/moandjiezana/toml/toml4j/0.7.2/toml4j-0.7.2.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES>

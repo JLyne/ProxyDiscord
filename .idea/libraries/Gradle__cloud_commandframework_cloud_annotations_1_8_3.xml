@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="Gradle: cloud.commandframework:cloud-annotations:1.8.3">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.local/share/gradle/caches/modules-2/files-2.1/cloud.commandframework/cloud-annotations/1.8.3/68dcc44c297893509c1923e2db6561ef4266c288/cloud-annotations-1.8.3.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.local/share/gradle/caches/modules-2/files-2.1/cloud.commandframework/cloud-annotations/1.8.3/a9d50efe7c6679e1a6cd623c27b9dea18b6aaf08/cloud-annotations-1.8.3-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>
