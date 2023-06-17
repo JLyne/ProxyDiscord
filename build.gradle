@@ -58,7 +58,7 @@ allprojects {
     }
 
     group = 'uk.co.notnull'
-    version = '1.1-SNAPSHOT'
+    version = '1.1'
     description = 'Velocity Discord integration solution'
 
     java.sourceCompatibility = JavaVersion.VERSION_17
