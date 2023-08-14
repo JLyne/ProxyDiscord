@@ -34,7 +34,6 @@ import net.kyori.adventure.text.TextReplacementConfig;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.flattener.ComponentFlattener;
 import net.kyori.adventure.text.minimessage.MiniMessage;
-import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.luckperms.api.model.user.User;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -82,9 +81,6 @@ public class Util {
 					return markdownPattern.matcher(theComponent.content()).replaceAll("\\\\$1");
 				}
 			}).build();
-
-	public static final LegacyComponentSerializer legacySerializer = LegacyComponentSerializer.builder()
-          .extractUrls().character('&').hexColors().useUnusualXRepeatedCharacterHexFormat().build();
 
 	public static final PlainTextComponentSerializer plainSerializer = PlainTextComponentSerializer.plainText();
 	public static final PlainTextComponentSerializer plainStripMarkdownSerializer = PlainTextComponentSerializer
@@ -239,9 +235,9 @@ public class Util {
 	 */
 	public static String prepareLogMessage(String message, boolean codeBlock) {
 		if(codeBlock) {
-			return plainSerializer.serialize(legacySerializer.deserialize(message)).replace("```", "");
+			return plainSerializer.serialize(miniMessage.deserialize(message)).replace("```", "");
 		} else {
-			return plainStripMarkdownSerializer.serialize(legacySerializer.deserialize(message));
+			return plainStripMarkdownSerializer.serialize(miniMessage.deserialize(message));
 		}
 	}
 

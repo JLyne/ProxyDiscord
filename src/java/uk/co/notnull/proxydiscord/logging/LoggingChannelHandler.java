@@ -404,8 +404,8 @@ public class LoggingChannelHandler {
 			placeholders.resolver(Placeholder.parsed("prefix", prefix));
 			placeholders.resolver(Placeholder.parsed("suffix", suffix));
 		} else {
-			placeholders.resolver(Placeholder.parsed("prefix", Util.miniMessage.serialize(Util.legacySerializer.deserialize(prefix))));
-			placeholders.resolver(Placeholder.parsed("suffix", Util.miniMessage.serialize(Util.legacySerializer.deserialize(suffix))));
+			placeholders.resolver(Placeholder.parsed("prefix", Util.miniMessage.serialize(Util.miniMessage.deserialize(prefix))));
+			placeholders.resolver(Placeholder.parsed("suffix", Util.miniMessage.serialize(Util.miniMessage.deserialize(suffix))));
 		}
 
 		Component messageComponent = Util.miniMessage.deserialize(ingameChatFormat, placeholders.build());
