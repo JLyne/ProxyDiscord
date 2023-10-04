@@ -315,7 +315,7 @@ public class LoggingChannelHandler {
 
     private void handleDiscordMessageEvent(MessageCreateEvent event) {
 		String channelName = "#" + event.getServerTextChannel().map(ServerTextChannel::getName).orElse("Unknown channel");
-		String ignoreMessage = "Ignoring message from " + event.getMessageAuthor().getDiscriminatedName() + " in " + channelName + ": ";
+		String ignoreMessage = "Ignoring message from " + event.getMessageAuthor().getName() + " in " + channelName + ": ";
 
 		if(event.getMessageAuthor().isYourself()) {
 			return;
@@ -396,9 +396,8 @@ public class LoggingChannelHandler {
         placeholders.resolver(Placeholder.unparsed("player", user.getFriendlyName()));
         placeholders.resolver(Placeholder.unparsed("uuid", user.getUniqueId().toString()));
         placeholders.resolver(Placeholder.unparsed("discord_id", author.getIdAsString()));
-        placeholders.resolver(Placeholder.unparsed("discord_username", author.getDiscriminatedName()));
-        placeholders.resolver(Placeholder.unparsed("discord_username", author.getDiscriminatedName()));
-        placeholders.resolver(Placeholder.component("message", Util.prepareDiscordMessage(message)));
+        placeholders.resolver(Placeholder.unparsed("discord_username", author.getName()));
+		placeholders.resolver(Placeholder.component("message", Util.prepareDiscordMessage(message)));
 
 		if(useMiniMessage) {
 			placeholders.resolver(Placeholder.parsed("prefix", prefix));

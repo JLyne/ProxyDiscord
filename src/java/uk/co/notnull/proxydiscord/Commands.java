@@ -103,7 +103,7 @@ public class Commands {
                             .thenAcceptAsync(user -> Messages.sendComponent(
                                     sender,
                                     "link-other-already-linked-known",
-                                    Map.of("player", target, "discord", user.getDiscriminatedName()),
+                                    Map.of("player", target, "discord", user.getName()),
                                     Collections.emptyMap()))
                             .exceptionally(error -> {
                                 Messages.sendComponent(sender, "link-other-already-linked-unknown",
@@ -127,7 +127,7 @@ public class Commands {
                             return userManager.lookupUsername(linkedMinecraft);
                         })
                         .thenAcceptAsync(minecraftUsername -> {
-                            String discordUsername = discordUser[0] != null ? discordUser[0].getDiscriminatedName() : String.valueOf(
+                            String discordUsername = discordUser[0] != null ? discordUser[0].getName() : String.valueOf(
                                     discordId);
 
                             String key;
@@ -167,7 +167,7 @@ public class Commands {
                     }
 
                     Messages.sendComponent(sender, key, Map.of(
-                            "discord", user.getDiscriminatedName(),
+                            "discord", user.getName(),
                             "player", target), Collections.emptyMap());
                 }
             }).exceptionally(error -> {

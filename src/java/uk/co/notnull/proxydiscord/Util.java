@@ -214,7 +214,7 @@ public class Util {
 			replace.apply("discord_id", String.valueOf(discordId));
 			replace.apply("discord_mention", "<@!" + discordId + ">");
 			replace.apply("discord_username", discordUser.map(
-					org.javacord.api.entity.user.User::getDiscriminatedName).orElse("Unknown"));
+					org.javacord.api.entity.user.User::getName).orElse("Unknown"));
 		} else {
 			replace.apply("discord_id", "Unlinked");
 			replace.apply("discord_mention", "Unlinked");
@@ -287,7 +287,7 @@ public class Util {
 
 		ref.message = ref.message.replace("<discord_id>", author.getIdAsString());
 		ref.message = ref.message.replace("<discord_mention>", "<@!" + author.getIdAsString() + ">");
-		ref.message = ref.message.replace("<discord_username>", author.getDiscriminatedName());
+		ref.message = ref.message.replace("<discord_username>", author.getName());
 		ref.message = ref.message.replace("<0x1b>", new StringBuilder().appendCodePoint(0x1b).toString());
 
 		replacements.forEach((String find, String replace) -> ref.message = ref.message
