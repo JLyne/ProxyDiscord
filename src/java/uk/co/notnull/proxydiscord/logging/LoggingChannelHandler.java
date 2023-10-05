@@ -156,7 +156,6 @@ public class LoggingChannelHandler {
         if(logFormats.isMap() || defaultLogFormats.isMap()) {
             ConfigurationNode dateFormat = logFormats.getNode("date");
             ConfigurationNode codeBlock = logFormats.getNode("code-block");
-           	ConfigurationNode minimessage = logFormats.getNode("use-minimessage");
             ConfigurationNode chatFormat = logFormats.getNode("chat");
             ConfigurationNode discordChatFormat = logFormats.getNode("discord-chat");
             ConfigurationNode joinFormat = logFormats.getNode("join");
@@ -166,7 +165,6 @@ public class LoggingChannelHandler {
 
             ConfigurationNode defaultDateFormat = defaultLogFormats.getNode("date");
             ConfigurationNode defaultCodeBlock = defaultLogFormats.getNode("code-block");
-            ConfigurationNode defaultMiniMessage = defaultLogFormats.getNode("use-minimessage");
             ConfigurationNode defaultChatFormat = defaultLogFormats.getNode("chat");
             ConfigurationNode defaultDiscordChatFormat = defaultLogFormats.getNode("discord-chat");
             ConfigurationNode defaultJoinFormat = defaultLogFormats.getNode("join");
@@ -181,7 +179,6 @@ public class LoggingChannelHandler {
             }
 
 			this.codeBlock = codeBlock.getBoolean(defaultCodeBlock.getBoolean(false));
-			this.useMiniMessage = minimessage.getBoolean(defaultMiniMessage.getBoolean(false));
 
             this.formats.put(LogType.CHAT, chatFormat.getString(defaultChatFormat.getString("")));
             this.formats.put(LogType.DISCORD_CHAT, discordChatFormat.getString(defaultDiscordChatFormat.getString("")));
@@ -398,14 +395,8 @@ public class LoggingChannelHandler {
         placeholders.resolver(Placeholder.unparsed("discord_id", author.getIdAsString()));
         placeholders.resolver(Placeholder.unparsed("discord_username", author.getName()));
 		placeholders.resolver(Placeholder.component("message", Util.prepareDiscordMessage(message)));
-
-		if(useMiniMessage) {
-			placeholders.resolver(Placeholder.parsed("prefix", prefix));
-			placeholders.resolver(Placeholder.parsed("suffix", suffix));
-		} else {
-			placeholders.resolver(Placeholder.parsed("prefix", Util.miniMessage.serialize(Util.miniMessage.deserialize(prefix))));
-			placeholders.resolver(Placeholder.parsed("suffix", Util.miniMessage.serialize(Util.miniMessage.deserialize(suffix))));
-		}
+		placeholders.resolver(Placeholder.parsed("prefix", prefix));
+		placeholders.resolver(Placeholder.parsed("suffix", suffix));
 
 		Component messageComponent = Util.miniMessage.deserialize(ingameChatFormat, placeholders.build());
 

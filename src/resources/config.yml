@@ -73,9 +73,6 @@ logging:
     # Not used by default, but other plugins using the API may avoid logging sensitive information in public channels
     public: true
 
-    # Whether to use minmessage for parsing player prefixes and suffixes
-    use-minimessage: false
-
     # Formats for logging various events
     formats:
       code-block: true # If true, will surround all log messages with ``` code blocks
