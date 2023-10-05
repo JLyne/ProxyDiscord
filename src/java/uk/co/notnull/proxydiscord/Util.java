@@ -42,7 +42,8 @@ import org.javacord.api.entity.message.Message;
 import org.javacord.api.entity.message.MessageAttachment;
 import org.jetbrains.annotations.NotNull;
 import uk.co.notnull.proxydiscord.api.emote.EmoteProvider;
-import uk.co.notnull.proxydiscord.renderer.CustomMinecraftRenderer;
+import uk.co.notnull.proxydiscord.markdown.CustomMarkdownRules;
+import uk.co.notnull.proxydiscord.markdown.CustomMinecraftRenderer;
 import uk.co.notnull.proxydiscord.emote.DefaultEmoteProvider;
 
 import java.util.Collections;
@@ -81,17 +82,19 @@ public class Util {
 			new MinecraftSerializerOptions<>(
 					new Parser<>(),
 					List.of(
-							DiscordMarkdownRules.createQuoteRule(),
+							SimpleMarkdownRules.createEscapeRule(),
+							CustomMarkdownRules.createLinkRule(),
+							SimpleMarkdownRules.createNewlineRule(),
+							DiscordMarkdownRules.createBoldRule(),
+							DiscordMarkdownRules.createUnderlineRule(),
+							DiscordMarkdownRules.createItalicsRule(),
+							DiscordMarkdownRules.createStrikethruRule(),
+
+							//	DiscordMarkdownRules.createQuoteRule(), //Seems broken atm
 							DiscordMarkdownRules.createSpoilerRule(),
 							DiscordMarkdownRules.createCodeBlockRule(),
 							DiscordMarkdownRules.createCodeStringRule(),
-							SimpleMarkdownRules.createEscapeRule(),
-							SimpleMarkdownRules.createLinkRule(),
-							SimpleMarkdownRules.createNewlineRule(),
-							SimpleMarkdownRules.createBoldRule(),
-							SimpleMarkdownRules.createUnderlineRule(),
-							SimpleMarkdownRules.createItalicsRule(),
-							SimpleMarkdownRules.createStrikethruRule(),
+//							DiscordMarkdownRules.createSpecialTextRule(), //Needed for quotes
 							SimpleMarkdownRules.createTextRule()
 					),
 					Collections.singletonList(new CustomMinecraftRenderer()),

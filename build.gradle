@@ -55,6 +55,7 @@ allprojects {
         mavenCentral()
         maven { url 'https://repo.not-null.co.uk/releases/' }
         maven { url "https://papermc.io/repo/repository/maven-public/" }
+        maven { url "https://s01.oss.sonatype.org/content/repositories/snapshots" }
     }
 
     group = 'uk.co.notnull'
@@ -76,7 +77,7 @@ dependencies {
     implementation 'cloud.commandframework:cloud-velocity:1.8.3'
     implementation 'cloud.commandframework:cloud-minecraft-extras:1.8.3'
     implementation 'cloud.commandframework:cloud-annotations:1.8.3'
-    implementation 'dev.vankka:mcdiscordreserializer:4.3.0'
+    implementation 'dev.vankka:mcdiscordreserializer:4.4.0-SNAPSHOT'
     implementation 'uk.co.notnull:SuperVanishBridge-helper:1.0'
 
     compileOnly 'net.luckperms:api:5.4'
