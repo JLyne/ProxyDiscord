@@ -27,16 +27,12 @@ import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.proxy.ServerConnection;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
-import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
-import net.luckperms.api.cacheddata.CachedMetaData;
 import net.luckperms.api.model.user.User;
 import net.luckperms.api.model.user.UserManager;
-import net.luckperms.api.query.QueryOptions;
 import ninja.leaping.configurate.ConfigurationNode;
 import org.javacord.api.entity.channel.ServerTextChannel;
 import org.javacord.api.entity.channel.TextChannel;
-import org.javacord.api.entity.message.MessageAuthor;
+import org.javacord.api.entity.message.Message;
 import org.javacord.api.entity.message.MessageBuilder;
 import org.javacord.api.entity.message.mention.AllowedMentions;
 import org.javacord.api.entity.message.mention.AllowedMentionsBuilder;
@@ -45,18 +41,14 @@ import org.javacord.api.listener.message.MessageCreateListener;
 import org.javacord.api.util.event.ListenerManager;
 import org.slf4j.Logger;
 import uk.co.notnull.proxydiscord.ProxyDiscord;
-import uk.co.notnull.proxydiscord.Util;
 import uk.co.notnull.proxydiscord.api.logging.LogEntry;
 import uk.co.notnull.proxydiscord.api.logging.LogType;
 import uk.co.notnull.proxydiscord.api.events.DiscordChatEvent;
 import uk.co.notnull.proxydiscord.api.logging.LogVisibility;
 import uk.co.notnull.proxydiscord.manager.LinkingManager;
 
-import java.text.SimpleDateFormat;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -74,12 +66,8 @@ public class LoggingChannelHandler {
 	private boolean logIsPublic = true;
 	private final AtomicReference<Integer> lockDummy = new AtomicReference<>(0);
 
-	private SimpleDateFormat dateFormat;
-	private boolean codeBlock;
-	private boolean useMiniMessage;
-	private String ingameChatFormat;
+	private LoggingFormatter formatter;
     private final Set<LogType> events = new HashSet<>();
-	private final Map<LogType, String> formats = new HashMap<>();
     private final Set<RegisteredServer> servers = new HashSet<>();
 
     private ListenerManager<MessageCreateListener> logListener;
@@ -150,43 +138,7 @@ public class LoggingChannelHandler {
 			});
 		}
 
-        ConfigurationNode logFormats = config.getNode("formats");
-        ConfigurationNode defaultLogFormats = defaultConfig.getNode("formats");
-
-        if(logFormats.isMap() || defaultLogFormats.isMap()) {
-            ConfigurationNode dateFormat = logFormats.getNode("date");
-            ConfigurationNode codeBlock = logFormats.getNode("code-block");
-            ConfigurationNode chatFormat = logFormats.getNode("chat");
-            ConfigurationNode discordChatFormat = logFormats.getNode("discord-chat");
-            ConfigurationNode joinFormat = logFormats.getNode("join");
-            ConfigurationNode leaveFormat = logFormats.getNode("leave");
-            ConfigurationNode commandFormat = logFormats.getNode("command");
-            ConfigurationNode ingameChatFormat = logFormats.getNode("discord-chat-ingame");
-
-            ConfigurationNode defaultDateFormat = defaultLogFormats.getNode("date");
-            ConfigurationNode defaultCodeBlock = defaultLogFormats.getNode("code-block");
-            ConfigurationNode defaultChatFormat = defaultLogFormats.getNode("chat");
-            ConfigurationNode defaultDiscordChatFormat = defaultLogFormats.getNode("discord-chat");
-            ConfigurationNode defaultJoinFormat = defaultLogFormats.getNode("join");
-            ConfigurationNode defaultLeaveFormat = defaultLogFormats.getNode("leave");
-            ConfigurationNode defaultCommandFormat = defaultLogFormats.getNode("command");
-            ConfigurationNode defaultIngameChatFormat = defaultLogFormats.getNode("discord-chat-ingame");
-
-            try {
-                this.dateFormat = new SimpleDateFormat(dateFormat.getString(defaultDateFormat.getString("")));
-            } catch(IllegalArgumentException e) {
-                logger.warn("Invalid logging date format: " + e.getMessage());
-            }
-
-			this.codeBlock = codeBlock.getBoolean(defaultCodeBlock.getBoolean(false));
-
-            this.formats.put(LogType.CHAT, chatFormat.getString(defaultChatFormat.getString("")));
-            this.formats.put(LogType.DISCORD_CHAT, discordChatFormat.getString(defaultDiscordChatFormat.getString("")));
-            this.formats.put(LogType.JOIN, joinFormat.getString(defaultJoinFormat.getString("")));
-            this.formats.put(LogType.LEAVE, leaveFormat.getString(defaultLeaveFormat.getString("")));
-            this.formats.put(LogType.COMMAND, commandFormat.getString(defaultCommandFormat.getString("")));
-            this.ingameChatFormat = ingameChatFormat.getString(defaultIngameChatFormat.getString(""));
-        }
+        this.formatter = new LoggingFormatter(config.getNode("formats"), defaultConfig.getNode("formats"));
 	}
 
 	private void findChannel() {
@@ -232,7 +184,7 @@ public class LoggingChannelHandler {
 			return false;
 		}
 
-		if(formats.getOrDefault(entry.getType(), "").isEmpty()) {
+		if(!formatter.hasFormat(entry.getType())) {
 			return false;
 		}
 
@@ -253,7 +205,7 @@ public class LoggingChannelHandler {
 
     public void logEvent(LogEntry entry) {
 		if(shouldLogEvent(entry)) {
-			queueLogMessage(Util.formatLogEntry(formats.get(entry.getType()), dateFormat, codeBlock, entry));
+			queueLogMessage(formatter.formatLogEntry(entry));
 		}
 	}
 
@@ -265,25 +217,14 @@ public class LoggingChannelHandler {
         }
 
         synchronized (lockDummy) {
-        	int currentLength  = currentMessage.getStringBuilder().length();
+			// Ensure <2000 characters
+			message = formatter.truncateMessage(message);
 
-        	if(message.length() > 2000) {
-        		message = message.substring(0, 1991) + "[...]";
-
-        		if(codeBlock) {
-        			message = message + "```";
-				}
+			// If message is too long to append, send existing message and try again
+			if(!formatter.appendMessage(currentMessage, message)) {
+				sendLogMessage(loggingChannel.get());
+				formatter.appendMessage(currentMessage, message);
 			}
-
-            if(currentLength > 0 && currentLength + message.length() > 2000) {
-            	sendLogMessage(loggingChannel.get());
-            }
-
-            if(currentLength > 0 && !codeBlock) {
-            	currentMessage.append("\n");
-			}
-
-            currentMessage.append(message);
 
             if(unsentLogs.incrementAndGet() >= logsPerMessage.get()) {
             	sendLogMessage(loggingChannel.get());
@@ -335,9 +276,10 @@ public class LoggingChannelHandler {
 			return;
 		}
 
-		String message = Util.getDiscordMessageContent(event.getMessage());
+		Message message = event.getMessage();
+		String content = message.getReadableContent();
 
-		if(message.isEmpty()) {
+		if(content.isEmpty() && message.getAttachments().isEmpty()) {
 			plugin.getDebugLogger().info(ignoreMessage + "empty message");
 			return;
 		}
@@ -351,14 +293,14 @@ public class LoggingChannelHandler {
 				return;
 			}
 
-			proxy.getEventManager().fire(new DiscordChatEvent(user, message, new HashSet<>(servers))).thenAccept(e -> {
+			proxy.getEventManager().fire(new DiscordChatEvent(user, content, new HashSet<>(servers))).thenAccept(e -> {
 				if (!e.getResult().isAllowed() && !logSentMessages) {
 					event.deleteMessage();
 					plugin.getDebugLogger().info(ignoreMessage + "DiscordChatEvent got denied result");
 					return;
 				}
 
-				handleDiscordMessage(user, event, e.getResult().getMessage().orElse(e.getMessage()), e.getServers());
+				handleDiscordMessage(message, e);
 			}).exceptionally(e -> {
 				logger.warn("Failed to handle discord message: " + e.getMessage());
 				return null;
@@ -366,39 +308,20 @@ public class LoggingChannelHandler {
 		}).schedule();
 	}
 
-    private void handleDiscordMessage(User user, MessageCreateEvent originalEvent, String message, Set<RegisteredServer> servers) {
-		if(ingameChatFormat.isEmpty()) {
-			return;
-		}
-
-		MessageAuthor author = originalEvent.getMessageAuthor();
+    private void handleDiscordMessage(Message message, DiscordChatEvent event) {
+		User user = event.getSender();
+		String messageContent = event.getResult().getMessage().orElse(event.getMessageContent());
+		Set<RegisteredServer> servers = event.getServers();
 
 		if(logSentMessages) {
 			try {
-				String sanitised = Util.plainSerializer.serialize(Util.plainSerializer.deserialize(message));
-				String formatted = Util.formatDiscordMessage(formats.get(LogType.DISCORD_CHAT), dateFormat, codeBlock,
-															 user, author, Map.of("message", sanitised));
-				queueLogMessage(formatted);
+				queueLogMessage(formatter.formatDiscordMessageLog(user, message, messageContent));
 			} catch (IllegalStateException e) {
 				logger.warn("Failed to send Discord message: " + e.getMessage());
 			}
 		}
 
-		CachedMetaData metaData = user.getCachedData().getMetaData(QueryOptions.nonContextual());
-		String prefix = ( metaData.getPrefix() != null) ?  metaData.getPrefix() : "";
-		String suffix = ( metaData.getSuffix() != null) ?  metaData.getSuffix() : "";
-
-		TagResolver.Builder placeholders = TagResolver.builder();
-
-        placeholders.resolver(Placeholder.unparsed("player", user.getFriendlyName()));
-        placeholders.resolver(Placeholder.unparsed("uuid", user.getUniqueId().toString()));
-        placeholders.resolver(Placeholder.unparsed("discord_id", author.getIdAsString()));
-        placeholders.resolver(Placeholder.unparsed("discord_username", author.getName()));
-		placeholders.resolver(Placeholder.component("message", Util.prepareDiscordMessage(message)));
-		placeholders.resolver(Placeholder.parsed("prefix", prefix));
-		placeholders.resolver(Placeholder.parsed("suffix", suffix));
-
-		Component messageComponent = Util.miniMessage.deserialize(ingameChatFormat, placeholders.build());
+		Component messageComponent = formatter.formatDiscordMessageIngame(user, message, messageContent);
 
 		proxy.getAllPlayers().forEach(player -> {
 			RegisteredServer server = player.getCurrentServer().map(ServerConnection::getServer).orElse(null);

@@ -1,7 +1,7 @@
 <component name="libraryTable">
   <library name="Gradle: cloud.commandframework:cloud-services:1.8.3">
     <CLASSES>
-      <root url="jar://$USER_HOME$/.local/share/gradle/caches/modules-2/files-2.1/cloud.commandframework/cloud-services/1.8.3/14ede2d39942c798d71396c293d5661237825ec8/cloud-services-1.8.3.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/cloud/commandframework/cloud-services/1.8.3/cloud-services-1.8.3.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES>

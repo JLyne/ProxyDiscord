@@ -170,7 +170,7 @@ public class AnnouncementChannelHandler {
         }
 
         lastMessage = message;
-        String content = Util.getDiscordMessageContent(message);
+        String content = message.getReadableContent();
         String headingKey = isNew ? "announcement-new" : "announcement-latest";
 
 		var state = new Object() {
@@ -196,12 +196,14 @@ public class AnnouncementChannelHandler {
 
 		if(state.truncated) {
 			announcement.append(Util.prepareDiscordMessage(text + "..."));
+			announcement.append(Util.prepareDiscordMessageAttachments(message));
 			announcement.append(Component.newline()).append(
 					Messages.getComponent("announcement-read-more")
 							.clickEvent(ClickEvent.openUrl(Util.getDiscordMessageURL(message)))
 							.hoverEvent(HoverEvent.showText(Messages.getComponent("announcement-read-more-tooltip"))));
         } else {
 			announcement.append(Util.prepareDiscordMessage(text));
+			announcement.append(Util.prepareDiscordMessageAttachments(message));
 		}
 
 		Component finalMessage = announcement.build();

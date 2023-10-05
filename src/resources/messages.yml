@@ -285,3 +285,10 @@ slash-command-info-discord-description: Get information on a Discord user's link
 slash-command-info-user-argument-description: The Discord user
 slash-command-info-username-argument-description: The player's Minecraft username or UUID
 context-menu-info-label: Minecraft Info
+
+attachment: '<link><hover:show_text:''Click to view attachment''><#8194e4>[<white><type_icon><#8194e4> <filename>]'
+attachment-log: "[<type> <filename> - <url>]"
+attachment-type-image: 'Image'
+attachment-type-image-icon: ''
+attachment-type-generic: 'File'
+attachment-type-generic-icon: ''

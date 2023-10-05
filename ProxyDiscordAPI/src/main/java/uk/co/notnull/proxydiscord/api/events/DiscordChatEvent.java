@@ -36,37 +36,57 @@ import java.util.Set;
  */
 @SuppressWarnings("unused")
 public final class DiscordChatEvent implements ResultedEvent<PlayerChatEvent.ChatResult> {
-	private final User user;
+	private final User sender;
 	private final Set<RegisteredServer> servers;
-	private final String message;
+	private final String messageContent;
 	private PlayerChatEvent.ChatResult result = PlayerChatEvent.ChatResult.allowed();
 
 	/**
 	 * Constructs a DiscordChatEvent.
-	 * @param user The Luckperms user of the Minecraft account which is linked to the sender Discord account
-	 * @param message The sent message
+	 * @param sender The Luckperms user of the Minecraft account which is linked to the sender Discord account
+	 * @param messageContent The sent message content
 	 * @param servers The servers the message is to be shown in
 	 */
-	public DiscordChatEvent(User user, String message, Set<RegisteredServer> servers) {
-		this.user = user;
-		this.message = message;
+	public DiscordChatEvent(User sender, String messageContent, Set<RegisteredServer> servers) {
+		this.sender = sender;
+		this.messageContent = messageContent;
 		this.servers = servers;
 	}
 
 	/**
 	 * Gets the luckperms {@link User} of the sending Discord account
 	 * @return the user
+	 * @deprecated use getSender instead
 	 */
+	@Deprecated
 	public User getUser() {
-		return user;
+		return sender;
+	}
+
+	/**
+	 * Gets the luckperms {@link User} of the sending Discord account
+	 * @return the user
+	 */
+	public User getSender() {
+		return sender;
+	}
+
+	/**
+	 * Gets the sent message
+	 * @return the message
+	 * @deprecated Use getMessageContent instead
+	 */
+	@Deprecated(forRemoval = true)
+	public String getMessage() {
+		return messageContent;
 	}
 
 	/**
 	 * Gets the sent message
 	 * @return the message
 	 */
-	public String getMessage() {
-		return message;
+	public String getMessageContent() {
+		return messageContent;
 	}
 
 	public PlayerChatEvent.ChatResult getResult() {
@@ -88,8 +108,8 @@ public final class DiscordChatEvent implements ResultedEvent<PlayerChatEvent.Cha
 	@Override
 	public String toString() {
 		return "PlayerChatEvent{"
-				+ "user=" + user
-				+ ", message=" + message
+				+ "sender=" + sender
+				+ ", messageContent=" + messageContent
 				+ ", result=" + result
 				+ '}';
 	}
