@@ -21,7 +21,7 @@
  * SOFTWARE.
  */
 
-package uk.co.notnull.proxydiscord.renderer;
+package uk.co.notnull.proxydiscord.markdown;
 
 import dev.vankka.mcdiscordreserializer.renderer.implementation.DefaultMinecraftRenderer;
 import net.kyori.adventure.text.Component;
