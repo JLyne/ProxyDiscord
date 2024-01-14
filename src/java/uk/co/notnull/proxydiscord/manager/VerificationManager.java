@@ -28,7 +28,7 @@ import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
-import ninja.leaping.configurate.ConfigurationNode;
+import org.spongepowered.configurate.ConfigurationNode;
 import org.javacord.api.entity.permission.Role;
 import org.javacord.api.entity.user.User;
 import org.javacord.api.event.server.member.ServerMemberBanEvent;
@@ -85,18 +85,18 @@ public class VerificationManager implements uk.co.notnull.proxydiscord.api.manag
     }
 
     private void parseConfig(ConfigurationNode config) {
-        ConfigurationNode roleIds = config.getNode("linking", "verified-role-ids");
+        ConfigurationNode roleIds = config.node("linking", "verified-role-ids");
 
         verifiedRoleIds = new HashSet<>();
         lastKnownStatuses.clear();
 
-        if(!roleIds.isEmpty()) {
+        if(!roleIds.empty()) {
             if(roleIds.isList()) {
 
-                List<? extends ConfigurationNode> children = roleIds.getChildrenList();
+                List<? extends ConfigurationNode> children = roleIds.childrenList();
 
                 children.forEach((ConfigurationNode child) -> {
-                    if(!child.isEmpty() && !child.isMap() && !child.isList()) {
+                    if(!child.empty() && !child.isMap() && !child.isList()) {
                         String roleId = child.getString(null);
 
                         try {
@@ -118,8 +118,8 @@ public class VerificationManager implements uk.co.notnull.proxydiscord.api.manag
             }
         }
 
-        bypassPermission = config.getNode("linking", "bypass-permission").getString();
-        String linkingServerName = config.getNode("linking", "linking-server").getString();
+        bypassPermission = config.node("linking", "bypass-permission").getString();
+        String linkingServerName = config.node("linking", "linking-server").getString();
         linkingServer = proxy.getServer(linkingServerName).orElse(null);
 
         publicServers.clear();
@@ -130,7 +130,7 @@ public class VerificationManager implements uk.co.notnull.proxydiscord.api.manag
             publicServers.add(linkingServer);
         }
 
-        List<? extends ConfigurationNode> publicServerNames = config.getNode("linking", "public-servers").getChildrenList();
+        List<? extends ConfigurationNode> publicServerNames = config.node("linking", "public-servers").childrenList();
 
         for(ConfigurationNode serverName : publicServerNames) {
             String name = serverName.getString();
@@ -143,7 +143,7 @@ public class VerificationManager implements uk.co.notnull.proxydiscord.api.manag
             }
         }
 
-        String defaultVerifiedServerName = config.getNode("linking", "default-destination-server").getString();
+        String defaultVerifiedServerName = config.node("linking", "default-destination-server").getString();
         defaultVerifiedServer = proxy.getServer(defaultVerifiedServerName).orElse(null);
 
         if(defaultVerifiedServer == null && defaultVerifiedServerName != null && !defaultVerifiedServerName.isEmpty()) {

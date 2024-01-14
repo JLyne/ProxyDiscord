@@ -26,7 +26,7 @@ package uk.co.notnull.proxydiscord.manager;
 import com.google.common.collect.HashBiMap;
 import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.proxy.Player;
-import ninja.leaping.configurate.ConfigurationNode;
+import org.spongepowered.configurate.ConfigurationNode;
 import org.javacord.api.DiscordApi;
 import org.javacord.api.entity.channel.ServerTextChannel;
 import org.javacord.api.entity.user.User;
@@ -98,9 +98,9 @@ public class LinkingManager implements uk.co.notnull.proxydiscord.api.manager.Li
     }
 
     private void parseConfig(ConfigurationNode config) {
-        String linkingChannelId = config.getNode("linking", "discord-channel-id").getString();
-		String linkingSecret = config.getNode("linking", "secret").getString(); //TODO: Validate
-		boolean allowDiscordUnlink = config.getNode("linking", "allow-discord-unlinking").getBoolean(false);
+        String linkingChannelId = config.node("linking", "discord-channel-id").getString();
+		String linkingSecret = config.node("linking", "secret").getString(); //TODO: Validate
+		boolean allowDiscordUnlink = config.node("linking", "allow-discord-unlinking").getBoolean(false);
 
 		this.linkingSecret = linkingSecret;
         this.linkingChannelId = linkingChannelId;

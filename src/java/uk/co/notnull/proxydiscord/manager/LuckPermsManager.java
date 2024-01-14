@@ -35,7 +35,7 @@ import net.luckperms.api.node.Node;
 import net.luckperms.api.query.Flag;
 import net.luckperms.api.query.QueryOptions;
 import net.luckperms.api.util.Tristate;
-import ninja.leaping.configurate.ConfigurationNode;
+import org.spongepowered.configurate.ConfigurationNode;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
@@ -71,7 +71,7 @@ public class LuckPermsManager {
     }
 
 	private void parseConfig(ConfigurationNode config) {
-        verifiedPermission = config.getNode("linking", "verified-permission").getString();
+        verifiedPermission = config.node("linking", "verified-permission").getString();
     }
 
 	@Subscribe(order = PostOrder.NORMAL)

@@ -23,7 +23,7 @@
 
 package uk.co.notnull.proxydiscord.manager;
 
-import ninja.leaping.configurate.ConfigurationNode;
+import org.spongepowered.configurate.ConfigurationNode;
 import org.slf4j.Logger;
 import uk.co.notnull.proxydiscord.ProxyDiscord;
 import uk.co.notnull.proxydiscord.announcements.AnnouncementChannelHandler;
@@ -37,7 +37,7 @@ public class AnnouncementManager {
     private final Logger logger;
 
     public AnnouncementManager(ProxyDiscord plugin, ConfigurationNode config) {
-        this.config = config.getNode("announcement-channels");
+        this.config = config.node("announcement-channels");
         this.logger = plugin.getLogger();
 
         handlers = new ArrayList<>();
@@ -50,10 +50,10 @@ public class AnnouncementManager {
         handlers.forEach(AnnouncementChannelHandler::remove);
         handlers.clear();
 
-        config.getChildrenMap().forEach((Object id, ConfigurationNode settings) -> {
+        config.childrenMap().forEach((Object id, ConfigurationNode settings) -> {
             String channelID = id.toString();
-            boolean serverList = !settings.getNode("servers").isVirtual();
-            List<? extends ConfigurationNode> servers = settings.getNode("servers").getChildrenList();
+            boolean serverList = !settings.node("servers").virtual();
+            List<? extends ConfigurationNode> servers = settings.node("servers").childrenList();
 
             if(serverList && servers.isEmpty()) {
                 logger.warn("Skipping announcement channel " + channelID + ". Server list defined but empty.");
@@ -77,7 +77,7 @@ public class AnnouncementManager {
     }
 
     public void reload(ConfigurationNode config) {
-        this.config = config.getNode("announcement-channels");
+        this.config = config.node("announcement-channels");
         findChannels();
     }
 }

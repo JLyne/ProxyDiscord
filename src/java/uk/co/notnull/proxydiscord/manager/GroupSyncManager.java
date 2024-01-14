@@ -27,7 +27,7 @@ import com.velocitypowered.api.event.PostOrder;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
-import ninja.leaping.configurate.ConfigurationNode;
+import org.spongepowered.configurate.ConfigurationNode;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.javacord.api.entity.permission.Role;
 import org.javacord.api.entity.user.User;
@@ -86,14 +86,14 @@ public class GroupSyncManager implements uk.co.notnull.proxydiscord.api.manager.
 	}
 
 	private void parseConfig(ConfigurationNode config) {
-		ConfigurationNode settings = config.getNode("synced-roles");
+		ConfigurationNode settings = config.node("synced-roles");
 
 		groups.clear();
 		syncedRoles.clear();
 		syncSettings.clear();
 
-		if (!settings.isEmpty()) {
-			Map<Object, ? extends ConfigurationNode> syncSettingsMap = settings.getChildrenMap();
+		if (!settings.empty()) {
+			Map<Object, ? extends ConfigurationNode> syncSettingsMap = settings.childrenMap();
 
 			syncSettingsMap.forEach((Object role, ConfigurationNode roleConfig) -> {
 				long roleId;
@@ -106,17 +106,17 @@ public class GroupSyncManager implements uk.co.notnull.proxydiscord.api.manager.
 					return;
 				}
 
-				if (roleConfig.isEmpty()) {
+				if (roleConfig.empty()) {
 					logger.warn("Ignoring synced role '" + role + "': No groups assigned");
 					return;
 				}
 
 				if (roleConfig.isList()) {
 					groupNames = new HashSet<>();
-					List<? extends ConfigurationNode> children = roleConfig.getChildrenList();
+					List<? extends ConfigurationNode> children = roleConfig.childrenList();
 
 					children.forEach((ConfigurationNode child) -> {
-						if (!child.isEmpty() && !child.isMap() && !child.isList()) {
+						if (!child.empty() && !child.isMap() && !child.isList()) {
 							groupNames.add(child.getString());
 						}
 					});

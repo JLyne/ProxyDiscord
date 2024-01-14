@@ -29,7 +29,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentLike;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
-import ninja.leaping.configurate.ConfigurationNode;
+import org.spongepowered.configurate.ConfigurationNode;
 import org.javacord.api.entity.message.component.ActionRowBuilder;
 import org.javacord.api.entity.message.component.Button;
 import org.javacord.api.entity.message.embed.EmbedBuilder;
@@ -59,7 +59,7 @@ public class Messages {
             return "";
         }
 
-        String message = messages.getNode((Object[]) id.split("\\."))
+        String message = messages.node((Object[]) id.split("\\."))
                 .getString("Message " + id + " does not exist");
 
         for (Map.Entry<String, String> entry : replacements.entrySet()) {
@@ -78,7 +78,7 @@ public class Messages {
             return Component.empty();
         }
 
-        String message = messages.getNode((Object[]) id.split("\\."))
+        String message = messages.node((Object[]) id.split("\\."))
                 .getString("Message " + id + " does not exist");
 
         TagResolver.@NotNull Builder placeholders = TagResolver.builder();
@@ -117,13 +117,13 @@ public class Messages {
             return new EmbedBuilder().setTitle("Invalid embed id " + id);
         }
 
-        ConfigurationNode message = messages.getNode(id);
+        ConfigurationNode message = messages.node(id);
 
-        if(message.isVirtual()) {
+        if(message.virtual()) {
             return new EmbedBuilder().setTitle("Embed " + id + " does not exist");
         }
 
-        Map<Object, ? extends ConfigurationNode> messageContent = message.getChildrenMap();
+        Map<Object, ? extends ConfigurationNode> messageContent = message.childrenMap();
         EmbedBuilder embed = new EmbedBuilder();
 
         if(messageContent.containsKey("title")) {
@@ -159,11 +159,11 @@ public class Messages {
         }
 
         if(messageContent.containsKey("fields")) {
-            List<? extends ConfigurationNode> fields = messageContent.get("fields").getChildrenList();
+            List<? extends ConfigurationNode> fields = messageContent.get("fields").childrenList();
 
             for (ConfigurationNode field : fields) {
-                String name = field.getNode("name").getString(null);
-                String value = field.getNode("value").getString(null);
+                String name = field.node("name").getString(null);
+                String value = field.node("value").getString(null);
 
                 if (name != null) {
                     for (Map.Entry<String, String> entry : replacements.entrySet()) {
@@ -177,7 +177,7 @@ public class Messages {
                     }
                 }
 
-                embed.addField(name, value, field.getNode("inline").getBoolean(false));
+                embed.addField(name, value, field.node("inline").getBoolean(false));
             }
         }
 
@@ -185,7 +185,7 @@ public class Messages {
             Color color;
 
             try {
-                color = Color.decode(message.getNode("colour").getString(""));
+                color = Color.decode(message.node("colour").getString(""));
             } catch (NumberFormatException e) {
                 color = Color.LIGHT_GRAY;
             }
@@ -205,18 +205,18 @@ public class Messages {
             return new ActionRowBuilder();
         }
 
-        ConfigurationNode node = messages.getNode(id);
+        ConfigurationNode node = messages.node(id);
 
-        if(node.isVirtual()) {
+        if(node.virtual()) {
             return new ActionRowBuilder();
         }
 
-        List<? extends ConfigurationNode> components = node.getChildrenList();
+        List<? extends ConfigurationNode> components = node.childrenList();
         ActionRowBuilder row = new ActionRowBuilder();
 
         for (ConfigurationNode component : components) {
-            String label = component.getNode("label").getString(null);
-            String url = component.getNode("url").getString(null);
+            String label = component.node("label").getString(null);
+            String url = component.node("url").getString(null);
 
             if (label != null) {
                 for (Map.Entry<String, String> entry : replacements.entrySet()) {

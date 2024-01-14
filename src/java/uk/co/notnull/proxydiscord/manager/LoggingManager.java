@@ -31,7 +31,7 @@ import com.velocitypowered.api.event.player.PlayerChatEvent;
 import com.velocitypowered.api.event.player.ServerPostConnectEvent;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
-import ninja.leaping.configurate.ConfigurationNode;
+import org.spongepowered.configurate.ConfigurationNode;
 import org.slf4j.Logger;
 import uk.co.notnull.proxydiscord.ProxyDiscord;
 import uk.co.notnull.proxydiscord.api.events.DiscordLogEvent;
@@ -82,14 +82,14 @@ public class LoggingManager implements uk.co.notnull.proxydiscord.api.manager.Lo
     private void parseConfig(ConfigurationNode config, boolean reload) {
         Set<Long> existing = new HashSet<>(handlers.keySet());
 
-		useChatEvent = config.getNode("events", "use-chat-event").getBoolean(true);
-		useCommandEvent = config.getNode("events", "use-command-event").getBoolean(true);
-		useConnectEvent = config.getNode("events", "use-connect-event").getBoolean(true);
-		useDisconnectEvent = config.getNode("events", "use-disconnect-event").getBoolean(true);
+		useChatEvent = config.node("events", "use-chat-event").getBoolean(true);
+		useCommandEvent = config.node("events", "use-command-event").getBoolean(true);
+		useConnectEvent = config.node("events", "use-connect-event").getBoolean(true);
+		useDisconnectEvent = config.node("events", "use-disconnect-event").getBoolean(true);
 
-        LoggingChannelHandler.defaultConfig = config.getNode("logging", "default");
+        LoggingChannelHandler.defaultConfig = config.node("logging", "default");
 
-        config.getNode("logging").getChildrenMap().forEach((Object key, ConfigurationNode channelConfig) -> {
+        config.node("logging").childrenMap().forEach((Object key, ConfigurationNode channelConfig) -> {
             if(key.toString().equals("default")) {
                 return;
             }

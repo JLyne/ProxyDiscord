@@ -29,7 +29,7 @@ import com.velocitypowered.api.proxy.server.RegisteredServer;
 import net.kyori.adventure.text.Component;
 import net.luckperms.api.model.user.User;
 import net.luckperms.api.model.user.UserManager;
-import ninja.leaping.configurate.ConfigurationNode;
+import org.spongepowered.configurate.ConfigurationNode;
 import org.javacord.api.entity.channel.ServerTextChannel;
 import org.javacord.api.entity.channel.TextChannel;
 import org.javacord.api.entity.message.Message;
@@ -104,11 +104,11 @@ public class LoggingChannelHandler {
 		servers.clear();
 		events.clear();
 
-		ConfigurationNode eventList = config.getNode("events");
-		eventList = eventList.isEmpty() ? defaultConfig.getNode("events") : eventList;
+		ConfigurationNode eventList = config.node("events");
+		eventList = eventList.empty() ? defaultConfig.node("events") : eventList;
 
 		if(eventList.isList()) {
-			eventList.getChildrenList().forEach((ConfigurationNode event) -> {
+			eventList.childrenList().forEach((ConfigurationNode event) -> {
 				try {
 					LogType logType = LogType.valueOf(event.getString("").toUpperCase(Locale.ROOT)
 															  .replace("-", "_"));
@@ -120,13 +120,13 @@ public class LoggingChannelHandler {
 		}
 
         logSentMessages = events.contains(LogType.DISCORD_CHAT);
-		logIsPublic = config.getNode("public").getBoolean(defaultConfig.getNode("public").getBoolean(true));
+		logIsPublic = config.node("public").getBoolean(defaultConfig.node("public").getBoolean(true));
 
-        ConfigurationNode serverList = config.getNode("servers");
-        serverList = serverList.isEmpty() ? defaultConfig.getNode("servers") : serverList;
+        ConfigurationNode serverList = config.node("servers");
+        serverList = serverList.empty() ? defaultConfig.node("servers") : serverList;
 
         if(serverList.isList()) {
-        	serverList.getChildrenList().forEach((ConfigurationNode key) -> {
+        	serverList.childrenList().forEach((ConfigurationNode key) -> {
         		Optional<RegisteredServer> server = proxy.getServer(key.getString(""));
 
         		if(server.isEmpty()) {
@@ -138,7 +138,7 @@ public class LoggingChannelHandler {
 			});
 		}
 
-        this.formatter = new LoggingFormatter(config.getNode("formats"), defaultConfig.getNode("formats"));
+        this.formatter = new LoggingFormatter(config.node("formats"), defaultConfig.node("formats"));
 	}
 
 	private void findChannel() {

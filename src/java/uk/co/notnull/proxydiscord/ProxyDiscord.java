@@ -66,11 +66,11 @@ import java.util.Optional;
 import java.util.function.Function;
 
 import com.google.common.io.ByteStreams;
-import ninja.leaping.configurate.ConfigurationNode;
+import org.spongepowered.configurate.ConfigurationNode;
 import org.slf4j.Logger;
 
 import javax.inject.Inject;
-import ninja.leaping.configurate.yaml.YAMLConfigurationLoader;
+import org.spongepowered.configurate.yaml.YamlConfigurationLoader;
 import uk.co.notnull.proxydiscord.manager.AnnouncementManager;
 import uk.co.notnull.proxydiscord.manager.GroupSyncManager;
 import uk.co.notnull.proxydiscord.manager.LinkingManager;
@@ -169,7 +169,7 @@ public class ProxyDiscord implements uk.co.notnull.proxydiscord.api.ProxyDiscord
 		// Setup config
 		loadResource("config.yml");
 		try {
-			configuration = YAMLConfigurationLoader.builder().setFile(
+			configuration = YamlConfigurationLoader.builder().file(
 					new File(dataDirectory.toAbsolutePath().toString(), "config.yml")).build().load();
 		} catch (IOException e) {
 			logger.error("Error loading config.yml");
@@ -182,7 +182,7 @@ public class ProxyDiscord implements uk.co.notnull.proxydiscord.api.ProxyDiscord
 		ConfigurationNode messagesConfiguration;
 
 		try {
-			messagesConfiguration = YAMLConfigurationLoader.builder().setFile(
+			messagesConfiguration = YamlConfigurationLoader.builder().file(
 					new File(dataDirectory.toAbsolutePath().toString(), "messages.yml")).build().load();
 		} catch (IOException e) {
 			logger.error("Error loading messages.yml");

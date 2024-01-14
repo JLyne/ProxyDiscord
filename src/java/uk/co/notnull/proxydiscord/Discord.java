@@ -26,7 +26,7 @@
 
 package uk.co.notnull.proxydiscord;
 
-import ninja.leaping.configurate.ConfigurationNode;
+import org.spongepowered.configurate.ConfigurationNode;
 import org.javacord.api.entity.activity.ActivityType;
 import org.javacord.api.entity.intent.Intent;
 import org.javacord.api.DiscordApiBuilder;
@@ -61,7 +61,7 @@ public class Discord {
 	public Discord(ProxyDiscord plugin, ConfigurationNode config) {
 		this.logger = plugin.getLogger();
 
-		String token = config.getNode("bot", "token").getString(null);
+		String token = config.node("bot", "token").getString(null);
 
 		if(token == null || token.isEmpty()) {
 			throw new IllegalArgumentException("No bot token provided, check the config");
@@ -112,8 +112,8 @@ public class Discord {
 	}
 
 	private void updateActivity(ConfigurationNode config) {
-		String activity = config.getNode("bot", "activity").getString(null);
-		String activityType = config.getNode("bot", "activity-type").getString("");
+		String activity = config.node("bot", "activity").getString(null);
+		String activityType = config.node("bot", "activity-type").getString("");
 		ActivityType type = switch (activityType.toLowerCase()) {
 			case "streaming" -> ActivityType.STREAMING;
 			case "listening" -> ActivityType.LISTENING;
@@ -215,7 +215,7 @@ public class Discord {
 	}
 
 	public void reload(ConfigurationNode config) {
-		if(connected && !api.getToken().equals(config.getNode("bot", "token").getString(null))) {
+		if(connected && !api.getToken().equals(config.node("bot", "token").getString(null))) {
 			logger.warn("You must restart the proxy for bot token changes to take effect");
 		}
 

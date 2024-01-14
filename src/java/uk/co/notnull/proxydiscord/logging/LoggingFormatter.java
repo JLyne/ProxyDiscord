@@ -29,7 +29,7 @@ import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import net.luckperms.api.cacheddata.CachedMetaData;
 import net.luckperms.api.model.user.User;
 import net.luckperms.api.query.QueryOptions;
-import ninja.leaping.configurate.ConfigurationNode;
+import org.spongepowered.configurate.ConfigurationNode;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.javacord.api.DiscordApi;
 import org.javacord.api.entity.emoji.CustomEmoji;
@@ -66,23 +66,23 @@ public class LoggingFormatter {
 
 	private void parseConfig(ConfigurationNode logFormats, ConfigurationNode defaultLogFormats) {
 		if(logFormats.isMap() || defaultLogFormats.isMap()) {
-            ConfigurationNode dateFormat = logFormats.getNode("date");
-            ConfigurationNode codeBlock = logFormats.getNode("code-block");
-            ConfigurationNode chatFormat = logFormats.getNode("chat");
-            ConfigurationNode discordChatFormat = logFormats.getNode("discord-chat");
-            ConfigurationNode joinFormat = logFormats.getNode("join");
-            ConfigurationNode leaveFormat = logFormats.getNode("leave");
-            ConfigurationNode commandFormat = logFormats.getNode("command");
-            ConfigurationNode ingameChatFormat = logFormats.getNode("discord-chat-ingame");
+            ConfigurationNode dateFormat = logFormats.node("date");
+            ConfigurationNode codeBlock = logFormats.node("code-block");
+            ConfigurationNode chatFormat = logFormats.node("chat");
+            ConfigurationNode discordChatFormat = logFormats.node("discord-chat");
+            ConfigurationNode joinFormat = logFormats.node("join");
+            ConfigurationNode leaveFormat = logFormats.node("leave");
+            ConfigurationNode commandFormat = logFormats.node("command");
+            ConfigurationNode ingameChatFormat = logFormats.node("discord-chat-ingame");
 
-            ConfigurationNode defaultDateFormat = defaultLogFormats.getNode("date");
-            ConfigurationNode defaultCodeBlock = defaultLogFormats.getNode("code-block");
-            ConfigurationNode defaultChatFormat = defaultLogFormats.getNode("chat");
-            ConfigurationNode defaultDiscordChatFormat = defaultLogFormats.getNode("discord-chat");
-            ConfigurationNode defaultJoinFormat = defaultLogFormats.getNode("join");
-            ConfigurationNode defaultLeaveFormat = defaultLogFormats.getNode("leave");
-            ConfigurationNode defaultCommandFormat = defaultLogFormats.getNode("command");
-            ConfigurationNode defaultIngameChatFormat = defaultLogFormats.getNode("discord-chat-ingame");
+            ConfigurationNode defaultDateFormat = defaultLogFormats.node("date");
+            ConfigurationNode defaultCodeBlock = defaultLogFormats.node("code-block");
+            ConfigurationNode defaultChatFormat = defaultLogFormats.node("chat");
+            ConfigurationNode defaultDiscordChatFormat = defaultLogFormats.node("discord-chat");
+            ConfigurationNode defaultJoinFormat = defaultLogFormats.node("join");
+            ConfigurationNode defaultLeaveFormat = defaultLogFormats.node("leave");
+            ConfigurationNode defaultCommandFormat = defaultLogFormats.node("command");
+            ConfigurationNode defaultIngameChatFormat = defaultLogFormats.node("discord-chat-ingame");
 
             try {
                  this.dateFormat = new SimpleDateFormat(dateFormat.getString(defaultDateFormat.getString("")));

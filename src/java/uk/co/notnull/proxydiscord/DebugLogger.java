@@ -26,7 +26,7 @@
 
 package uk.co.notnull.proxydiscord;
 
-import ninja.leaping.configurate.ConfigurationNode;
+import org.spongepowered.configurate.ConfigurationNode;
 import org.slf4j.Logger;
 
 public class DebugLogger {
@@ -47,7 +47,7 @@ public class DebugLogger {
 	}
 
 	private void parseConfig(ConfigurationNode config) {
-		debugEnabled = config.getNode("debug").getBoolean(false);
+		debugEnabled = config.node("debug").getBoolean(false);
 
 		if(debugEnabled) {
 			logger.info("Enabled debug logging.");
