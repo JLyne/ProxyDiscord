@@ -25,7 +25,7 @@ import org.apache.tools.ant.filters.ReplaceTokens
 
 plugins {
     id 'java'
-    id 'com.github.johnrengelman.shadow' version '8.1.1'
+    id("io.github.goooler.shadow") version "8.1.3"
 }
 
 rootProject.ext.mavenUserName=""
@@ -54,6 +54,7 @@ allprojects {
         mavenLocal()
         mavenCentral()
         maven { url 'https://repo.not-null.co.uk/releases/' }
+        maven { url 'https://repo.not-null.co.uk/snapshots/' }
         maven { url "https://papermc.io/repo/repository/maven-public/" }
         maven { url "https://s01.oss.sonatype.org/content/repositories/snapshots" }
     }
@@ -73,18 +74,18 @@ allprojects {
 
 dependencies {
     implementation project(":ProxyDiscordAPI")
-    implementation 'uk.co.notnull:javacord:3.8.0'
-    implementation 'cloud.commandframework:cloud-velocity:1.8.3'
-    implementation 'cloud.commandframework:cloud-minecraft-extras:1.8.3'
-    implementation 'cloud.commandframework:cloud-annotations:1.8.3'
+    implementation 'uk.co.notnull:javacord:3.9.0-SNAPSHOT'
+    implementation 'cloud.commandframework:cloud-velocity:1.8.4'
+    implementation 'cloud.commandframework:cloud-minecraft-extras:1.8.4'
+    implementation 'cloud.commandframework:cloud-annotations:1.8.4'
     implementation 'dev.vankka:mcdiscordreserializer:4.4.0-SNAPSHOT'
     implementation 'uk.co.notnull:SuperVanishBridge-helper:1.0'
 
     compileOnly 'net.luckperms:api:5.4'
-    compileOnly 'com.velocitypowered:velocity-api:3.2.0-SNAPSHOT'
-    compileOnly 'uk.co.notnull:PlatformDetection-velocity:2.1'
+    compileOnly 'com.velocitypowered:velocity-api:3.3.0-SNAPSHOT'
+    compileOnly 'uk.co.notnull:PlatformDetection-velocity:2.2'
 
-    annotationProcessor 'com.velocitypowered:velocity-api:3.2.0-SNAPSHOT'
+    annotationProcessor 'com.velocitypowered:velocity-api:3.3.0-SNAPSHOT'
 }
 
 tasks {
