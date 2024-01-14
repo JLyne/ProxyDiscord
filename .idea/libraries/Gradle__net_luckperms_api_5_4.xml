@@ -1,9 +1,0 @@
-<component name="libraryTable">
-  <library name="Gradle: net.luckperms:api:5.4">
-    <CLASSES>
-      <root url="jar://$MAVEN_REPOSITORY$/net/luckperms/api/5.4/api-5.4.jar!/" />
-    </CLASSES>
-    <JAVADOC />
-    <SOURCES />
-  </library>
-</component>
