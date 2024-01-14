@@ -42,7 +42,7 @@
         <module name="ProxyDiscord.main" />
       </profile>
     </annotationProcessing>
-    <bytecodeTargetLevel target="17">
+    <bytecodeTargetLevel target="21">
       <module name="BungeeDiscord" target="1.8" />
       <module name="BungeeDiscord.main" target="1.8" />
       <module name="BungeeDiscord.test" target="1.8" />
