@@ -97,7 +97,7 @@ public class VerificationManager implements uk.co.notnull.proxydiscord.api.manag
 
                 children.forEach((ConfigurationNode child) -> {
                     if(!child.empty() && !child.isMap() && !child.isList()) {
-                        String roleId = child.getString(null);
+                        String roleId = child.getString();
 
                         try {
                             verifiedRoleIds.add(Long.parseLong(roleId));
@@ -107,7 +107,7 @@ public class VerificationManager implements uk.co.notnull.proxydiscord.api.manag
                     }
                 });
             } else {
-                String roleId = roleIds.getString(null);
+                String roleId = roleIds.getString();
 
                 try {
                     verifiedRoleIds = Collections.singleton(Long.parseLong(roleId));

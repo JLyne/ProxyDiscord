@@ -147,7 +147,7 @@ public class Messages {
         }
 
         if(messageContent.containsKey("thumbnail")) {
-            String thumbnail = messageContent.get("thumbnail").getString(null);
+            String thumbnail = messageContent.get("thumbnail").getString();
 
             if(thumbnail != null) {
                 for (Map.Entry<String, String> entry : replacements.entrySet()) {
@@ -162,8 +162,8 @@ public class Messages {
             List<? extends ConfigurationNode> fields = messageContent.get("fields").childrenList();
 
             for (ConfigurationNode field : fields) {
-                String name = field.node("name").getString(null);
-                String value = field.node("value").getString(null);
+                String name = field.node("name").getString();
+                String value = field.node("value").getString();
 
                 if (name != null) {
                     for (Map.Entry<String, String> entry : replacements.entrySet()) {
@@ -215,8 +215,8 @@ public class Messages {
         ActionRowBuilder row = new ActionRowBuilder();
 
         for (ConfigurationNode component : components) {
-            String label = component.node("label").getString(null);
-            String url = component.node("url").getString(null);
+            String label = component.node("label").getString();
+            String url = component.node("url").getString();
 
             if (label != null) {
                 for (Map.Entry<String, String> entry : replacements.entrySet()) {

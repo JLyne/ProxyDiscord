@@ -61,7 +61,7 @@ public class Discord {
 	public Discord(ProxyDiscord plugin, ConfigurationNode config) {
 		this.logger = plugin.getLogger();
 
-		String token = config.node("bot", "token").getString(null);
+		String token = config.node("bot", "token").getString();
 
 		if(token == null || token.isEmpty()) {
 			throw new IllegalArgumentException("No bot token provided, check the config");
@@ -112,7 +112,7 @@ public class Discord {
 	}
 
 	private void updateActivity(ConfigurationNode config) {
-		String activity = config.node("bot", "activity").getString(null);
+		String activity = config.node("bot", "activity").getString();
 		String activityType = config.node("bot", "activity-type").getString("");
 		ActivityType type = switch (activityType.toLowerCase()) {
 			case "streaming" -> ActivityType.STREAMING;
@@ -215,7 +215,7 @@ public class Discord {
 	}
 
 	public void reload(ConfigurationNode config) {
-		if(connected && !api.getToken().equals(config.node("bot", "token").getString(null))) {
+		if(connected && !api.getToken().equals(config.node("bot", "token").getString())) {
 			logger.warn("You must restart the proxy for bot token changes to take effect");
 		}
 
