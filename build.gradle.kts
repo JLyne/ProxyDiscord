@@ -21,6 +21,40 @@
  * SOFTWARE.
  */
 
-include "ProxyDiscordAPI"
+plugins {
+    id("proxy-discord.java-conventions")
+    alias(libs.plugins.shadow)
+}
 
-rootProject.name = 'ProxyDiscord'
+dependencies {
+    implementation(project(":ProxyDiscordAPI"))
+    implementation(libs.javacord)
+    implementation(libs.cloudVelocity)
+    implementation(libs.cloudMinecraftExtras)
+    implementation(libs.cloudAnnotations)
+    implementation(libs.superVanishBridgeHelper)
+    implementation(libs.discordReserializer)
+
+    compileOnly(libs.platformDetection)
+
+    annotationProcessor(libs.velocityApi)
+}
+
+description = "Velocity Discord integration solution"
+
+tasks {
+    shadowJar {
+        archiveClassifier = ""
+        relocate("cloud.commandframework", "uk.co.notnull.proxyqueues.shaded.cloud")
+        relocate("io.leangen.geantyref", "uk.co.notnull.proxyqueues.shaded.typetoken")
+        relocate("uk.co.notnull.SuperVanishBridge", "uk.co.notnull.proxyqueues.shaded.supervanishbridge")
+    }
+
+    build {
+        dependsOn(shadowJar)
+    }
+
+    processResources {
+        expand("version" to project.version)
+    }
+}

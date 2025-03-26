@@ -1,8 +1,8 @@
 {
   "id": "proxydiscord",
   "name": "ProxyDiscord",
-  "version": "@project.version@",
-  "authors": ["Jim (NotKatuen)"],
+  "version": "${version}",
+  "authors": ["Jim (AnEnragedPigeon)"],
   "dependencies": [
     {
       "id": "luckperms",
