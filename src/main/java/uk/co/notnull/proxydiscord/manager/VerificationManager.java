@@ -23,7 +23,6 @@
 
 package uk.co.notnull.proxydiscord.manager;
 
-import com.velocitypowered.api.event.PostOrder;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
@@ -54,7 +53,7 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
-public class VerificationManager implements uk.co.notnull.proxydiscord.api.manager.VerificationManager {
+public final class VerificationManager implements uk.co.notnull.proxydiscord.api.manager.VerificationManager {
     private final ProxyDiscord plugin;
     private final LinkingManager linkingManager;
 
@@ -153,12 +152,12 @@ public class VerificationManager implements uk.co.notnull.proxydiscord.api.manag
         populateUsers();
     }
 
-    @Subscribe(order = PostOrder.NORMAL)
+    @Subscribe()
     public void onPlayerLink(PlayerLinkEvent event) {
         event.getPlayer().ifPresent(this::checkVerificationStatus);
     }
 
-    @Subscribe(order = PostOrder.NORMAL)
+    @Subscribe()
     public void onPlayerUnlink(PlayerUnlinkEvent event) {
         event.getPlayer().ifPresent(this::checkVerificationStatus);
     }

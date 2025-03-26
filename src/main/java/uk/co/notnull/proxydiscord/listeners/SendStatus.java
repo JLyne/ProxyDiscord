@@ -54,12 +54,12 @@ public class SendStatus {
         linkingManager = plugin.getLinkingManager();
     }
 
-	@Subscribe(order = PostOrder.FIRST)
+	@Subscribe(priority = Short.MAX_VALUE - 1)
     public void onServerPostConnect(ServerPostConnectEvent e) {
 		sendStatusPacket(e.getPlayer(), verificationManager.checkVerificationStatus(e.getPlayer()));
     }
 
-    @Subscribe(order = PostOrder.LAST)
+    @Subscribe(priority = Short.MIN_VALUE + 1)
     public void onPlayerVerifyStatusChange(PlayerVerifyStateChangeEvent e) {
 		if(e.getState() == VerificationResult.VERIFIED && !e.getPreviousState().isVerified()
 				&& e.getPreviousState() != VerificationResult.UNKNOWN) {

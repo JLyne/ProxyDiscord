@@ -23,7 +23,6 @@
 
 package uk.co.notnull.proxydiscord.manager;
 
-import com.velocitypowered.api.event.PostOrder;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.player.ServerPreConnectEvent;
 import com.velocitypowered.api.proxy.Player;
@@ -54,7 +53,7 @@ public class RedirectManager {
         destinations = new ConcurrentHashMap<>();
     }
 
-    @Subscribe(order = PostOrder.LAST)
+    @Subscribe(priority = Short.MIN_VALUE + 1)
     public void onPlayerConnect(ServerPreConnectEvent event) {
         Optional<RegisteredServer> redirectServer = event.getResult().getServer();
 
@@ -67,7 +66,7 @@ public class RedirectManager {
         }
     }
 
-    @Subscribe(order = PostOrder.NORMAL)
+    @Subscribe()
     public void onPlayerVerifyStateChange(PlayerVerifyStateChangeEvent event) {
         Player player = event.getPlayer();
         RegisteredServer currentServer = player.getCurrentServer().map(ServerConnection::getServer).orElse(null);

@@ -23,7 +23,6 @@
 
 package uk.co.notnull.proxydiscord.manager;
 
-import com.velocitypowered.api.event.PostOrder;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
@@ -54,7 +53,7 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class GroupSyncManager implements uk.co.notnull.proxydiscord.api.manager.GroupSyncManager {
+public final class GroupSyncManager implements uk.co.notnull.proxydiscord.api.manager.GroupSyncManager {
 	private final ProxyDiscord plugin;
 	private final Logger logger;
 	private final ProxyServer proxy;
@@ -161,12 +160,12 @@ public class GroupSyncManager implements uk.co.notnull.proxydiscord.api.manager.
         proxy.getAllPlayers().forEach(this::syncPlayer);
 	}
 
-	@Subscribe(order = PostOrder.NORMAL)
+	@Subscribe()
     public void onPlayerLink(PlayerLinkEvent event) {
         event.getPlayer().ifPresent(this::syncPlayer);
     }
 
-    @Subscribe(order = PostOrder.NORMAL)
+    @Subscribe()
     public void onPlayerUnlink(PlayerUnlinkEvent event) {
         event.getPlayer().ifPresent(this::syncPlayer);
     }

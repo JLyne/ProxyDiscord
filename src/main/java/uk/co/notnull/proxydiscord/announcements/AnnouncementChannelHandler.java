@@ -23,7 +23,6 @@
 
 package uk.co.notnull.proxydiscord.announcements;
 
-import com.velocitypowered.api.event.PostOrder;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.connection.DisconnectEvent;
 import com.velocitypowered.api.event.player.ServerPostConnectEvent;
@@ -56,7 +55,7 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
-public class AnnouncementChannelHandler {
+public final class AnnouncementChannelHandler {
 	private final ProxyDiscord plugin;
 	private final ProxyServer proxy;
 	private final Logger logger;
@@ -246,7 +245,7 @@ public class AnnouncementChannelHandler {
 		proxy.getEventManager().unregisterListener(plugin, this);
 	}
 
-	@Subscribe(order = PostOrder.LATE)
+	@Subscribe(priority = Short.MIN_VALUE / 2)
 	public void onPlayerConnected(ServerPostConnectEvent event) {
 		Player player = event.getPlayer();
 
@@ -273,7 +272,7 @@ public class AnnouncementChannelHandler {
 		}
 	}
 
-	@Subscribe(order = PostOrder.LATE)
+	@Subscribe(priority = Short.MIN_VALUE / 2)
 	public void onPlayerDisconnected(DisconnectEvent event) {
 		sentLatestMessage.remove(event.getPlayer().getUniqueId());
 	}

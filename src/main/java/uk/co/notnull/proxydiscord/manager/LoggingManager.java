@@ -23,7 +23,6 @@
 
 package uk.co.notnull.proxydiscord.manager;
 
-import com.velocitypowered.api.event.PostOrder;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.command.CommandExecuteEvent;
 import com.velocitypowered.api.event.connection.DisconnectEvent;
@@ -122,7 +121,6 @@ public class LoggingManager implements uk.co.notnull.proxydiscord.api.manager.Lo
         });
     }
 
-    @SuppressWarnings("UnstableApiUsage")
 	@Subscribe
 	public void onServerPostConnect(ServerPostConnectEvent event) {
 		if(!useConnectEvent) {
@@ -158,7 +156,7 @@ public class LoggingManager implements uk.co.notnull.proxydiscord.api.manager.Lo
 		logEvent(leaveLog);
 	}
 
-    @Subscribe(order = PostOrder.LAST)
+    @Subscribe(priority = Short.MIN_VALUE + 1)
     public void onPlayerChat(PlayerChatEvent event) {
         if(!useChatEvent || !event.getResult().isAllowed()) {
             return;
@@ -170,7 +168,7 @@ public class LoggingManager implements uk.co.notnull.proxydiscord.api.manager.Lo
         logEvent(chatLog);
     }
 
-    @Subscribe(order = PostOrder.LATE)
+    @Subscribe(priority = Short.MIN_VALUE / 2)
     public void onPlayerCommand(CommandExecuteEvent event) {
 		if(!useCommandEvent || !event.getResult().isAllowed() || !(event.getCommandSource() instanceof Player)) {
             return;

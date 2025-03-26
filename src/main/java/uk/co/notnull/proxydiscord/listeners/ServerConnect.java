@@ -44,7 +44,7 @@ public class ServerConnect {
         verificationManager = plugin.getVerificationManager();
     }
 
-    @Subscribe(order = PostOrder.FIRST)
+    @Subscribe(priority = Short.MAX_VALUE - 1)
     public void onServerConnect(ServerPreConnectEvent e) {
         RegisteredServer server = e.getOriginalServer();
         server = e.getResult().getServer().orElse(server);

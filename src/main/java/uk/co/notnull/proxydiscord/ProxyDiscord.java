@@ -81,7 +81,7 @@ import uk.co.notnull.proxydiscord.manager.VerificationManager;
 import uk.co.notnull.supervanishbridge.helper.CloudHelper;
 import uk.co.notnull.supervanishbridge.helper.SuperVanishBridgeHelper;
 
-public class ProxyDiscord implements uk.co.notnull.proxydiscord.api.ProxyDiscord {
+public final class ProxyDiscord implements uk.co.notnull.proxydiscord.api.ProxyDiscord {
 	private static MinecraftChannelIdentifier statusIdentifier;
 	private static ProxyDiscord instance;
 

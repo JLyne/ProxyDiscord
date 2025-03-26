@@ -50,7 +50,7 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 @SuppressWarnings("unused")
-public class LinkingManager implements uk.co.notnull.proxydiscord.api.manager.LinkingManager {
+public final class LinkingManager implements uk.co.notnull.proxydiscord.api.manager.LinkingManager {
     private final ProxyDiscord plugin;
     private final ProxyServer proxy;
 

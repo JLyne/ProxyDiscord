@@ -23,7 +23,6 @@
 
 package uk.co.notnull.proxydiscord.manager;
 
-import com.velocitypowered.api.event.PostOrder;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.proxy.Player;
 import net.luckperms.api.LuckPerms;
@@ -74,7 +73,7 @@ public class LuckPermsManager {
         verifiedPermission = config.node("linking", "verified-permission").getString();
     }
 
-	@Subscribe(order = PostOrder.NORMAL)
+	@Subscribe()
     public void onPlayerVerifyStateChange(PlayerVerifyStateChangeEvent event) {
         Player player = event.getPlayer();
 

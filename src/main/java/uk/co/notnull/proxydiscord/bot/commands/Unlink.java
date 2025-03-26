@@ -41,7 +41,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
-public class Unlink implements MessageCreateListener, SlashCommandCreateListener {
+public final class Unlink implements MessageCreateListener, SlashCommandCreateListener {
     private final LinkingManager linkingManager;
     private final UserManager userManager;
 

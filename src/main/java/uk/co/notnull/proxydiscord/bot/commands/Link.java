@@ -45,7 +45,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
-public class Link implements MessageCreateListener, SlashCommandCreateListener {
+public final class Link implements MessageCreateListener, SlashCommandCreateListener {
     private final LinkingManager linkingManager;
     private final UserManager userManager;
 

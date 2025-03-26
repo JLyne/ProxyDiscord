@@ -26,7 +26,6 @@
 
 package uk.co.notnull.proxydiscord.listeners;
 
-import com.velocitypowered.api.event.PostOrder;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.connection.DisconnectEvent;
 import com.velocitypowered.api.event.player.PlayerChooseInitialServerEvent;
@@ -56,7 +55,7 @@ public class JoinLeave {
 		loggingManager = plugin.getLoggingManager();
     }
 
-	@Subscribe(order = PostOrder.FIRST)
+	@Subscribe(priority = Short.MAX_VALUE - 1)
 	public void onChooseInitialServer(PlayerChooseInitialServerEvent event) {
 		Player player = event.getPlayer();
 
@@ -72,7 +71,7 @@ public class JoinLeave {
 		});
 	}
 	
-	@Subscribe(order = PostOrder.LAST)
+	@Subscribe(priority = Short.MIN_VALUE + 1)
 	public void onDisconnect(DisconnectEvent event) {
 		Player player = event.getPlayer();
 
