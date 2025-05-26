@@ -29,13 +29,15 @@ import dev.vankka.simpleast.core.parser.ParseSpec;
 import dev.vankka.simpleast.core.parser.Parser;
 import dev.vankka.simpleast.core.parser.Rule;
 
+import java.net.*;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class CustomMarkdownRules {
-	private static final Pattern PATTERN_LINK = Pattern.compile("^https?://(?:(?:\\d{1,3}.){3}\\d{1,3}|[-\\w_.]+\\.\\w{2,})(?:/\\S*)?");
+	private static final Pattern PATTERN_LINK = Pattern.compile("^<?https?://(?:(?:\\d{1,3}.){3}\\d{1,3}|[-\\w_.]+\\.\\w{2,})(?:[^\\s>]*)?>?");
 
     private static <R> StyleNode<R, StyleNode.Style> styleNode(StyleNode.Style style) {
         return new StyleNode<>(new ArrayList<>(Collections.singletonList(style)));
@@ -52,8 +54,28 @@ public class CustomMarkdownRules {
 			public ParseSpec<R, Node<R>, S> parse(Matcher matcher, Parser<R, Node<R>, S> parser, S state) {
 				String link = matcher.group();
 
+				// Hack to fix embed suppression <> ending up in the URL
+				if(link.startsWith("<")) {
+					link = link.substring(1);
+				}
+
+				if(link.endsWith(">")) {
+					link = link.substring(0, link.length() - 1);
+				}
+
+				URI uri;
+
+				try {
+					URL url = new URL(URLDecoder.decode(link, StandardCharsets.UTF_8));
+					uri = new URI(url.getProtocol(), url.getUserInfo(), url.getHost(),
+									  url.getPort(), url.getPath(), url.getQuery(), url.getRef());
+				} catch (URISyntaxException | MalformedURLException e) {
+					return ParseSpec.createTerminal(StyleNode.createWithText(
+							link, Collections.emptyList()), state);
+				}
+
 				return ParseSpec.createTerminal(
-						styleNode(new StyleNode.ContentStyle(StyleNode.ContentStyle.Type.LINK, link)),
+						styleNode(new StyleNode.ContentStyle(StyleNode.ContentStyle.Type.LINK, uri.toString())),
 						state
 				);
 			}
