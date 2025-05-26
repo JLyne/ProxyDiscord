@@ -5,10 +5,9 @@ cloud = "1.8.4"
 superVanishBridge = "1.1"
 jetbrainsAnnotations = "26.0.2"
 platformDetection="2.2"
-proxyDiscordApi="1.2"
 javacord="3.9.0-SNAPSHOT"
 discordReserializer="4.4.0-SNAPSHOT"
-luckperms = "5.4"
+luckperms = "5.5"
 
 [libraries]
 velocityApi = { group = "com.velocitypowered", name = "velocity-api", version.ref="velocityApi" }
@@ -18,7 +17,6 @@ cloudAnnotations = { group = "cloud.commandframework", name = "cloud-annotations
 superVanishBridgeHelper = { group = "uk.co.notnull", name = "SuperVanishBridge-helper", version.ref="superVanishBridge" }
 jetbrainsAnnotations = { group = "org.jetbrains", name = "annotations", version.ref="jetbrainsAnnotations" }
 platformDetection = { group = "uk.co.notnull", name = "PlatformDetection-velocity", version.ref="platformDetection" }
-proxyDiscordApi = { group = "uk.co.notnull", name = "ProxyDiscordAPI", version.ref="proxyDiscordApi" }
 javacord = { group = "uk.co.notnull", name = "javacord", version.ref="javacord" }
 discordReserializer = { group = "dev.vankka", name = "mcdiscordreserializer", version.ref="discordReserializer" }
 luckpermsApi = { group = "net.luckperms", name = "api", version.ref = "luckperms" }
