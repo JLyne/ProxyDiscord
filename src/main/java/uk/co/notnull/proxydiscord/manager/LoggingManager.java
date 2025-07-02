@@ -128,7 +128,7 @@ public class LoggingManager implements uk.co.notnull.proxydiscord.api.manager.Lo
 		}
 
 		Player player = event.getPlayer();
-		boolean privateLog = plugin.getSuperVanishBridgeHelper().isVanished(player);
+		boolean privateLog = plugin.getVanishBridgeHelper().isVanished(player);
 		LogEntry joinLog = LogEntry.builder().type(LogType.JOIN).player(player)
 				.visibility(privateLog ? LogVisibility.PRIVATE_ONLY : LogVisibility.UNSPECIFIED).build();
 
@@ -149,7 +149,7 @@ public class LoggingManager implements uk.co.notnull.proxydiscord.api.manager.Lo
 		}
 
 		Player player = event.getPlayer();
-		boolean privateLog = plugin.getSuperVanishBridgeHelper().isVanished(player);
+		boolean privateLog = plugin.getVanishBridgeHelper().isVanished(player);
 		LogEntry leaveLog = LogEntry.builder().type(LogType.LEAVE).player(player)
 				.visibility(privateLog ? LogVisibility.PRIVATE_ONLY : LogVisibility.UNSPECIFIED).build();
 

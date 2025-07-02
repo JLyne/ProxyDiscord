@@ -30,7 +30,6 @@ import cloud.commandframework.CommandManager;
 import cloud.commandframework.annotations.AnnotationParser;
 import cloud.commandframework.arguments.parser.StandardParameters;
 import cloud.commandframework.arguments.standard.LongArgument;
-import cloud.commandframework.context.CommandContext;
 import cloud.commandframework.execution.CommandExecutionCoordinator;
 import cloud.commandframework.meta.SimpleCommandMeta;
 import cloud.commandframework.minecraft.extras.MinecraftExceptionHandler;
@@ -78,8 +77,8 @@ import uk.co.notnull.proxydiscord.manager.LoggingManager;
 import uk.co.notnull.proxydiscord.manager.LuckPermsManager;
 import uk.co.notnull.proxydiscord.manager.RedirectManager;
 import uk.co.notnull.proxydiscord.manager.VerificationManager;
-import uk.co.notnull.supervanishbridge.helper.CloudHelper;
-import uk.co.notnull.supervanishbridge.helper.SuperVanishBridgeHelper;
+import uk.co.notnull.vanishbridge.helper.CloudHelper;
+import uk.co.notnull.vanishbridge.helper.VanishBridgeHelper;
 
 public final class ProxyDiscord implements uk.co.notnull.proxydiscord.api.ProxyDiscord {
 	private static MinecraftChannelIdentifier statusIdentifier;
@@ -104,7 +103,7 @@ public final class ProxyDiscord implements uk.co.notnull.proxydiscord.api.ProxyD
 
 	private boolean platformDetectionEnabled = false;
 	private PlatformDetectionHandler platformDetectionHandler;
-	private SuperVanishBridgeHelper superVanishBridgeHelper;
+	private VanishBridgeHelper vanishBridgeHelper;
 
 	@Inject
     public ProxyDiscord(ProxyServer proxy, Logger logger, @DataDirectory Path dataDirectory) {
@@ -153,7 +152,7 @@ public final class ProxyDiscord implements uk.co.notnull.proxydiscord.api.ProxyD
             this.platformDetectionHandler = new PlatformDetectionHandler(this);
         }
 
-		this.superVanishBridgeHelper = new SuperVanishBridgeHelper(proxy);
+		this.vanishBridgeHelper = new VanishBridgeHelper(proxy);
 	}
 
 	@Subscribe
@@ -350,8 +349,8 @@ public final class ProxyDiscord implements uk.co.notnull.proxydiscord.api.ProxyD
 		return platformDetectionHandler;
 	}
 
-	public SuperVanishBridgeHelper getSuperVanishBridgeHelper() {
-		return superVanishBridgeHelper;
+	public VanishBridgeHelper getVanishBridgeHelper() {
+		return vanishBridgeHelper;
 	}
 
 	public void setEmoteProvider(EmoteProvider provider) {

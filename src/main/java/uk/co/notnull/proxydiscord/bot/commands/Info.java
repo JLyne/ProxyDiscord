@@ -107,7 +107,7 @@ public class Info implements SlashCommandCreateListener, UserContextMenuCommandL
 		switch (subcommand) {
 			case "player" -> {
 				String query = interaction.getFocusedOption().getStringValue().orElse("").toLowerCase();
-				List<SlashCommandOptionChoice> choices = ProxyDiscord.inst().getSuperVanishBridgeHelper()
+				List<SlashCommandOptionChoice> choices = ProxyDiscord.inst().getVanishBridgeHelper()
 						.getPlayerSuggestions(query, null).stream()
 						.map(player -> SlashCommandOptionChoice.create(player.getUsername(),
 																	   player.getUniqueId().toString()))
@@ -214,7 +214,7 @@ public class Info implements SlashCommandCreateListener, UserContextMenuCommandL
 				playerInfo.setCurrentServer(onlinePlayer.get().getCurrentServer()
 													.map(ServerConnection::getServer)
 													.orElse(null));
-				playerInfo.setVanished(plugin.getSuperVanishBridgeHelper().isVanished(onlinePlayer.get()));
+				playerInfo.setVanished(plugin.getVanishBridgeHelper().isVanished(onlinePlayer.get()));
 			}
 
 			return plugin.getProxy().getEventManager().fire(new PlayerInfoEvent(playerInfo));

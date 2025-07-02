@@ -32,7 +32,7 @@ dependencies {
     implementation(libs.cloudVelocity)
     implementation(libs.cloudMinecraftExtras)
     implementation(libs.cloudAnnotations)
-    implementation(libs.superVanishBridgeHelper)
+    implementation(libs.vanishBridgeHelper)
     implementation(libs.discordReserializer)
 
     compileOnly(libs.platformDetection)
@@ -47,7 +47,7 @@ tasks {
         archiveClassifier = ""
         relocate("cloud.commandframework", "uk.co.notnull.proxyqueues.shaded.cloud")
         relocate("io.leangen.geantyref", "uk.co.notnull.proxyqueues.shaded.typetoken")
-        relocate("uk.co.notnull.SuperVanishBridge", "uk.co.notnull.proxyqueues.shaded.supervanishbridge")
+        relocate("uk.co.notnull.VanishBridge", "uk.co.notnull.proxyqueues.shaded.vanishbridge")
     }
 
     build {
