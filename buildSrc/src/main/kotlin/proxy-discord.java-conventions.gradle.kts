@@ -12,9 +12,6 @@ version = "1.4-SNAPSHOT"
 val libs = the<LibrariesForLibs>()
 
 repositories {
-    mavenLocal()
-    mavenCentral()
-
     maven {
         url = uri("https://repo.papermc.io/repository/maven-public/")
     }
@@ -30,6 +27,9 @@ repositories {
     maven {
         url = uri("https://s01.oss.sonatype.org/content/repositories/snapshots")
     }
+
+    mavenCentral()
+    mavenLocal()
 }
 
 dependencies {
