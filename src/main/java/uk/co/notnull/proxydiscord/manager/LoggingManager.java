@@ -121,27 +121,39 @@ public class LoggingManager implements uk.co.notnull.proxydiscord.api.manager.Lo
         });
     }
 
-	@Subscribe
-	public void onServerPostConnect(ServerPostConnectEvent event) {
+	// Listen on high priority to run before VanishBridge updates the vanish state
+	// This allows us to log leave messages if a player leaves unvanished to join another server vanished
+	@Subscribe(priority = Short.MAX_VALUE - 1)
+	public void onServerLeave(ServerPostConnectEvent event) {
 		if(!useConnectEvent) {
 			return;
 		}
 
 		Player player = event.getPlayer();
-		boolean joinPrivateLog = plugin.getVanishBridgeHelper().isVanished(player); // Check if player is now vanished
-		boolean leavePrivateLog = plugin.getVanishBridgeHelper().wasVanished(player); // Check if player was vanished upon leaving previous server
-
-		LogEntry joinLog = LogEntry.builder().type(LogType.JOIN).player(player)
-				.visibility(joinPrivateLog ? LogVisibility.PRIVATE_ONLY : LogVisibility.UNSPECIFIED).build();
-
-		logEvent(joinLog);
+		boolean privateLog = plugin.getVanishBridgeHelper().isVanished(player);
 
 		if(event.getPreviousServer() != null) {
-			joinLog = LogEntry.builder().type(LogType.LEAVE).player(player).server(event.getPreviousServer())
-					.visibility(leavePrivateLog ? LogVisibility.PRIVATE_ONLY : LogVisibility.UNSPECIFIED).build();
+			LogEntry leaveLog = LogEntry.builder().type(LogType.LEAVE).player(player).server(event.getPreviousServer())
+					.visibility(privateLog ? LogVisibility.PRIVATE_ONLY : LogVisibility.UNSPECIFIED).build();
 
-			logEvent(joinLog);
+			logEvent(leaveLog);
 		}
+	}
+
+	// Listen on low priority to run before VanishBridge updates the vanish state
+	// This allows us to suppress join messages if a player leaves unvanished to join another server vanished
+	@Subscribe(priority = Short.MIN_VALUE + 1)
+	public void onServerJoin(ServerPostConnectEvent event) {
+		if(!useConnectEvent) {
+			return;
+		}
+
+		Player player = event.getPlayer();
+		boolean privateLog = plugin.getVanishBridgeHelper().isVanished(player);
+		LogEntry joinLog = LogEntry.builder().type(LogType.JOIN).player(player)
+				.visibility(privateLog ? LogVisibility.PRIVATE_ONLY : LogVisibility.UNSPECIFIED).build();
+
+		logEvent(joinLog);
 	}
 
 	@Subscribe
