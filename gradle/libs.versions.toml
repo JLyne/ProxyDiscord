@@ -1,6 +1,6 @@
 [versions]
 velocityApi = "3.4.0-SNAPSHOT"
-shadow = "8.3.6"
+shadow = "8.3.8"
 cloud = "1.8.4"
 vanishBridge = "2.0-SNAPSHOT"
 jetbrainsAnnotations = "26.0.2"
