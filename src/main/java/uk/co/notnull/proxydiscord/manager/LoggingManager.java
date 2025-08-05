@@ -128,15 +128,17 @@ public class LoggingManager implements uk.co.notnull.proxydiscord.api.manager.Lo
 		}
 
 		Player player = event.getPlayer();
-		boolean privateLog = plugin.getVanishBridgeHelper().isVanished(player);
+		boolean joinPrivateLog = plugin.getVanishBridgeHelper().isVanished(player); // Check if player is now vanished
+		boolean leavePrivateLog = plugin.getVanishBridgeHelper().wasVanished(player); // Check if player was vanished upon leaving previous server
+
 		LogEntry joinLog = LogEntry.builder().type(LogType.JOIN).player(player)
-				.visibility(privateLog ? LogVisibility.PRIVATE_ONLY : LogVisibility.UNSPECIFIED).build();
+				.visibility(joinPrivateLog ? LogVisibility.PRIVATE_ONLY : LogVisibility.UNSPECIFIED).build();
 
 		logEvent(joinLog);
 
 		if(event.getPreviousServer() != null) {
 			joinLog = LogEntry.builder().type(LogType.LEAVE).player(player).server(event.getPreviousServer())
-					.visibility(privateLog ? LogVisibility.PRIVATE_ONLY : LogVisibility.UNSPECIFIED).build();
+					.visibility(leavePrivateLog ? LogVisibility.PRIVATE_ONLY : LogVisibility.UNSPECIFIED).build();
 
 			logEvent(joinLog);
 		}
