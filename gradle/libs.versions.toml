@@ -1,9 +1,8 @@
 [versions]
 velocityApi = "3.4.0-SNAPSHOT"
-shadow = "8.3.8"
+shadow = "9.2.2"
 cloud = "1.8.4"
 vanishBridge = "2.0-SNAPSHOT"
-jetbrainsAnnotations = "26.0.2"
 platformDetection="2.2"
 javacord="3.9.0-SNAPSHOT"
 discordReserializer="4.4.0-SNAPSHOT"
@@ -15,7 +14,6 @@ cloudVelocity = { group = "cloud.commandframework", name = "cloud-velocity", ver
 cloudMinecraftExtras = { group = "cloud.commandframework", name = "cloud-minecraft-extras", version.ref="cloud" }
 cloudAnnotations = { group = "cloud.commandframework", name = "cloud-annotations", version.ref="cloud" }
 vanishBridgeHelper = { group = "uk.co.notnull", name = "VanishBridge-helper", version.ref="vanishBridge" }
-jetbrainsAnnotations = { group = "org.jetbrains", name = "annotations", version.ref="jetbrainsAnnotations" }
 platformDetection = { group = "uk.co.notnull", name = "PlatformDetection-velocity", version.ref="platformDetection" }
 javacord = { group = "uk.co.notnull", name = "javacord", version.ref="javacord" }
 discordReserializer = { group = "dev.vankka", name = "mcdiscordreserializer", version.ref="discordReserializer" }
