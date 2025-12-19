@@ -26,7 +26,6 @@ package uk.co.notnull.proxydiscord.manager;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.player.ServerPreConnectEvent;
 import com.velocitypowered.api.proxy.Player;
-import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.proxy.ServerConnection;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import net.kyori.adventure.text.Component;
@@ -45,8 +44,6 @@ public class RedirectManager {
     private final ConcurrentHashMap<UUID, RegisteredServer> destinations;
 
     public RedirectManager(ProxyDiscord plugin) {
-        ProxyServer proxy = plugin.getProxy();
-
         this.plugin = plugin;
         this.verificationManager = plugin.getVerificationManager();
 

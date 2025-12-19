@@ -101,12 +101,12 @@ public final class GroupSyncManager implements uk.co.notnull.proxydiscord.api.ma
 				try {
 					roleId = Long.parseLong(role.toString());
 				} catch (NumberFormatException e) {
-					logger.warn("Ignoring synced role '" + role + "': Invalid role ID");
+					logger.warn("Ignoring synced role '{}': Invalid role ID", role);
 					return;
 				}
 
 				if (roleConfig.empty()) {
-					logger.warn("Ignoring synced role '" + role + "': No groups assigned");
+					logger.warn("Ignoring synced role '{}': No groups assigned", role);
 					return;
 				}
 
@@ -139,14 +139,14 @@ public final class GroupSyncManager implements uk.co.notnull.proxydiscord.api.ma
 			Optional<Role> role = plugin.getDiscord().getApi().getRoleById(roleId);
 
 			if (role.isEmpty()) {
-				logger.warn("Failed to load role (" + roleId + "). Is the ID incorrect or is discord down?");
+				logger.warn("Failed to load role ({}). Is the ID incorrect or is discord down?", roleId);
 
 				return;
 			}
 
 			Set<Long> userSet = ConcurrentHashMap.newKeySet();
 
-			logger.info("Role syncing enabled for role " + role.get().getName());
+			logger.info("Role syncing enabled for role {}", role.get().getName());
 
 			Collection<User> users = role.get().getUsers();
 

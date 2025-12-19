@@ -96,7 +96,7 @@ public final class AnnouncementChannelHandler {
 				if(server.isPresent()) {
 					servers.add(server.get());
 				} else {
-					logger.warn("Unknown server " + name + " for announcement channel " + channelId);
+					logger.warn("Unknown server {} for announcement channel {}", name, channelId);
 				}
 			});
 
@@ -127,7 +127,7 @@ public final class AnnouncementChannelHandler {
 	private void createListeners() {
 		TextChannel channel = getChannel();
 
-		logger.info("Announcements enabled for channel: " + channelName + " (id: " + channelId + ")");
+		logger.info("Announcements enabled for channel: {} (id: {})", channelName, channelId);
 		createListener = channel.addMessageCreateListener(messageCreateEvent ->
 																sendAnnouncement(messageCreateEvent.getMessage()));
 
@@ -154,7 +154,7 @@ public final class AnnouncementChannelHandler {
 				lastMessage = messages.getNewestMessage().get();
 			}
 		}).exceptionally(e -> {
-			logger.warn("Failed to retrieve latest announcement for " + channelName);
+			logger.warn("Failed to retrieve latest announcement for {}", channelName);
 			return null;
 		});
 	}
@@ -216,7 +216,7 @@ public final class AnnouncementChannelHandler {
         	List<Player> recipients = proxy.getAllPlayers().stream()
 					.filter(p -> p.getCurrentServer().isPresent()
 							&& servers.contains(p.getCurrentServer().get().getServer()))
-					.collect(Collectors.toList());
+					.toList();
 
             recipients.forEach(p ->{
             	sentLatestMessage.add(p.getUniqueId());
@@ -229,7 +229,7 @@ public final class AnnouncementChannelHandler {
         	List<Player> recipients = proxy.getAllPlayers().stream()
 					.filter(p -> p.getCurrentServer().isPresent()
 							&& (linkingServer == null || !p.getCurrentServer().get().getServer().equals(linkingServer)))
-					.collect(Collectors.toList());
+					.toList();
 
         	recipients.forEach(p -> {
             	sentLatestMessage.add(p.getUniqueId());

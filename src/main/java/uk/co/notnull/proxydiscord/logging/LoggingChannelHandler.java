@@ -114,7 +114,7 @@ public class LoggingChannelHandler {
 															  .replace("-", "_"));
 					events.add(logType);
 				} catch(IllegalArgumentException e) {
-					logger.warn("Ignoring unknown event type '" + event.getString("") + "'");
+					logger.warn("Ignoring unknown event type '{}'", event.getString(""));
 				}
 			});
 		}
@@ -130,7 +130,7 @@ public class LoggingChannelHandler {
         		Optional<RegisteredServer> server = proxy.getServer(key.getString(""));
 
         		if(server.isEmpty()) {
-        			logger.warn("Ignoring unknown server '" + key.getString("") + "'");
+					logger.warn("Ignoring unknown server '{}'", key.getString(""));
         			return;
 				}
 
@@ -156,17 +156,17 @@ public class LoggingChannelHandler {
         logListener = loggingChannel.get().addMessageCreateListener(this::handleDiscordMessageEvent);
         String channelName = "#" + loggingChannel.get().getName();
 
-        logger.info("Activity logging enabled for channel: " + channelName + " (id: " + channelId + ")");
+		logger.info("Activity logging enabled for channel: {} (id: {})", channelName, channelId);
 
         loggingChannel.ifPresent(channel -> {
             if(!channel.canYouWrite()) {
-                logger.warn("I don't have permission to send messages in " + channelName + " (id: " +
-									channel.getIdAsString() + ")!");
+				logger.warn("I don't have permission to send messages in {} (id: {})!", channelName,
+							channel.getIdAsString());
             }
 
             if(!channel.canYouManageMessages()) {
-                logger.warn("I don't have permission to manage messages in " + channelName + " (id: " +
-									channel.getIdAsString() + ")!");
+				logger.warn("I don't have permission to manage messages in {} (id: {})!", channelName,
+							channel.getIdAsString());
             }
         });
     }
@@ -198,7 +198,7 @@ public class LoggingChannelHandler {
 	public void updateLogsPerMessage() {
 		//Decrease logs per message if a low number of messages are unsent
 		if(queuedToSend.get() <= 2 && logsPerMessage.get() > 1) {
-			logger.info("Decreasing logsPerMessage due to low activity (" + queuedToSend.get() + " queued messages)");
+			logger.info("Decreasing logsPerMessage due to low activity ({} queued messages)", queuedToSend.get());
 			logsPerMessage.set(Math.max(logsPerMessage.get() / 2, 1));
 		}
 	}
@@ -232,7 +232,7 @@ public class LoggingChannelHandler {
 
             //Increase logsPerMessage if many messages are queued, to help stop the log falling behind
             if(queuedToSend.get() >= 5 && logsPerMessage.get() < 16) {
-                logger.info("Increasing logsPerMessage due to high activity (" + queuedToSend.get() + " queued messages)");
+				logger.info("Increasing logsPerMessage due to high activity ({} queued messages)", queuedToSend.get());
                 logsPerMessage.set(Math.min(logsPerMessage.get() * 2, 16));
             }
         }
@@ -242,7 +242,7 @@ public class LoggingChannelHandler {
 		queuedToSend.incrementAndGet();
 		currentMessage.setAllowedMentions(allowedMentions);
 		currentMessage.send(channel).thenAcceptAsync(result -> queuedToSend.decrementAndGet()).exceptionally(error -> {
-			logger.warn("Failed to send log message: " + error.getMessage());
+			logger.warn("Failed to send log message: {}", error.getMessage());
 			queuedToSend.decrementAndGet();
 			return null;
 		});
@@ -302,7 +302,7 @@ public class LoggingChannelHandler {
 
 				handleDiscordMessage(message, e);
 			}).exceptionally(e -> {
-				logger.warn("Failed to handle discord message: " + e.getMessage());
+				logger.warn("Failed to handle discord message: {}", e.getMessage());
 				return null;
 			});
 		}).schedule();
@@ -317,7 +317,7 @@ public class LoggingChannelHandler {
 			try {
 				queueLogMessage(formatter.formatDiscordMessageLog(user, message, messageContent));
 			} catch (IllegalStateException e) {
-				logger.warn("Failed to send Discord message: " + e.getMessage());
+				logger.warn("Failed to send Discord message: {}", e.getMessage());
 			}
 		}
 

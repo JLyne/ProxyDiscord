@@ -33,7 +33,6 @@ import cloud.commandframework.annotations.specifier.Range;
 import cloud.commandframework.minecraft.extras.MinecraftHelp;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
-import net.kyori.adventure.audience.MessageType;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.luckperms.api.model.user.UserManager;
@@ -273,9 +272,9 @@ public class Commands {
     @CommandPermission("discord.admin")
     public void recreateCommands(CommandSource sender) {
         plugin.getDiscord().createSlashCommands(true)
-                .thenAccept((unused) -> Messages.sendComponent(sender, "refresh-commands-success"))
+                .thenAccept(_ -> Messages.sendComponent(sender, "refresh-commands-success"))
                 .exceptionally(e -> {
-                    e.printStackTrace();
+                    plugin.getLogger().error("Failed to refresh commands", e);
                     Messages.sendComponent(sender, "refresh-commands-error");
                     return null;
                 });

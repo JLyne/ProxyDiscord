@@ -139,7 +139,6 @@ public final class LinkingManager implements uk.co.notnull.proxydiscord.api.mana
         return getLinkingToken(player.getUniqueId());
     }
 
-    @SuppressWarnings("SpellCheckingInspection")
     public String getLinkingToken(UUID uuid) {
         if(this.pendingLinks.containsValue(uuid)) {
             return this.pendingLinks.inverse().get(uuid);
@@ -314,7 +313,7 @@ public final class LinkingManager implements uk.co.notnull.proxydiscord.api.mana
                     try {
                         this.links.put(UUID.fromString(key), value);
                     } catch(IllegalArgumentException e) {
-                        logger.warn("Invalid UUID for discord ID " + value + ". Skipping.");
+						logger.warn("Invalid UUID for discord ID {}. Skipping.", value);
                     }
                 });
 
@@ -322,13 +321,14 @@ public final class LinkingManager implements uk.co.notnull.proxydiscord.api.mana
                     try {
                         this.pendingLinks.put(key, UUID.fromString(value));
                     } catch(IllegalArgumentException e) {
-                        logger.warn("Invalid UUID for linking code " + value + ". Skipping.");
+						logger.warn("Invalid UUID for linking code {}. Skipping.", value);
                     }
                 });
 
                 logger.info("Saving new links file...");
                 saveLinks();
-                logger.info("Imported " + this.links.size() + " linked accounts and " + this.pendingLinks.size() + " pending links.");
+				logger.info("Imported {} linked accounts and {} pending links.", this.links.size(),
+							this.pendingLinks.size());
             } else {
                 this.links = HashBiMap.create(1024);
                 this.pendingLinks = HashBiMap.create(1024);
@@ -370,12 +370,11 @@ public final class LinkingManager implements uk.co.notnull.proxydiscord.api.mana
         }
 
         String channelName = "#" + linkingChannel.get().getName();
-        logger.info("Account linking enabled for channel: " + channelName + " (id: " + linkingChannelId + ")");
+		logger.info("Account linking enabled for channel: {} (id: {})", channelName, linkingChannelId);
 
         linkingChannel.ifPresent(channel -> {
             if(!channel.canYouWrite()) {
-                logger.warn("I don't have permission to send messages in #" + channelName
-                                    + " (id: " + linkingChannelId + ")!");
+				logger.warn("I don't have permission to send messages in #{} (id: {})!", channelName, linkingChannelId);
             }
         });
     }

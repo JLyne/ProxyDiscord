@@ -24,7 +24,6 @@
 package uk.co.notnull.proxydiscord;
 
 import com.velocitypowered.api.command.CommandSource;
-import net.kyori.adventure.audience.MessageType;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentLike;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;

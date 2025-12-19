@@ -56,7 +56,7 @@ public class AnnouncementManager {
             List<? extends ConfigurationNode> servers = settings.node("servers").childrenList();
 
             if(serverList && servers.isEmpty()) {
-                logger.warn("Skipping announcement channel " + channelID + ". Server list defined but empty.");
+				logger.warn("Skipping announcement channel {}. Server list defined but empty.", channelID);
                 return;
             }
 
@@ -70,8 +70,7 @@ public class AnnouncementManager {
                     handlers.add(new AnnouncementChannelHandler(channelID));
                 }
             } catch(RuntimeException e) {
-                logger.warn("Unable to add handler for announcement channel " + channelID);
-                e.printStackTrace();
+				logger.warn("Unable to add handler for announcement channel {}", channelID, e);
             }
         });
     }

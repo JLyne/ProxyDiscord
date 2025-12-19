@@ -127,15 +127,12 @@ public class Util {
 	public static String getDiscordMessageURL(Message message) {
 		Optional<ServerChannel> serverChannel = message.getChannel().asServerChannel();
 
-		if(serverChannel.isPresent()) {
-			return String.format("https://discord.com/channels/%s/%s/%s",
-								 serverChannel.get().getServer().getIdAsString(),
-								 serverChannel.get().getIdAsString(),
-								 message.getIdAsString());
-		} else {
-			return String.format("https://discord.com/channels/@me/%s/%s", message.getChannel().getIdAsString(),
-								 message.getIdAsString());
-		}
+		return serverChannel.map(channel -> String.format("https://discord.com/channels/%s/%s/%s",
+														  channel.getServer().getIdAsString(),
+														  channel.getIdAsString(),
+														  message.getIdAsString())).orElseGet(
+				() -> String.format("https://discord.com/channels/@me/%s/%s", message.getChannel().getIdAsString(),
+									message.getIdAsString()));
 	}
 
 	/**

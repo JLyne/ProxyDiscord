@@ -75,14 +75,14 @@ public class Info implements SlashCommandCreateListener, UserContextMenuCommandL
 			return;
 		}
 
-		String subcommand = interaction.getOptions().get(0).getName();
+		String subcommand = interaction.getOptions().getFirst().getName();
 
 		switch (subcommand) {
 			case "discord" -> //noinspection OptionalGetWithoutIsPresent
-					handleDiscordInfoRequest(interaction.getArguments().get(0).getUserValue().get(), event);
+					handleDiscordInfoRequest(interaction.getArguments().getFirst().getUserValue().get(), event);
 
 			case "player" -> //noinspection OptionalGetWithoutIsPresent
-					handleMinecraftInfoRequest(interaction.getArguments().get(0).getStringValue().get(), event);
+					handleMinecraftInfoRequest(interaction.getArguments().getFirst().getStringValue().get(), event);
 //
 //			case "server" -> event.getInteraction()
 //					.createImmediateResponder()
@@ -102,7 +102,7 @@ public class Info implements SlashCommandCreateListener, UserContextMenuCommandL
 			return;
 		}
 
-		String subcommand = interaction.getOptions().get(0).getName();
+		String subcommand = interaction.getOptions().getFirst().getName();
 
 		switch (subcommand) {
 			case "player" -> {
@@ -174,8 +174,7 @@ public class Info implements SlashCommandCreateListener, UserContextMenuCommandL
 		builder.addEmbed(embed)
 				.respond()
 				.exceptionally(e -> {
-					plugin.getLogger().warn("Failed to immediately respond to interaction");
-					e.printStackTrace();
+					plugin.getLogger().warn("Failed to immediately respond to interaction", e);
 					builder.removeAllEmbeds().addEmbed(Messages.getEmbed("embed-info-error")).respond();
 					return null;
 				});
@@ -227,8 +226,7 @@ public class Info implements SlashCommandCreateListener, UserContextMenuCommandL
 
 			return preparePlayerInfoResponse(updater, result.getPlayerInfo(), discordFuture.join());
 		}).thenAccept(InteractionOriginalResponseUpdater::update).exceptionally(e -> {
-			plugin.getLogger().warn("Failed to respond to interaction");
-			e.printStackTrace();
+			plugin.getLogger().warn("Failed to respond to interaction", e);
 
 			if (updaterFuture.isDone()) {
 				updaterFuture.join().removeAllEmbeds().addEmbed(Messages.getEmbed("embed-info-error")).update();

@@ -33,7 +33,6 @@ import com.velocitypowered.api.proxy.Player;
 import org.slf4j.Logger;
 import uk.co.notnull.proxydiscord.Messages;
 import uk.co.notnull.proxydiscord.manager.GroupSyncManager;
-import uk.co.notnull.proxydiscord.manager.LoggingManager;
 import uk.co.notnull.proxydiscord.ProxyDiscord;
 import uk.co.notnull.proxydiscord.manager.VerificationManager;
 import uk.co.notnull.proxydiscord.api.VerificationResult;
@@ -44,7 +43,6 @@ public class JoinLeave {
 
 	private static VerificationManager verificationManager;
 	private static GroupSyncManager groupSyncManager;
-	private static LoggingManager loggingManager;
 
 	public JoinLeave(ProxyDiscord plugin) {
     	this.plugin = plugin;
@@ -52,7 +50,6 @@ public class JoinLeave {
 
         verificationManager = plugin.getVerificationManager();
         groupSyncManager = plugin.getGroupSyncManager();
-		loggingManager = plugin.getLoggingManager();
     }
 
 	@Subscribe(priority = Short.MAX_VALUE - 1)
@@ -67,7 +64,7 @@ public class JoinLeave {
 
 		groupSyncManager.syncPlayer(player).thenRun(() -> {
 			VerificationResult result = verificationManager.checkVerificationStatus(player);
-			logger.info("Player " + player.getUsername() + " joined with verification status " + result);
+			logger.info("Player {} joined with verification status {}", player.getUsername(), result);
 		});
 	}
 	

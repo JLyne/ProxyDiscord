@@ -25,7 +25,6 @@ package uk.co.notnull.proxydiscord.listeners;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.velocitypowered.api.event.PostOrder;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.player.ServerPostConnectEvent;
 import com.velocitypowered.api.proxy.Player;
@@ -101,8 +100,7 @@ public class SendStatus {
                 Gson gson = new GsonBuilder().create();
 		   		connection.sendPluginMessage(ProxyDiscord.getStatusIdentifier(), gson.toJson(payload).getBytes());
             } catch(NoSuchAlgorithmException | InvalidKeyException e) {
-                plugin.getLogger().error("Failed to generate status packet for " + player.getUsername());
-                e.printStackTrace();
+				plugin.getLogger().error("Failed to generate status packet for {}", player.getUsername(), e);
             }
         });
     }

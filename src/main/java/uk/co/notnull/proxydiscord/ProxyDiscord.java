@@ -171,8 +171,7 @@ public final class ProxyDiscord implements uk.co.notnull.proxydiscord.api.ProxyD
 			configuration = YamlConfigurationLoader.builder().file(
 					new File(dataDirectory.toAbsolutePath().toString(), "config.yml")).build().load();
 		} catch (IOException e) {
-			logger.error("Error loading config.yml");
-			e.printStackTrace();
+			logger.error("Error loading config.yml", e);
 			return false;
 		}
 
@@ -184,8 +183,7 @@ public final class ProxyDiscord implements uk.co.notnull.proxydiscord.api.ProxyD
 			messagesConfiguration = YamlConfigurationLoader.builder().file(
 					new File(dataDirectory.toAbsolutePath().toString(), "messages.yml")).build().load();
 		} catch (IOException e) {
-			logger.error("Error loading messages.yml");
-			e.printStackTrace();
+			logger.error("Error loading messages.yml", e);
 			return false;
 		}
 

@@ -79,12 +79,11 @@ public class Discord {
 
 			connected = true;
 		} catch (CompletionException e) {
-			logger.error("Failed to connect to Discord. Did you put a valid token in the config?");
-			e.printStackTrace();
+			logger.error("Failed to connect to Discord. Did you put a valid token in the config?", e);
 			return;
 		}
 
-        logger.info("Bot Invite Link: " + api.createBotInvite());
+		logger.info("Bot Invite Link: {}", api.createBotInvite());
 
 		//Don't cache any messages by default
 		api.setMessageCacheSize(0, 0);
@@ -151,12 +150,11 @@ public class Discord {
 
 				return CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).exceptionally(e -> {
 					if(e != null) {
-						logger.warn("An error occurred while removing slash command. Changes may not be fully applied.");
-						e.printStackTrace();
+						logger.warn("An error occurred while removing slash command. Changes may not be fully applied.", e);
 					}
 
 					return null;
-				}).thenCompose((unused) -> createSlashCommands(false));
+				}).thenCompose(_ -> createSlashCommands(false));
 			});
 		}
 
@@ -207,9 +205,8 @@ public class Discord {
 						.with(Messages.get("context-menu-info-label"))
 						.setDefaultEnabledForPermissions(PermissionType.MANAGE_ROLES));
 
-		return api.bulkOverwriteGlobalApplicationCommands(commands).thenAccept((result) -> {}).exceptionally(e -> {
-			logger.warn("An error occurred while registering slash commands. Commands may not function correctly.");
-			e.printStackTrace();
+		return api.bulkOverwriteGlobalApplicationCommands(commands).thenAccept(_ -> {}).exceptionally(e -> {
+			logger.warn("An error occurred while registering slash commands. Commands may not function correctly.", e);
 			return null;
 		});
 	}

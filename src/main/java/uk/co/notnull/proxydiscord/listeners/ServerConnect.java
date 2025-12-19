@@ -23,7 +23,6 @@
 
 package uk.co.notnull.proxydiscord.listeners;
 
-import com.velocitypowered.api.event.PostOrder;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.player.ServerPreConnectEvent;
 import com.velocitypowered.api.proxy.ServerConnection;
@@ -59,21 +58,15 @@ public class ServerConnect {
             return;
         }
 
-        Component message;
+        Component message = switch (result) {
+			case NOT_LINKED -> Messages.getComponent("server-change-not-linked");
+			case LINKED_NOT_VERIFIED -> Messages.getComponent("server-change-linked-not-verified");
+			default ->
+				//TODO Make configurable
+					Component.text("An error has occurred.").color(NamedTextColor.RED);
+		};
 
-        switch(result) {
-            case NOT_LINKED:
-                message = Messages.getComponent("server-change-not-linked");
-                break;
-            case LINKED_NOT_VERIFIED:
-                message = Messages.getComponent("server-change-linked-not-verified");
-                break;
-            default:
-                //TODO Make configurable
-                message = Component.text("An error has occurred.").color(NamedTextColor.RED);
-        }
-
-        if(!verificationManager.getPublicServers().isEmpty()) {
+		if(!verificationManager.getPublicServers().isEmpty()) {
             plugin.getDebugLogger().info("Blocking unverified player " + e.getPlayer().getUsername() + " from joining " + e.getOriginalServer().getServerInfo().getName());
 
             RegisteredServer linkingServer = verificationManager.getLinkingServer();

@@ -98,7 +98,7 @@ public class LoggingManager implements uk.co.notnull.proxydiscord.api.manager.Lo
             try {
                 channelId = Long.parseLong(key.toString());
             } catch(NumberFormatException e) {
-                logger.warn("Ignoring logging channel '" + key + "': Invalid channel ID");
+				logger.warn("Ignoring logging channel '{}': Invalid channel ID", key);
                 return;
             }
 

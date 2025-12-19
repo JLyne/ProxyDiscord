@@ -36,7 +36,7 @@ public class DebugLogger {
 	
 	public void info(String message) {
 		if(debugEnabled) {
-			logger.info("[ProxyDiscord.DEBUG] " + message);
+			logger.info("[ProxyDiscord.DEBUG] {}", message);
 		}
 	}
 	

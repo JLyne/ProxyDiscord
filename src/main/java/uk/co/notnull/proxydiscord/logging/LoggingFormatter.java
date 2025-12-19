@@ -87,7 +87,7 @@ public class LoggingFormatter {
             try {
                  this.dateFormat = new SimpleDateFormat(dateFormat.getString(defaultDateFormat.getString("")));
             } catch(IllegalArgumentException e) {
-                logger.warn("Invalid logging date format: " + e.getMessage());
+				logger.warn("Invalid logging date format: {}", e.getMessage());
             }
 
 			this.codeBlock = codeBlock.getBoolean(defaultCodeBlock.getBoolean(false));

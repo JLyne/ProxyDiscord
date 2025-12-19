@@ -102,7 +102,7 @@ public class LuckPermsManager {
             Node node = Node.builder(verifiedPermission).build();
             user.transientData().add(node);
         } catch(IllegalStateException e) {
-            logger.warn("Failed to update permissions: " + e.getMessage());
+			logger.warn("Failed to update permissions: {}", e.getMessage());
         }
     }
 
@@ -123,7 +123,7 @@ public class LuckPermsManager {
             Node node = Node.builder(verifiedPermission).build();
             user.transientData().remove(node);
         } catch (IllegalStateException e) {
-            logger.warn("Failed to update permissions: " + e.getMessage());
+			logger.warn("Failed to update permissions: {}", e.getMessage());
         }
     }
 
@@ -171,7 +171,7 @@ public class LuckPermsManager {
                                 .ifPresent((service) -> service.pushUserUpdate(user));
                         return true;
                     }).exceptionally(e -> {
-                        logger.warn("Failed to save and propagate groups for " + user.getUsername(), e);
+						logger.warn("Failed to save and propagate groups for {}", user.getUsername(), e);
                         return false;
                     });
         } else {

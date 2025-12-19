@@ -101,7 +101,7 @@ public final class VerificationManager implements uk.co.notnull.proxydiscord.api
                         try {
                             verifiedRoleIds.add(Long.parseLong(roleId));
                         } catch(NumberFormatException e) {
-                            logger.warn("Ignoring verified role '" + roleId + "': Invalid role ID");
+							logger.warn("Ignoring verified role '{}': Invalid role ID", roleId);
                         }
                     }
                 });
@@ -111,7 +111,7 @@ public final class VerificationManager implements uk.co.notnull.proxydiscord.api
                 try {
                     verifiedRoleIds = Collections.singleton(Long.parseLong(roleId));
                 } catch(NumberFormatException e) {
-                    logger.warn("Ignoring verified role '" + roleId + "': Invalid role ID");
+					logger.warn("Ignoring verified role '{}': Invalid role ID", roleId);
                     verifiedRoleIds = Collections.emptySet();
                 }
             }
@@ -124,7 +124,7 @@ public final class VerificationManager implements uk.co.notnull.proxydiscord.api
         publicServers.clear();
 
         if(linkingServer == null && linkingServerName != null && !linkingServerName.isEmpty()) {
-            logger.warn("Linking server (" + linkingServerName + ") does not exist!");
+			logger.warn("Linking server ({}) does not exist!", linkingServerName);
         } else if(linkingServer != null) {
             publicServers.add(linkingServer);
         }
@@ -138,7 +138,7 @@ public final class VerificationManager implements uk.co.notnull.proxydiscord.api
             server.ifPresent(publicServers::add);
 
             if(server.isEmpty() && name != null && !name.isEmpty()) {
-                logger.warn("Public server (" + name + ") does not exist!");
+				logger.warn("Public server ({}) does not exist!", name);
             }
         }
 
@@ -146,7 +146,7 @@ public final class VerificationManager implements uk.co.notnull.proxydiscord.api
         defaultVerifiedServer = proxy.getServer(defaultVerifiedServerName).orElse(null);
 
         if(defaultVerifiedServer == null && defaultVerifiedServerName != null && !defaultVerifiedServerName.isEmpty()) {
-            logger.warn("Default verified server (" + defaultVerifiedServerName + ") does not exist!");
+			logger.warn("Default verified server ({}) does not exist!", defaultVerifiedServerName);
         }
 
         populateUsers();
@@ -236,12 +236,12 @@ public final class VerificationManager implements uk.co.notnull.proxydiscord.api
             Optional<Role> verifiedRole = plugin.getDiscord().getApi().getRoleById(roleId);
 
             if(verifiedRole.isEmpty()) {
-                logger.warn("Failed to load verified role (" + roleId + "). Is the ID incorrect or is discord down?)");
+				logger.warn("Failed to load verified role ({}). Is the ID incorrect or is discord down?)", roleId);
 
                 return;
             }
 
-            logger.info("Role verification enabled for role " + verifiedRole.get().getName());
+			logger.info("Role verification enabled for role {}", verifiedRole.get().getName());
 
             Collection<User> users = verifiedRole.get().getUsers();
 
