@@ -1,11 +1,11 @@
 [versions]
 velocityApi = "3.4.0-SNAPSHOT"
-shadow = "9.2.2"
+shadow = "9.3.0"
 cloud = "1.8.4"
 vanishBridge = "2.0-SNAPSHOT"
 platformDetection="2.2"
 javacord="3.9.0-SNAPSHOT"
-discordReserializer="4.4.0-SNAPSHOT"
+discordReserializer="4.4.0"
 luckperms = "5.5"
 
 [libraries]
