@@ -294,8 +294,11 @@ public class LoggingChannelHandler {
 			}
 
 			proxy.getEventManager().fire(new DiscordChatEvent(user, content, new HashSet<>(servers))).thenAccept(e -> {
-				if (!e.getResult().isAllowed() && !logSentMessages) {
-					event.deleteMessage();
+				if (!e.getResult().isAllowed()) {
+					if(!logSentMessages) {
+						event.deleteMessage();
+					}
+
 					plugin.getDebugLogger().info(ignoreMessage + "DiscordChatEvent got denied result");
 					return;
 				}
