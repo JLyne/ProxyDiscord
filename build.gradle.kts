@@ -29,11 +29,9 @@ plugins {
 dependencies {
     implementation(project(":ProxyDiscordAPI"))
     implementation(libs.javacord)
-    implementation(libs.cloudVelocity)
-    implementation(libs.cloudMinecraftExtras)
-    implementation(libs.cloudAnnotations)
     implementation(libs.vanishBridgeHelper)
     implementation(libs.discordReserializer)
+    implementation(libs.vanishBridgeHelper)
 
     compileOnly(libs.platformDetection)
 
@@ -45,8 +43,6 @@ description = "Velocity Discord integration solution"
 tasks {
     shadowJar {
         archiveClassifier = ""
-        relocate("cloud.commandframework", "uk.co.notnull.proxyqueues.shaded.cloud")
-        relocate("io.leangen.geantyref", "uk.co.notnull.proxyqueues.shaded.typetoken")
         relocate("uk.co.notnull.VanishBridge", "uk.co.notnull.proxyqueues.shaded.vanishbridge")
     }
 

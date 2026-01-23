@@ -23,14 +23,16 @@
 
 package uk.co.notnull.proxydiscord;
 
-import cloud.commandframework.CommandManager;
-import cloud.commandframework.annotations.Argument;
-import cloud.commandframework.annotations.CommandMethod;
-import cloud.commandframework.annotations.CommandPermission;
-import cloud.commandframework.annotations.ProxiedBy;
-import cloud.commandframework.annotations.specifier.Greedy;
-import cloud.commandframework.annotations.specifier.Range;
-import cloud.commandframework.minecraft.extras.MinecraftHelp;
+import com.mojang.brigadier.Command;
+import com.mojang.brigadier.arguments.LongArgumentType;
+import com.mojang.brigadier.arguments.StringArgumentType;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.suggestion.SuggestionProvider;
+import com.mojang.brigadier.tree.LiteralCommandNode;
+import com.velocitypowered.api.command.BrigadierCommand;
+import com.velocitypowered.api.command.CommandManager;
+import com.velocitypowered.api.command.CommandMeta;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
 import net.kyori.adventure.text.Component;
@@ -41,41 +43,98 @@ import uk.co.notnull.proxydiscord.api.LinkResult;
 import uk.co.notnull.proxydiscord.api.VerificationResult;
 import uk.co.notnull.proxydiscord.manager.LinkingManager;
 import uk.co.notnull.proxydiscord.manager.VerificationManager;
+import uk.co.notnull.vanishbridge.helper.VanishBridgeHelper;
 
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+import static com.velocitypowered.api.command.BrigadierCommand.literalArgumentBuilder;
+import static com.velocitypowered.api.command.BrigadierCommand.requiredArgumentBuilder;
+
 public class Commands {
     private final ProxyDiscord plugin;
     private final LinkingManager linkingManager;
     private final VerificationManager verificationManager;
     private final UserManager userManager;
-    private final MinecraftHelp<CommandSource> minecraftHelp;
+    private static final SuggestionProvider<CommandSource> playerSuggestions =
+            (ctx, builder) -> {
+        VanishBridgeHelper.getInstance()
+                .getUsernameSuggestions(builder.getRemainingLowerCase(), ctx.getSource())
+                .forEach(builder::suggest);
 
-    public Commands(ProxyDiscord plugin, CommandManager<CommandSource> commandManager) {
+        return builder.buildFuture();
+    };
+
+    public Commands(ProxyDiscord plugin) {
         this.plugin = plugin;
         this.linkingManager = plugin.getLinkingManager();
         this.verificationManager = plugin.getVerificationManager();
         this.userManager = plugin.getLuckpermsManager().getUserManager();
-
-        this.minecraftHelp = new MinecraftHelp<>("/discord", p -> p, commandManager);
     }
 
-    @CommandMethod("discord help [query]")
-    private void commandHelp(
-            final CommandSource sender,
-            final @Argument("query") @Greedy String query
-    ) {
-        this.minecraftHelp.queryCommands(query == null ? "" : query, sender);
+    public void createCommands() {
+        LiteralCommandNode<CommandSource> topNode = literalArgumentBuilder("discord")
+                .then(literalArgumentBuilder("save")
+                              .requires(source -> source.hasPermission("discord.save"))
+                              .executes(context -> save(context.getSource()))
+                )
+                .then(literalArgumentBuilder("reload")
+                              .requires(source -> source.hasPermission("discord.admin"))
+                              .executes(context -> reload(context.getSource()))
+                )
+                .then(literalArgumentBuilder("reload")
+                              .requires(source -> source.hasPermission("discord.admin"))
+                              .executes(context -> recreateCommands(context.getSource()))
+                )
+                .then(createLinkNode())
+                .then(createUnlinkNode())
+                .build();
+
+        BrigadierCommand topCommand = new BrigadierCommand(topNode);
+        BrigadierCommand linkCommand = new BrigadierCommand(createLinkNode().build()); // Make /link alias for /discord link
+        BrigadierCommand unlinkCommand = new BrigadierCommand(createUnlinkNode().build()); // Make /unlink alias for /discord unlink
+
+        CommandManager commandManager = plugin.getProxy().getCommandManager();
+
+        // Register commands
+        CommandMeta topMeta = commandManager.metaBuilder("discord").plugin(plugin).build();
+        CommandMeta linkMeta = commandManager.metaBuilder("link").plugin(plugin).build();
+        CommandMeta unlinkMeta = commandManager.metaBuilder("unlink").plugin(plugin).build();
+
+        commandManager.register(topMeta, topCommand);
+        commandManager.register(linkMeta, linkCommand);
+        commandManager.register(unlinkMeta, unlinkCommand);
     }
 
-	@CommandMethod("discord link <player> <discordId>")
-    @ProxiedBy("link")
-    @CommandPermission("discord.link")
-    public void link(CommandSource sender, @Argument(value = "player", suggestions = "visibleplayers") String target,
-                     @Argument(value = "discordId") @Range(min = "0") Long discordId) {
+    private LiteralArgumentBuilder<CommandSource> createLinkNode() {
+        return literalArgumentBuilder("link")
+                .requires(source -> source.hasPermission("discord.link"))
+                .then(
+                        requiredArgumentBuilder("player", StringArgumentType.word())
+                                .suggests(playerSuggestions)
+                                .then(requiredArgumentBuilder("discordId", LongArgumentType.longArg(0))
+                                              .executes(this::link))
+                );
+    }
+
+    private LiteralArgumentBuilder<CommandSource> createUnlinkNode() {
+        return literalArgumentBuilder("unlink")
+                .requires(source -> source.hasPermission("discord.unlink"))
+                .executes(this::unlink)
+                .then(
+                        requiredArgumentBuilder("player", StringArgumentType.word())
+                                .requires(source -> source.hasPermission("discord.unlink.other"))
+                                .suggests(playerSuggestions)
+                                .executes(this::unlinkOther)
+                );
+    }
+
+    public int link(CommandContext<CommandSource> ctx) {
+        CommandSource sender = ctx.getSource();
+        String target = ctx.getArgument("player", String.class);
+        Long discordId = ctx.getArgument("discordId", Long.class);
 
         userManager.lookupUniqueId(target).thenAccept((UUID uuid) -> {
             if (uuid == null) {
@@ -174,103 +233,109 @@ public class Commands {
                 return null;
             });
         });
+
+        return Command.SINGLE_SUCCESS;
     }
 
-	@CommandMethod("discord unlink [player]")
-    @ProxiedBy("unlink")
-    @CommandPermission("discord.unlink")
-    public void unlink(Player sender, @Argument(value = "player", suggestions = "visibleplayers") String target) {
-        //Unlinking another player
-        if(target != null) {
-            if(!sender.hasPermission("discord.unlink.others")) {
-                return;
-            }
-
-            Long discordId = null;
-
-            try {
-                discordId = Long.parseLong(target);
-            } catch (NumberFormatException ignored) {
-            }
-
-            if(discordId != null) {
-                UUID uuid = linkingManager.getLinked(discordId);
-
-                if(uuid != null) {
-                    Player onlinePlayer = plugin.getProxy().getPlayer(uuid).orElse(null);
-                    linkingManager.unlink(discordId);
-
-                    Messages.sendComponent(sender, "unlink-other-discord-success",
-                                                                             Collections.singletonMap("player", target),
-                                                                             Collections.emptyMap());
-
-                    if (onlinePlayer != null) {
-                        Messages.sendComponent(onlinePlayer, "unlink-by-other-success",
-                                               Collections.singletonMap("player", sender.getUsername()),
-                                               Collections.emptyMap());
-                    }
-                } else {
-                    Messages.sendComponent(sender, "unlink-other-discord-not-linked",
-                                                                             Collections.singletonMap("player", target),
-                                                                             Collections.emptyMap());
-                }
-
-                return;
-            }
-
-            userManager.lookupUniqueId(target).thenAccept((UUID uuid) -> {
-                if(uuid == null) {
-                    Messages.sendComponent(sender, "unlink-other-not-found",
-                                                             Collections.singletonMap("player", target),
-                                                             Collections.emptyMap());
-
-                    return;
-                }
-
-                Player onlinePlayer = plugin.getProxy().getPlayer(uuid).orElse(null);
-
-                if(linkingManager.isLinked(uuid)) {
-                    linkingManager.unlink(uuid);
-
-                    Messages.sendComponent(sender, "unlink-other-success",
-                                           Collections.singletonMap("player", target),
-                                           Collections.emptyMap());
-
-                    if(onlinePlayer != null) {
-                        Messages.sendComponent(onlinePlayer, "unlink-by-other-success",
-                                               Collections.singletonMap("player", sender.getUsername()),
-                                               Collections.emptyMap());
-                    }
-                } else {
-                    Messages.sendComponent(sender, "unlink-other-not-linked",
-                                                             Collections.singletonMap("player", target),
-                                                             Collections.emptyMap());
-                }
-            });
-        } else if(linkingManager.isLinked(sender)) { //Unlinking self
-            linkingManager.unlink(sender);
-        } else {
-            Messages.sendComponent(sender, "unlink-not-linked");
+    public int unlink(CommandContext<CommandSource> ctx) {
+        if (!(ctx.getSource() instanceof Player player)) {
+            Messages.sendComponent(ctx.getSource(), "unlink-not-player");
+            return Command.SINGLE_SUCCESS;
         }
+
+        if(linkingManager.isLinked(player)) { //Unlinking self
+            linkingManager.unlink(player);
+        } else {
+            Messages.sendComponent(player, "unlink-not-linked");
+        }
+
+        return Command.SINGLE_SUCCESS;
     }
 
-    @CommandMethod("discord save")
-    @CommandPermission("discord.save")
-    public void save(CommandSource sender) {
+    //Unlinking another player
+    public int unlinkOther(CommandContext<CommandSource> ctx) {
+        CommandSource sender = ctx.getSource();
+        String target = ctx.getArgument("player", String.class);
+        String actorName = sender instanceof Player player ? player.getUsername() : "Console";
+
+        Long discordId = null;
+
+        try {
+            discordId = Long.parseLong(target);
+        } catch (NumberFormatException ignored) {
+        }
+
+        if(discordId != null) {
+            UUID uuid = linkingManager.getLinked(discordId);
+
+            if(uuid != null) {
+                Player onlinePlayer = plugin.getProxy().getPlayer(uuid).orElse(null);
+                linkingManager.unlink(discordId);
+
+                Messages.sendComponent(sender, "unlink-other-discord-success",
+                                                                         Collections.singletonMap("player", target),
+                                                                         Collections.emptyMap());
+
+                if (onlinePlayer != null) {
+                    Messages.sendComponent(onlinePlayer, "unlink-by-other-success",
+                                           Collections.singletonMap("player", actorName),
+                                           Collections.emptyMap());
+                }
+            } else {
+                Messages.sendComponent(sender, "unlink-other-discord-not-linked",
+                                                                         Collections.singletonMap("player", target),
+                                                                         Collections.emptyMap());
+            }
+
+            return Command.SINGLE_SUCCESS;
+        }
+
+        userManager.lookupUniqueId(target).thenAccept((UUID uuid) -> {
+            if(uuid == null) {
+                Messages.sendComponent(sender, "unlink-other-not-found",
+                                                         Collections.singletonMap("player", target),
+                                                         Collections.emptyMap());
+
+                return;
+            }
+
+            Player onlinePlayer = plugin.getProxy().getPlayer(uuid).orElse(null);
+
+            if(linkingManager.isLinked(uuid)) {
+                linkingManager.unlink(uuid);
+
+                Messages.sendComponent(sender, "unlink-other-success",
+                                       Collections.singletonMap("player", target),
+                                       Collections.emptyMap());
+
+                if(onlinePlayer != null) {
+                    Messages.sendComponent(onlinePlayer, "unlink-by-other-success",
+                                           Collections.singletonMap("player", actorName),
+                                           Collections.emptyMap());
+                }
+            } else {
+                Messages.sendComponent(sender, "unlink-other-not-linked",
+                                                         Collections.singletonMap("player", target),
+                                                         Collections.emptyMap());
+            }
+        });
+
+        return Command.SINGLE_SUCCESS;
+    }
+
+    private int save(CommandSource sender) {
         linkingManager.saveLinks();
         Messages.sendComponent(sender, "save-success");
+        return Command.SINGLE_SUCCESS;
     }
 
-    @CommandMethod("discord reload")
-    @CommandPermission("discord.admin")
-    public void reload(CommandSource sender) {
+    private int reload(CommandSource sender) {
         plugin.reload();
         Messages.sendComponent(sender, "reload-success");
+        return Command.SINGLE_SUCCESS;
     }
 
-    @CommandMethod("discord refreshcommands")
-    @CommandPermission("discord.admin")
-    public void recreateCommands(CommandSource sender) {
+    private int recreateCommands(CommandSource sender) {
         plugin.getDiscord().createSlashCommands(true)
                 .thenAccept(_ -> Messages.sendComponent(sender, "refresh-commands-success"))
                 .exceptionally(e -> {
@@ -278,5 +343,6 @@ public class Commands {
                     Messages.sendComponent(sender, "refresh-commands-error");
                     return null;
                 });
+        return Command.SINGLE_SUCCESS;
     }
 }

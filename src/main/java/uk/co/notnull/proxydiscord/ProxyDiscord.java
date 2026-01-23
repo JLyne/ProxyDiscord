@@ -26,15 +26,6 @@
 
 package uk.co.notnull.proxydiscord;
 
-import cloud.commandframework.CommandManager;
-import cloud.commandframework.annotations.AnnotationParser;
-import cloud.commandframework.arguments.parser.StandardParameters;
-import cloud.commandframework.arguments.standard.LongArgument;
-import cloud.commandframework.execution.CommandExecutionCoordinator;
-import cloud.commandframework.meta.SimpleCommandMeta;
-import cloud.commandframework.minecraft.extras.MinecraftExceptionHandler;
-import cloud.commandframework.velocity.VelocityCommandManager;
-import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
 import com.velocitypowered.api.event.proxy.ProxyShutdownEvent;
@@ -42,7 +33,6 @@ import com.velocitypowered.api.plugin.PluginContainer;
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.proxy.messages.MinecraftChannelIdentifier;
-import io.leangen.geantyref.TypeToken;
 import uk.co.notnull.proxydiscord.api.emote.EmoteProvider;
 import uk.co.notnull.proxydiscord.bot.commands.Info;
 import uk.co.notnull.proxydiscord.bot.listeners.Reconnect;
@@ -62,7 +52,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Path;
 import java.util.Optional;
-import java.util.function.Function;
 
 import com.google.common.io.ByteStreams;
 import org.spongepowered.configurate.ConfigurationNode;
@@ -77,7 +66,6 @@ import uk.co.notnull.proxydiscord.manager.LoggingManager;
 import uk.co.notnull.proxydiscord.manager.LuckPermsManager;
 import uk.co.notnull.proxydiscord.manager.RedirectManager;
 import uk.co.notnull.proxydiscord.manager.VerificationManager;
-import uk.co.notnull.vanishbridge.helper.CloudHelper;
 import uk.co.notnull.vanishbridge.helper.VanishBridgeHelper;
 
 public final class ProxyDiscord implements uk.co.notnull.proxydiscord.api.ProxyDiscord {
@@ -141,7 +129,7 @@ public final class ProxyDiscord implements uk.co.notnull.proxydiscord.api.ProxyD
 		loggingManager.init();
 
 		initListeners();
-        initCommands();
+		new Commands(this).createCommands();
 
         Optional<PluginContainer> platformDetection = proxy.getPluginManager()
                 .getPlugin("platform-detection");
@@ -191,42 +179,6 @@ public final class ProxyDiscord implements uk.co.notnull.proxydiscord.api.ProxyD
 
 		return true;
 	}
-
-	private void initCommands() {
-    	//Cloud setup
-        CommandManager<CommandSource> manager = new VelocityCommandManager<>(
-				proxy.getPluginManager().fromInstance(this).get(),
-				proxy,
-				CommandExecutionCoordinator.simpleCoordinator(),
-				Function.identity(),
-				Function.identity());
-
-        new MinecraftExceptionHandler<CommandSource>()
-            .withArgumentParsingHandler()
-            .withInvalidSenderHandler()
-            .withInvalidSyntaxHandler()
-            .withNoPermissionHandler()
-            .withCommandExecutionHandler()
-            .withDecorator(message -> message)
-            .apply(manager, p -> p);
-
-		CloudHelper.registerVisiblePlayerArgument(manager);
-
-        //Custom LongParser for now as the built in one doesn't work properly
-        manager.parserRegistry().registerParserSupplier(TypeToken.get(Long.class), options ->
-                new LongArgument.LongParser<>(
-                        (long) options.get(StandardParameters.RANGE_MIN, Long.MIN_VALUE),
-                        (long) options.get(StandardParameters.RANGE_MAX, Long.MAX_VALUE)
-                ));
-
-        AnnotationParser<CommandSource> annotationParser = new AnnotationParser<>(
-                manager,
-                CommandSource.class,
-                parameters -> SimpleCommandMeta.empty()
-        );
-
-        annotationParser.parse(new Commands(this, manager));
-    }
 
 	private void initListeners() {
     	proxy.getEventManager().register(this, luckPermsManager);

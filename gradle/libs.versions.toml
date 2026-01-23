@@ -1,7 +1,6 @@
 [versions]
 velocityApi = "3.4.0-SNAPSHOT"
 shadow = "9.3.0"
-cloud = "1.8.4"
 vanishBridge = "2.0-SNAPSHOT"
 platformDetection="2.2"
 javacord="3.9.0-SNAPSHOT"
@@ -10,9 +9,6 @@ luckperms = "5.5"
 
 [libraries]
 velocityApi = { group = "com.velocitypowered", name = "velocity-api", version.ref="velocityApi" }
-cloudVelocity = { group = "cloud.commandframework", name = "cloud-velocity", version.ref="cloud" }
-cloudMinecraftExtras = { group = "cloud.commandframework", name = "cloud-minecraft-extras", version.ref="cloud" }
-cloudAnnotations = { group = "cloud.commandframework", name = "cloud-annotations", version.ref="cloud" }
 vanishBridgeHelper = { group = "uk.co.notnull", name = "VanishBridge-helper", version.ref="vanishBridge" }
 platformDetection = { group = "uk.co.notnull", name = "PlatformDetection-velocity", version.ref="platformDetection" }
 javacord = { group = "uk.co.notnull", name = "javacord", version.ref="javacord" }

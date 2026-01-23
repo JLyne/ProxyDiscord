@@ -43,6 +43,9 @@ link-other-not-found: '<red>Unknown player: <player>.'
 link-other-not-verified: |-
   <yellow><player> has been linked to <discord>, but they do not appear to have any of the required roles.
 
+# When the console uses /unlink without a player
+unlink-not-player: '<red>You must provide a player when unlinking from the console.'
+
 # When a player uses /unlink without a discord account linked
 unlink-not-linked: '<red>You have not linked a discord account.'
 
