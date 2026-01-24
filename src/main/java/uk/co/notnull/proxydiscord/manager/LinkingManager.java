@@ -27,8 +27,6 @@ import com.google.common.collect.HashBiMap;
 import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.proxy.Player;
 import org.spongepowered.configurate.ConfigurationNode;
-import org.javacord.api.DiscordApi;
-import org.javacord.api.entity.channel.ServerTextChannel;
 import org.javacord.api.entity.user.User;
 import org.slf4j.Logger;
 import uk.co.notnull.proxydiscord.api.LinkResult;
@@ -57,8 +55,6 @@ public final class LinkingManager implements uk.co.notnull.proxydiscord.api.mana
     private HashBiMap<UUID, Long> links;
     private HashBiMap<String, UUID> pendingLinks;
     private String linkingSecret;
-    private String linkingChannelId;
-    private boolean allowDiscordUnlink;
 
     private final Logger logger;
     private Link linkCommand;
@@ -80,31 +76,11 @@ public final class LinkingManager implements uk.co.notnull.proxydiscord.api.mana
             plugin.getDebugLogger().info("Saving linked accounts");
             saveLinks();
         }).repeat(300, TimeUnit.SECONDS).delay(300, TimeUnit.SECONDS).schedule();
-
-        //Bot commands need Luckperms to be loaded, so wait until after ProxyInitializeEvent
-        plugin.getDiscord().getApi().addReconnectListener(event -> {
-            if(linkingChannelId != null) {
-                findChannel();
-            } else {
-                removeCommands();
-            }
-        });
-
-        if(linkingChannelId != null) {
-            findChannel();
-        } else {
-            removeCommands();
-        }
     }
 
     private void parseConfig(ConfigurationNode config) {
-        String linkingChannelId = config.node("linking", "discord-channel-id").getString();
-		String linkingSecret = config.node("linking", "secret").getString(); //TODO: Validate
-		boolean allowDiscordUnlink = config.node("linking", "allow-discord-unlinking").getBoolean(false);
-
-		this.linkingSecret = linkingSecret;
-        this.linkingChannelId = linkingChannelId;
-        this.allowDiscordUnlink = allowDiscordUnlink;
+		//TODO: Validate
+		this.linkingSecret = config.node("linking", "secret").getString();
     }
 
     public boolean isLinked(Player player) {
@@ -340,45 +316,6 @@ public final class LinkingManager implements uk.co.notnull.proxydiscord.api.mana
         }
     }
 
-    private void findChannel() {
-        DiscordApi api = plugin.getDiscord().getApi();
-        Optional <ServerTextChannel> linkingChannel = api.getServerTextChannelById(linkingChannelId);
-
-        if(linkingChannel.isEmpty()) {
-            logger.warn("Unable to find linking channel. Did you put a valid channel ID in the config?");
-
-            removeCommands();
-
-            return;
-        } else {
-            if(linkCommand == null) {
-                linkCommand = new Link(this, linkingChannel.get());
-            } else {
-                linkCommand.setLinkingChannel(linkingChannel.get());
-            }
-
-            if(allowDiscordUnlink) {
-                if(unlinkCommand == null) {
-                    unlinkCommand = new Unlink(this, linkingChannel.get());
-                } else {
-                    unlinkCommand.setLinkingChannel(linkingChannel.get());
-                }
-            } else if(unlinkCommand != null) {
-                unlinkCommand.remove();
-                unlinkCommand = null;
-            }
-        }
-
-        String channelName = "#" + linkingChannel.get().getName();
-		logger.info("Account linking enabled for channel: {} (id: {})", channelName, linkingChannelId);
-
-        linkingChannel.ifPresent(channel -> {
-            if(!channel.canYouWrite()) {
-				logger.warn("I don't have permission to send messages in #{} (id: {})!", channelName, linkingChannelId);
-            }
-        });
-    }
-
     private void removeCommands() {
         if(linkCommand != null) {
             linkCommand.remove();
@@ -397,11 +334,5 @@ public final class LinkingManager implements uk.co.notnull.proxydiscord.api.mana
 
     public void reload(ConfigurationNode config) {
         parseConfig(config);
-
-        if(linkingChannelId != null) {
-            findChannel();
-        } else {
-            removeCommands();
-        }
     }
 }

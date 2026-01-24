@@ -24,14 +24,10 @@
 package uk.co.notnull.proxydiscord.bot.commands;
 
 import net.luckperms.api.model.user.UserManager;
-import org.javacord.api.entity.channel.ServerTextChannel;
-import org.javacord.api.entity.message.MessageAuthor;
 import org.javacord.api.entity.message.embed.EmbedBuilder;
 import org.javacord.api.event.interaction.SlashCommandCreateEvent;
-import org.javacord.api.event.message.MessageCreateEvent;
 import org.javacord.api.interaction.SlashCommandInteraction;
 import org.javacord.api.listener.interaction.SlashCommandCreateListener;
-import org.javacord.api.listener.message.MessageCreateListener;
 import org.javacord.api.util.event.ListenerManager;
 import uk.co.notnull.proxydiscord.Messages;
 import uk.co.notnull.proxydiscord.api.LinkResult;
@@ -49,51 +45,12 @@ public final class Link implements MessageCreateListener, SlashCommandCreateList
     private final LinkingManager linkingManager;
     private final UserManager userManager;
 
-    private ListenerManager<MessageCreateListener> messageListener;
     private ListenerManager<SlashCommandCreateListener> slashCommandListener;
-    private long linkingChannelId;
 
-    public Link(LinkingManager linkingManager, ServerTextChannel linkingChannel) {
+    public Link(LinkingManager linkingManager) {
 	    this.linkingManager = linkingManager;
 	    this.userManager = ProxyDiscord.inst().getLuckpermsManager().getUserManager();
-
-	    setLinkingChannel(linkingChannel);
 	}
-
-    @Override
-    public void onMessageCreate(MessageCreateEvent event) {
-        String content = event.getMessageContent();
-
-        //Ignore random messages
-        if(!event.getMessageAuthor().isRegularUser() || (!content.startsWith("!link") && !content.startsWith("/link"))) {
-            return;
-        }
-
-        if(event.getChannel().getId() != linkingChannelId) {
-            return;
-        }
-
-        MessageAuthor author = event.getMessageAuthor();
-        Long id = author.getId();
-        String token = content.replace("!link ", "")
-                .replace("/link ", "").toUpperCase();
-        LinkResult result;
-
-        try {
-            result = linkingManager.completeLink(token, id);
-        } catch (Exception e) {
-            e.printStackTrace();
-            result = LinkResult.UNKNOWN_ERROR;
-        }
-
-        getResponse(result, event.getMessageAuthor().getId())
-                .thenAccept((EmbedBuilder e) -> event.getMessage().reply(e))
-                .exceptionally((e) -> {
-                    e.printStackTrace();
-                    event.getMessage().reply(Messages.getEmbed("embed-link-error"));
-                    return null;
-                });
-    }
 
     @Override
     public void onSlashCommandCreate(SlashCommandCreateEvent event) {
@@ -179,21 +136,7 @@ public final class Link implements MessageCreateListener, SlashCommandCreateList
         return embed;
     }
 
-    public void setLinkingChannel(ServerTextChannel linkingChannel) {
-        remove();
-
-        if(linkingChannel != null) {
-            linkingChannelId = linkingChannel.getId();
-            messageListener = linkingChannel.addMessageCreateListener(this);
-            slashCommandListener = linkingChannel.getApi().addSlashCommandCreateListener(this);
-        }
-    }
-
     public void remove() {
-        if(messageListener != null) {
-            messageListener.remove();
-        }
-
         if(slashCommandListener != null) {
             slashCommandListener.remove();
         }

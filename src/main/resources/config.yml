@@ -10,9 +10,6 @@ bot:
 linking:
   secret: ')2z#*MR^BrGVygg7'
 
-  # Discord channel for the bot to listen for and respond to link attempts
-  discord-channel-id: '123456789'
-
   # Server to send players to for the linking and verification processes
   linking-server: 'linking'
 
@@ -31,10 +28,6 @@ linking:
 
   # Servers which players can join without being linked or verified
   public-servers: []
-
-  # Whether to allow the !unlink bot command for unlinking from discord
-  # If false, players will need to use /unlink in-game
-  allow-discord-unlinking: false
 
 # Discord roles to sync to luckperms groups
 # Note that removing a group from this list will *not* remove it from players who have it. You will have to do this manually.
