@@ -1,6 +1,6 @@
 [versions]
 velocityApi = "3.4.0-SNAPSHOT"
-shadow = "9.3.0"
+shadow = "9.3.1"
 vanishBridge = "2.0-SNAPSHOT"
 platformDetection="2.2"
 discordReserializer="4.4.0"
