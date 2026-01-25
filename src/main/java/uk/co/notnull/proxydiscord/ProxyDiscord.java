@@ -34,13 +34,6 @@ import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.proxy.messages.MinecraftChannelIdentifier;
 import uk.co.notnull.proxydiscord.api.emote.EmoteProvider;
-import uk.co.notnull.proxydiscord.bot.commands.Info;
-import uk.co.notnull.proxydiscord.bot.listeners.Reconnect;
-import uk.co.notnull.proxydiscord.bot.listeners.ServerMemberBan;
-import uk.co.notnull.proxydiscord.bot.listeners.ServerMemberJoin;
-import uk.co.notnull.proxydiscord.bot.listeners.ServerMemberLeave;
-import uk.co.notnull.proxydiscord.bot.listeners.UserRoleAdd;
-import uk.co.notnull.proxydiscord.bot.listeners.UserRoleRemove;
 import uk.co.notnull.proxydiscord.listeners.JoinLeave;
 import uk.co.notnull.proxydiscord.listeners.SendStatus;
 import uk.co.notnull.proxydiscord.listeners.ServerConnect;
@@ -109,20 +102,19 @@ public final class ProxyDiscord implements uk.co.notnull.proxydiscord.api.ProxyD
 
 		debugLogger = new DebugLogger(this, configuration);
 
-		discord = new Discord(this, configuration);
-
 		luckPermsManager = new LuckPermsManager(this, configuration);
 		linkingManager = new LinkingManager(this, configuration);
 		verificationManager = new VerificationManager(this, configuration);
 		groupSyncManager = new GroupSyncManager(this, configuration);
 		loggingManager = new LoggingManager(this, configuration);
 		redirectManager = new RedirectManager(this);
+		announcementManager = new AnnouncementManager(this, configuration);
+
+		discord = new Discord(this, configuration);
 	}
 
 	@Subscribe
 	public void onProxyInitialization(ProxyInitializeEvent event) {
-		announcementManager = new AnnouncementManager(this, configuration);
-
 		//Init the things we couldn't before proxy initialization
 		luckPermsManager.init();
 		linkingManager.init();
@@ -149,7 +141,7 @@ public final class ProxyDiscord implements uk.co.notnull.proxydiscord.api.ProxyD
     		linkingManager.saveLinks();
 		}
 
-		discord.disconnect().join();
+		discord.disconnect();
 	}
 
 	private boolean loadConfig() {
@@ -190,14 +182,6 @@ public final class ProxyDiscord implements uk.co.notnull.proxydiscord.api.ProxyD
 		proxy.getEventManager().register(this, new ServerConnect(this));
 		proxy.getEventManager().register(this, new SendStatus(this));
 		proxy.getEventManager().register(this, new JoinLeave(this));
-
-		discord.getApi().addUserRoleAddListener(new UserRoleAdd(this));
-		discord.getApi().addUserRoleRemoveListener(new UserRoleRemove(this));
-		discord.getApi().addServerMemberBanListener(new ServerMemberBan(this));
-		discord.getApi().addServerMemberJoinListener(new ServerMemberJoin(this));
-		discord.getApi().addServerMemberLeaveListener(new ServerMemberLeave(this));
-		discord.getApi().addReconnectListener(new Reconnect(this));
-		discord.getApi().addListener(new Info(this));
 	}
 
 	private void loadResource(String resource) {
@@ -279,6 +263,14 @@ public final class ProxyDiscord implements uk.co.notnull.proxydiscord.api.ProxyD
 		return groupSyncManager;
 	}
 
+	/**
+	 * Gets the {@link AnnouncementManager} instance
+	 * @return the announcement manager
+	 */
+	public AnnouncementManager getAnnouncementManager() {
+		return announcementManager;
+	}
+
 	public Logger getLogger() {
     	return logger;
 	}
@@ -326,6 +318,7 @@ public final class ProxyDiscord implements uk.co.notnull.proxydiscord.api.ProxyD
 			groupSyncManager.reload(configuration);
 			loggingManager.reload(configuration);
 			announcementManager.reload(configuration);
+			discord.reload(configuration);
 		}
 	}
 }

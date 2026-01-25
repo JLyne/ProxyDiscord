@@ -30,6 +30,8 @@ import com.velocitypowered.api.event.player.PlayerChatEvent;
 import com.velocitypowered.api.event.player.ServerPostConnectEvent;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
+import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.channel.middleman.StandardGuildMessageChannel;
 import org.spongepowered.configurate.ConfigurationNode;
 import org.slf4j.Logger;
 import uk.co.notnull.proxydiscord.ProxyDiscord;
@@ -40,17 +42,17 @@ import uk.co.notnull.proxydiscord.api.logging.LogVisibility;
 import uk.co.notnull.proxydiscord.logging.LoggingChannelHandler;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 public class LoggingManager implements uk.co.notnull.proxydiscord.api.manager.LoggingManager {
     private final ProxyDiscord plugin;
 	private final ProxyServer proxy;
     private final Logger logger;
-    private final Map<Long, LoggingChannelHandler> handlers;
+    private final Map<Guild, Map<StandardGuildMessageChannel, LoggingChannelHandler>> handlers;
+	private ConfigurationNode config;
 
 	private boolean useChatEvent = true;
 	private boolean useCommandEvent = true;
@@ -63,63 +65,71 @@ public class LoggingManager implements uk.co.notnull.proxydiscord.api.manager.Lo
         this.logger = plugin.getLogger();
 
         this.handlers = new HashMap<>();
+		this.config = config;
 
-        parseConfig(config, false);
+		parseConfig();
     }
 
     public void init() {
 		//Can't schedule tasks until ProxyInitializeEvent
         proxy.getScheduler().buildTask(plugin, () ->
-				handlers.forEach((id, handler) -> handler.updateLogsPerMessage()))
+				handlers.forEach((_, guildHandlers)
+										 -> guildHandlers.values().forEach(LoggingChannelHandler::updateLogsPerMessage)))
 				.repeat(5, TimeUnit.SECONDS)
 				.delay(5, TimeUnit.SECONDS)
 				.schedule();
-
-        handlers.forEach((id, handler) -> handler.init());
 	}
 
-    private void parseConfig(ConfigurationNode config, boolean reload) {
-        Set<Long> existing = new HashSet<>(handlers.keySet());
-
+    private void parseConfig() {
 		useChatEvent = config.node("events", "use-chat-event").getBoolean(true);
 		useCommandEvent = config.node("events", "use-command-event").getBoolean(true);
 		useConnectEvent = config.node("events", "use-connect-event").getBoolean(true);
 		useDisconnectEvent = config.node("events", "use-disconnect-event").getBoolean(true);
 
         LoggingChannelHandler.defaultConfig = config.node("logging", "default");
-
-        config.node("logging").childrenMap().forEach((Object key, ConfigurationNode channelConfig) -> {
-            if(key.toString().equals("default")) {
-                return;
-            }
-
-            long channelId;
-
-            try {
-                channelId = Long.parseLong(key.toString());
-            } catch(NumberFormatException e) {
-				logger.warn("Ignoring logging channel '{}': Invalid channel ID", key);
-                return;
-            }
-
-            if(existing.contains(channelId)) {
-                handlers.get(channelId).update(channelConfig);
-                existing.remove(channelId);
-            } else if(!handlers.containsKey(channelId)) {
-            	LoggingChannelHandler handler = new LoggingChannelHandler(plugin, channelId, channelConfig);
-                handlers.put(channelId, handler);
-
-                if(reload) {
-                	handler.init();
-				}
-            }
-        });
-
-        existing.forEach((Long channelId) -> {
-            handlers.get(channelId).remove();
-            handlers.remove(channelId);
-        });
     }
+
+	public void findChannels(Guild guild) {
+		removeChannels(guild);
+		Map<StandardGuildMessageChannel, LoggingChannelHandler> newHandlers = new ConcurrentHashMap<>();
+
+		 config.node("logging").childrenMap().forEach((Object key, ConfigurationNode channelConfig) -> {
+			 if(key.toString().equals("default")) {
+                return;
+			 }
+
+			 String channelId = key.toString();
+
+			 try {
+				 StandardGuildMessageChannel channel = guild.getChannelById(StandardGuildMessageChannel.class, channelId);
+
+				 if (channel == null) {
+					 return;
+				 }
+
+				 LoggingChannelHandler handler = new LoggingChannelHandler(plugin, channel, channelConfig);
+				 newHandlers.put(channel, handler);
+
+				 guild.getJDA().addEventListener(handler);
+				 plugin.getProxy().getEventManager().register(plugin, handler);
+			 } catch(RuntimeException e) {
+				 logger.warn("Unable to add handler for announcement channel {}", channelId, e);
+			 }
+		});
+
+		handlers.put(guild, newHandlers);
+	}
+
+	public void removeChannels(Guild guild) {
+		handlers.computeIfPresent(guild, (_, value) -> {
+			for (LoggingChannelHandler handler : value.values()) {
+				guild.getJDA().removeEventListener(handler);
+				plugin.getProxy().getEventManager().unregisterListener(plugin, handler);
+			}
+
+			return null;
+		});
+	}
 
 	// Listen on high priority to run before VanishBridge updates the vanish state
 	// This allows us to log leave messages if a player leaves unvanished to join another server vanished
@@ -197,21 +207,30 @@ public class LoggingManager implements uk.co.notnull.proxydiscord.api.manager.Lo
     @Override
     public CompletableFuture<Void> logEvent(LogEntry entry) {
     	return proxy.getEventManager().fire(new DiscordLogEvent(entry)).thenAccept(event -> {
-    		if(!event.getResult().isAllowed()) {
+			if (!event.getResult().isAllowed()) {
 				return;
 			}
 
-    		LogEntry newEntry = entry.toBuilder().visibility(event.getResult().getVisibility()).build();
-    		handlers.forEach((channelId, handler) -> handler.logEvent(newEntry));
+			LogEntry newEntry = entry.toBuilder().visibility(event.getResult().getVisibility()).build();
+			logCustomEvent(newEntry);
 		});
 	}
 
     @Override
     public void logCustomEvent(LogEntry entry) {
-        handlers.forEach((channelId, handler) -> handler.logEvent(entry));
+		for (Map<StandardGuildMessageChannel, LoggingChannelHandler> handlers : handlers.values()) {
+			for (LoggingChannelHandler handler : handlers.values()) {
+				handler.logEvent(entry);
+			}
+		}
     }
 
     public void reload(ConfigurationNode config) {
-        parseConfig(config, true);
+		this.config = config;
+		parseConfig();
+
+        for (Guild guild : plugin.getDiscord().getJDA().getGuilds()) {
+            findChannels(guild);
+        }
     }
 }

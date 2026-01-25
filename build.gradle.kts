@@ -28,10 +28,11 @@ plugins {
 
 dependencies {
     implementation(project(":ProxyDiscordAPI"))
-    implementation(libs.javacord)
     implementation(libs.vanishBridgeHelper)
     implementation(libs.discordReserializer)
-    implementation(libs.vanishBridgeHelper)
+    implementation(libs.jda) {
+        exclude(module="opus-java")
+    }
 
     compileOnly(libs.platformDetection)
 
@@ -43,6 +44,7 @@ description = "Velocity Discord integration solution"
 tasks {
     shadowJar {
         archiveClassifier = ""
+        minimize()
         relocate("uk.co.notnull.VanishBridge", "uk.co.notnull.proxyqueues.shaded.vanishbridge")
     }
 

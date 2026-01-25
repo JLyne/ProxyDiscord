@@ -23,6 +23,9 @@
 
 package uk.co.notnull.proxydiscord.logging;
 
+import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.emoji.RichCustomEmoji;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
@@ -31,13 +34,6 @@ import net.luckperms.api.model.user.User;
 import net.luckperms.api.query.QueryOptions;
 import org.spongepowered.configurate.ConfigurationNode;
 import org.checkerframework.checker.nullness.qual.NonNull;
-import org.javacord.api.DiscordApi;
-import org.javacord.api.entity.emoji.CustomEmoji;
-import org.javacord.api.entity.emoji.KnownCustomEmoji;
-import org.javacord.api.entity.message.Message;
-import org.javacord.api.entity.message.MessageAttachment;
-import org.javacord.api.entity.message.MessageAuthor;
-import org.javacord.api.entity.message.MessageBuilder;
 import org.slf4j.Logger;
 import uk.co.notnull.proxydiscord.Messages;
 import uk.co.notnull.proxydiscord.ProxyDiscord;
@@ -130,11 +126,16 @@ public class LoggingFormatter {
 			return null;
 		};
 
+		BiFunction<String, Component, Void> safeComponentReplace = (String f, Component r) -> {
+			ref.message = ref.message.replace("<" + f + ">", sanitiseLogMessage(r));
+			return null;
+		};
+
         Long discordId = ProxyDiscord.inst().getLinkingManager().getLinked(entry.getPlayer());
-		Optional<org.javacord.api.entity.user.User> discordUser = Optional.empty();
+		Optional<net.dv8tion.jda.api.entities.User> discordUser = Optional.empty();
 
 		if(discordId != null) {
-			discordUser = ProxyDiscord.inst().getDiscord().getApi().getCachedUserById(discordId);
+			discordUser = Optional.ofNullable(ProxyDiscord.inst().getDiscord().getJDA().getUserById(discordId));
 		}
 
         replace.apply("date", dateFormat != null ? dateFormat.format(new Date()) : "");
@@ -150,7 +151,7 @@ public class LoggingFormatter {
 			replace.apply("discord_id", String.valueOf(discordId));
 			replace.apply("discord_mention", "<@!" + discordId + ">");
 			replace.apply("discord_username", discordUser.map(
-					org.javacord.api.entity.user.User::getName).orElse("Unknown"));
+					net.dv8tion.jda.api.entities.User::getName).orElse("Unknown"));
 		} else {
 			replace.apply("discord_id", "Unlinked");
 			replace.apply("discord_mention", "Unlinked");
@@ -158,6 +159,7 @@ public class LoggingFormatter {
 		}
 
 		entry.getReplacements().forEach(safeReplace::apply);
+		entry.getComponentReplacements().forEach(safeComponentReplace::apply);
 
 		return codeBlock ? "```" + ref.message + " ```" : ref.message;
 	}
@@ -169,13 +171,13 @@ public class LoggingFormatter {
 	 * @return the message with emote mentions added
 	 */
 	private static String addEmoteMentions(String message) {
-		DiscordApi api = ProxyDiscord.inst().getDiscord().getApi();
+		JDA jda = ProxyDiscord.inst().getDiscord().getJDA();
 
 		return Util.emotePattern.matcher(message).replaceAll(result -> {
-			Optional<KnownCustomEmoji> emoji = api.getCustomEmojisByNameIgnoreCase(
-					result.group(1).replace("\\", ""))
+			Optional<RichCustomEmoji> emoji = jda.getEmojisByName(
+					result.group(1).replace("\\", ""), true)
 					.stream().filter(e -> !e.isManaged()).findFirst();
-			return emoji.map(CustomEmoji::getMentionTag).orElse(result.group());
+			return emoji.map(RichCustomEmoji::getAsMention).orElse(result.group());
 		});
 	}
 
@@ -186,9 +188,17 @@ public class LoggingFormatter {
 	 */
 	private String sanitiseLogMessage(String message) {
 		if(codeBlock) {
-			return Util.plainSerializer.serialize(Util.miniMessage.deserialize(message)).replace("```", "");
+			return message.replace("```", "");
 		} else {
 			return Util.plainStripMarkdownSerializer.serialize(Util.miniMessage.deserialize(message));
+		}
+	}
+
+	private String sanitiseLogMessage(Component message) {
+		if(codeBlock) {
+			return Util.plainSerializer.serialize(message).replace("```", "");
+		} else {
+			return Util.plainStripMarkdownSerializer.serialize(message);
 		}
 	}
 
@@ -209,8 +219,8 @@ public class LoggingFormatter {
 			return null;
 		}
 
-		MessageAuthor author = message.getAuthor();
-		messageContent = Util.plainSerializer.serialize(Util.plainSerializer.deserialize(messageContent)); //FIXME: Needed?
+		net.dv8tion.jda.api.entities.User author = message.getAuthor();
+//		messageContent = Util.plainSerializer.serialize(Util.plainSerializer.deserialize(messageContent)); //FIXME: Needed?
 
 		String date = dateFormat != null ? dateFormat.format(new Date()) : "";
         ref.result = ref.result.replace("<date>", date);
@@ -219,8 +229,8 @@ public class LoggingFormatter {
 		ref.result = ref.result.replace("<player>", user.getFriendlyName());
 		ref.result = ref.result.replace("<uuid>", user.getUniqueId().toString());
 
-		ref.result = ref.result.replace("<discord_id>", author.getIdAsString());
-		ref.result = ref.result.replace("<discord_mention>", "<@!" + author.getIdAsString() + ">");
+		ref.result = ref.result.replace("<discord_id>", author.getId());
+		ref.result = ref.result.replace("<discord_mention>", author.getAsMention());
 		ref.result = ref.result.replace("<discord_username>", author.getName());
 		ref.result = ref.result.replace("<message>", messageContent);
 		ref.result = ref.result.replace("<attachments>", formatDiscordMessageAttachments(message));
@@ -238,9 +248,9 @@ public class LoggingFormatter {
 		StringBuilder result = new StringBuilder();
 		boolean first = true;
 
-		for(MessageAttachment attachment: message.getAttachments()) {
+		for(Message.Attachment attachment: message.getAttachments()) {
 			// Put each attachment on new line
-			if(!first || !message.getContent().isEmpty()) {
+			if(!first || !message.getContentStripped().isEmpty()) {
 				result.append("\n");
 			}
 
@@ -256,7 +266,7 @@ public class LoggingFormatter {
 	 * @param attachment The attachment to format
 	 * @return the formatted string
 	 */
-	private static String formatDiscordMessageAttachment(MessageAttachment attachment) {
+	private static String formatDiscordMessageAttachment(Message.Attachment attachment) {
 		String result = Messages.get("attachment-log");
 
 		if(result.isEmpty()) {
@@ -269,7 +279,7 @@ public class LoggingFormatter {
 		result = result.replace("<type>", type);
 		result = result.replace("<type_icon>", typeIcon);
 		result = result.replace("<filename>", attachment.getFileName());
-		result = result.replace("<url>", attachment.getUrl().toString());
+		result = result.replace("<url>", attachment.getUrl());
 
         return result;
 	}
@@ -287,7 +297,7 @@ public class LoggingFormatter {
 			return null;
 		}
 
-		MessageAuthor author = message.getAuthor();
+		net.dv8tion.jda.api.entities.User author = message.getAuthor();
 		CachedMetaData metaData = ingameUser.getCachedData().getMetaData(QueryOptions.nonContextual());
 		String prefix = ( metaData.getPrefix() != null) ?  metaData.getPrefix() : "";
 		String suffix = ( metaData.getSuffix() != null) ?  metaData.getSuffix() : "";
@@ -298,7 +308,7 @@ public class LoggingFormatter {
 		placeholders.resolver(Placeholder.parsed("suffix", suffix));
         placeholders.resolver(Placeholder.unparsed("player", ingameUser.getFriendlyName()));
         placeholders.resolver(Placeholder.unparsed("uuid", ingameUser.getUniqueId().toString()));
-        placeholders.resolver(Placeholder.unparsed("discord_id", author.getIdAsString()));
+        placeholders.resolver(Placeholder.unparsed("discord_id", author.getId()));
         placeholders.resolver(Placeholder.unparsed("discord_username", author.getName()));
 		placeholders.resolver(Placeholder.component("message", Util.prepareDiscordMessage(messageContent)));
 		placeholders.resolver(Placeholder.component("attachments", Util.prepareDiscordMessageAttachments(message)));
@@ -314,8 +324,8 @@ public class LoggingFormatter {
 	 * @param newMessage The message to append
 	 * @return Whether the message can be appended
 	 */
-	public boolean appendMessage(MessageBuilder currentMessage, String newMessage) {
-		int currentLength  = currentMessage.getStringBuilder().length();
+	public boolean appendMessage(StringBuilder currentMessage, String newMessage) {
+		int currentLength = currentMessage.length();
 
         if(currentLength > 0 && currentLength + newMessage.length() > 2000) {
         	return false;

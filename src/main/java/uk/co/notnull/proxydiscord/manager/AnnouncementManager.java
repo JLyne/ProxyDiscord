@@ -23,6 +23,8 @@
 
 package uk.co.notnull.proxydiscord.manager;
 
+import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.channel.middleman.StandardGuildMessageChannel;
 import org.spongepowered.configurate.ConfigurationNode;
 import org.slf4j.Logger;
 import uk.co.notnull.proxydiscord.ProxyDiscord;
@@ -30,25 +32,26 @@ import uk.co.notnull.proxydiscord.announcements.AnnouncementChannelHandler;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class AnnouncementManager {
+    private final ProxyDiscord plugin;
     private ConfigurationNode config;
-    private final List<AnnouncementChannelHandler> handlers;
+    private final ConcurrentHashMap<Guild, Map<StandardGuildMessageChannel, AnnouncementChannelHandler>> handlers;
     private final Logger logger;
 
     public AnnouncementManager(ProxyDiscord plugin, ConfigurationNode config) {
+        this.plugin = plugin;
         this.config = config.node("announcement-channels");
         this.logger = plugin.getLogger();
 
-        handlers = new ArrayList<>();
-        findChannels();
-
-        plugin.getDiscord().getApi().addReconnectListener(event -> findChannels());
+        handlers = new ConcurrentHashMap<>();
     }
 
-    private void findChannels() {
-        handlers.forEach(AnnouncementChannelHandler::remove);
-        handlers.clear();
+    public void findChannels(Guild guild) {
+        removeChannels(guild);
+        Map<StandardGuildMessageChannel, AnnouncementChannelHandler> newHandlers = new ConcurrentHashMap<>();
 
         config.childrenMap().forEach((Object id, ConfigurationNode settings) -> {
             String channelID = id.toString();
@@ -61,22 +64,50 @@ public class AnnouncementManager {
             }
 
             try {
+                plugin.getLogger().info(channelID);
+                StandardGuildMessageChannel channel = guild.getChannelById(StandardGuildMessageChannel.class, channelID);
+                AnnouncementChannelHandler handler;
+
+                if (channel == null) {
+                    return;
+                }
+
                 if(serverList) {
                     List<String> list = new ArrayList<>();
                     servers.forEach(s -> list.add(s.getString()));
 
-                    handlers.add(new AnnouncementChannelHandler(channelID, list));
+                    handler = new AnnouncementChannelHandler(channel, list);
                 } else {
-                    handlers.add(new AnnouncementChannelHandler(channelID));
+                    handler = new AnnouncementChannelHandler(channel);
                 }
+
+                newHandlers.put(channel, handler);
+                guild.getJDA().addEventListener(handler);
+                plugin.getProxy().getEventManager().register(plugin, handler);
             } catch(RuntimeException e) {
 				logger.warn("Unable to add handler for announcement channel {}", channelID, e);
             }
+        });
+
+        handlers.put(guild, newHandlers);
+    }
+
+    public void removeChannels(Guild guild) {
+        handlers.computeIfPresent(guild, (_, value) -> {
+            for (AnnouncementChannelHandler handler : value.values()) {
+                guild.getJDA().removeEventListener(handler);
+                plugin.getProxy().getEventManager().unregisterListener(plugin, handler);
+            }
+
+            return null;
         });
     }
 
     public void reload(ConfigurationNode config) {
         this.config = config.node("announcement-channels");
-        findChannels();
+
+        for (Guild guild : plugin.getDiscord().getJDA().getGuilds()) {
+            findChannels(guild);
+        }
     }
 }

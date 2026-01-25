@@ -25,23 +25,25 @@ package uk.co.notnull.proxydiscord.bot.commands;
 
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ServerConnection;
-import net.luckperms.api.model.user.UserManager;
-import org.javacord.api.entity.message.embed.EmbedBuilder;
-import org.javacord.api.entity.permission.Role;
-import org.javacord.api.entity.user.User;
-import org.javacord.api.event.interaction.ApplicationCommandEvent;
-import org.javacord.api.event.interaction.AutocompleteCreateEvent;
-import org.javacord.api.event.interaction.SlashCommandCreateEvent;
-import org.javacord.api.event.interaction.UserContextMenuCommandEvent;
-import org.javacord.api.interaction.AutocompleteInteraction;
-import org.javacord.api.interaction.SlashCommandInteraction;
-import org.javacord.api.interaction.SlashCommandOptionChoice;
-import org.javacord.api.interaction.callback.InteractionImmediateResponseBuilder;
-import org.javacord.api.interaction.callback.InteractionOriginalResponseUpdater;
-import org.javacord.api.listener.interaction.AutocompleteCreateListener;
-import org.javacord.api.listener.interaction.SlashCommandCreateListener;
-import org.javacord.api.listener.interaction.UserContextMenuCommandListener;
+import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.entities.Role;
+import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
+import net.dv8tion.jda.api.events.interaction.command.GenericCommandInteractionEvent;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.events.interaction.command.UserContextInteractionEvent;
+import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.interactions.InteractionHook;
+import net.dv8tion.jda.api.interactions.commands.Command;
+import net.dv8tion.jda.api.interactions.commands.CommandAutoCompleteInteraction;
+import net.dv8tion.jda.api.interactions.commands.SlashCommandInteraction;
+import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
+import net.dv8tion.jda.api.utils.messages.MessageCreateData;
 import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
+
 import uk.co.notnull.proxydiscord.Messages;
 import uk.co.notnull.proxydiscord.Util;
 import uk.co.notnull.proxydiscord.api.VerificationResult;
@@ -49,40 +51,41 @@ import uk.co.notnull.proxydiscord.api.events.PlayerInfoEvent;
 import uk.co.notnull.proxydiscord.api.info.PlayerInfo;
 import uk.co.notnull.proxydiscord.manager.LinkingManager;
 import uk.co.notnull.proxydiscord.ProxyDiscord;
+import uk.co.notnull.proxydiscord.manager.LuckPermsManager;
 import uk.co.notnull.proxydiscord.manager.VerificationManager;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
-public class Info implements SlashCommandCreateListener, UserContextMenuCommandListener, AutocompleteCreateListener {
+public class Info extends ListenerAdapter {
 	private final ProxyDiscord plugin;
-	private final UserManager userManager;
+	private final LuckPermsManager luckPermsManager;
 	private final LinkingManager linkingManager;
 	private final VerificationManager verificationManager;
 
     public Info(ProxyDiscord plugin) {
 		this.plugin = plugin;
-	    this.userManager = ProxyDiscord.inst().getLuckpermsManager().getUserManager();
+	    this.luckPermsManager = ProxyDiscord.inst().getLuckpermsManager();
 	    this.linkingManager = ProxyDiscord.inst().getLinkingManager();
 	    this.verificationManager = ProxyDiscord.inst().getVerificationManager();
 	}
 
-    public void onSlashCommandCreate(SlashCommandCreateEvent event) {
-        SlashCommandInteraction interaction = event.getSlashCommandInteraction();
+    public void onSlashCommandInteraction(SlashCommandInteractionEvent event) {
+        SlashCommandInteraction interaction = event.getInteraction();
 
-		if(!interaction.getCommandName().equals("info")) {
+		if(!interaction.getName().equals("info")) {
 			return;
 		}
 
-		String subcommand = interaction.getOptions().getFirst().getName();
+		String subcommand = interaction.getSubcommandName();
 
 		switch (subcommand) {
-			case "discord" -> //noinspection OptionalGetWithoutIsPresent
-					handleDiscordInfoRequest(interaction.getArguments().getFirst().getUserValue().get(), event);
+			case "discord" ->
+					handleDiscordInfoRequest(interaction.getOption("user").getAsUser(), event);
 
-			case "player" -> //noinspection OptionalGetWithoutIsPresent
-					handleMinecraftInfoRequest(interaction.getArguments().getFirst().getStringValue().get(), event);
+			case "player" ->
+					handleMinecraftInfoRequest(interaction.getOption("username_or_uuid").getAsString(), event);
 //
 //			case "server" -> event.getInteraction()
 //					.createImmediateResponder()
@@ -91,28 +94,29 @@ public class Info implements SlashCommandCreateListener, UserContextMenuCommandL
 		}
     }
 
-	public void onUserContextMenuCommand(UserContextMenuCommandEvent event) {
-		handleDiscordInfoRequest(event.getUserContextMenuInteraction().getTarget(), event);
+	public void onUserContextInteraction(@NonNull UserContextInteractionEvent event) {
+		handleDiscordInfoRequest(event.getInteraction().getTarget(), event);
 	}
 
-	public void onAutocompleteCreate(AutocompleteCreateEvent event) {
-		AutocompleteInteraction interaction = event.getAutocompleteInteraction();
+	public void onCommandAutoCompleteInteraction(CommandAutoCompleteInteractionEvent event) {
+		CommandAutoCompleteInteraction interaction = event.getInteraction();
 
-		if(!interaction.getCommandName().equals("info")) {
+		if(!interaction.getName().equals("info")) {
 			return;
 		}
 
-		String subcommand = interaction.getOptions().getFirst().getName();
+		String subcommand = interaction.getSubcommandName();
 
 		switch (subcommand) {
 			case "player" -> {
-				String query = interaction.getFocusedOption().getStringValue().orElse("").toLowerCase();
-				List<SlashCommandOptionChoice> choices = ProxyDiscord.inst().getVanishBridgeHelper()
+				String query = interaction.getFocusedOption().getValue().toLowerCase();
+				List<Command.Choice> choices = ProxyDiscord.inst().getVanishBridgeHelper()
 						.getPlayerSuggestions(query, null).stream()
-						.map(player -> SlashCommandOptionChoice.create(player.getUsername(),
-																	   player.getUniqueId().toString()))
+						.limit(25)
+						.map(player -> new Command.Choice(player.getUsername(),
+															 player.getUniqueId().toString()))
 						.toList();
-				interaction.respondWithChoices(choices);
+				interaction.replyChoices(choices).queue();
 			}
 //
 //			case "server" -> {
@@ -132,13 +136,13 @@ public class Info implements SlashCommandCreateListener, UserContextMenuCommandL
 	 * @param user - The user to return information for
 	 * @param event - The command event to respond to
 	 */
-	private void handleDiscordInfoRequest(User user, ApplicationCommandEvent event) {
-		UUID uuid = linkingManager.getLinked(user.getId());
+	private void handleDiscordInfoRequest(User user, GenericCommandInteractionEvent event) {
+		UUID uuid = linkingManager.getLinked(user.getIdLong());
 
 		if(uuid == null) {
 			respondWithEmbed(event, Messages.getEmbed(
 					"embed-info-discord-not-linked",
-					Collections.singletonMap("discord", user.getMentionTag())));
+					Collections.singletonMap("discord", user.getAsMention())));
 		} else {
 			respondWithPlayerInfo(event, uuid);
 		}
@@ -149,11 +153,11 @@ public class Info implements SlashCommandCreateListener, UserContextMenuCommandL
 	 * @param usernameOrUUID - UUID or username to return information for
 	 * @param event - The command event to respond to
 	 */
-	private void handleMinecraftInfoRequest(String usernameOrUUID, ApplicationCommandEvent event) {
+	private void handleMinecraftInfoRequest(String usernameOrUUID, GenericCommandInteractionEvent event) {
 		if(Util.isValidUUID(usernameOrUUID)) {
 			respondWithPlayerInfo(event, UUID.fromString(usernameOrUUID));
 		} else {
-			userManager.lookupUniqueId(usernameOrUUID).thenAccept(uuid -> {
+			luckPermsManager.getUserManager().lookupUniqueId(usernameOrUUID).thenAccept(uuid -> {
 				if(uuid == null) {
 					respondWithEmbed(event, Messages.getEmbed("embed-info-player-not-found"));
 				} else {
@@ -168,16 +172,11 @@ public class Info implements SlashCommandCreateListener, UserContextMenuCommandL
 	 * @param event - The command event to respond to
 	 * @param embed - The embed to respond with
 	 */
-	private void respondWithEmbed(@NotNull ApplicationCommandEvent event, EmbedBuilder embed) {
-		InteractionImmediateResponseBuilder builder = event.getInteraction().createImmediateResponder();
-
-		builder.addEmbed(embed)
-				.respond()
-				.exceptionally(e -> {
-					plugin.getLogger().warn("Failed to immediately respond to interaction", e);
-					builder.removeAllEmbeds().addEmbed(Messages.getEmbed("embed-info-error")).respond();
-					return null;
-				});
+	private void respondWithEmbed(@NotNull GenericCommandInteractionEvent event, MessageEmbed embed) {
+		event.reply(MessageCreateData.fromEmbeds(embed)).queue(null, e -> {
+			plugin.getLogger().warn("Failed to immediately respond to interaction", e);
+//			builder.removeAllEmbeds().addEmbed(Messages.getEmbed("embed-info-error")).respond(); //FIXME
+		});
 	}
 
 	/**
@@ -186,19 +185,19 @@ public class Info implements SlashCommandCreateListener, UserContextMenuCommandL
 	 * @param event - The command event to respond to
 	 * @param uuid - The UUID of the user to return information for
 	 */
-	private void respondWithPlayerInfo(@NotNull ApplicationCommandEvent event, @NotNull UUID uuid) {
-		CompletableFuture<InteractionOriginalResponseUpdater> updaterFuture = event.getInteraction().respondLater();
-		CompletableFuture<net.luckperms.api.model.user.User> userFuture = userManager.loadUser(uuid);
-		CompletableFuture<User> discordFuture;
+	private void respondWithPlayerInfo(@NotNull GenericCommandInteractionEvent event, @NotNull UUID uuid) {
+		CompletableFuture<InteractionHook> updaterFuture = event.getInteraction().deferReply().submit();
+		CompletableFuture<net.luckperms.api.model.user.User> userFuture = luckPermsManager.getUserManager().loadUser(uuid);
+		CompletableFuture<net.dv8tion.jda.api.entities.User> discordFuture;
 		Long discordId = linkingManager.getLinked(uuid);
 
 		if (discordId != null) {
-			discordFuture = plugin.getDiscord().getApi().getUserById(discordId);
+			discordFuture = event.getJDA().retrieveUserById(discordId).submit();
 		} else {
 			discordFuture = CompletableFuture.completedFuture(null);
 		}
 
-		CompletableFuture.allOf(updaterFuture, userFuture, discordFuture).thenCompose((unused) -> {
+		CompletableFuture.allOf(updaterFuture, userFuture, discordFuture).thenCompose(_ -> {
 			net.luckperms.api.model.user.User user = userFuture.join();
 
 			if (user.getUsername() == null) {
@@ -218,43 +217,47 @@ public class Info implements SlashCommandCreateListener, UserContextMenuCommandL
 
 			return plugin.getProxy().getEventManager().fire(new PlayerInfoEvent(playerInfo));
 		}).thenApply(result -> {
-			InteractionOriginalResponseUpdater updater = updaterFuture.join();
-
 			if (result == null) {
-				return updater.addEmbed(Messages.getEmbed("embed-info-player-not-found"));
+				return MessageCreateData.fromEmbeds(Messages.getEmbed("embed-info-player-not-found"));
 			}
 
-			return preparePlayerInfoResponse(updater, result.getPlayerInfo(), discordFuture.join());
-		}).thenAccept(InteractionOriginalResponseUpdater::update).exceptionally(e -> {
+			return preparePlayerInfoResponse(result.getPlayerInfo(), discordFuture.join());
+		}).thenAccept(message -> event.getHook().sendMessage(message).queue()).exceptionally(e -> {
 			plugin.getLogger().warn("Failed to respond to interaction", e);
 
-			if (updaterFuture.isDone()) {
-				updaterFuture.join().removeAllEmbeds().addEmbed(Messages.getEmbed("embed-info-error")).update();
-			}
+			event.getHook().sendMessage(
+					MessageCreateData.fromEmbeds(Messages.getEmbed("embed-info-error"))).queue();
 
 			return null;
 		});
 	}
 
-	private InteractionOriginalResponseUpdater preparePlayerInfoResponse(
-			InteractionOriginalResponseUpdater updater, PlayerInfo info, User discordUser) {
+	private MessageCreateData preparePlayerInfoResponse(PlayerInfo info, User discordUser) {
 		String discord = discordUser != null ?
 				Messages.get("info-discord-linked",
-							 Collections.singletonMap("<discord>", discordUser.getMentionTag())) :
+							 Collections.singletonMap("<discord>", discordUser.getAsMention())) :
 				Messages.get("info-discord-not-linked");
 
 		String status = Messages.get("info-status-offline");
 		VerificationResult verifyStatus = discordUser != null ?
-				verificationManager.checkVerificationStatus(discordUser.getId()) :
+				verificationManager.checkVerificationStatus(discordUser) :
 				VerificationResult.NOT_LINKED;
 
 		String access = switch (verifyStatus) {
 			case UNKNOWN, NOT_LINKED -> Messages.get("info-access-not-linked");
 			case LINKED_NOT_VERIFIED -> Messages.get("info-access-linked-missing-roles");
 			case VERIFIED -> {
+				Set<Role> verifiedRoles = verificationManager.getVerifiedRoles();
+				Map<Guild, Set<Role>> guildRoles = new HashMap<>();
+
+				verifiedRoles.stream().map(Role::getGuild).distinct().forEach(g -> {
+					Member member = g.getMember(discordUser);
+					guildRoles.put(g, member != null ? member.getUnsortedRoles() : Collections.emptySet());
+				});
+
 				String roles = verificationManager.getVerifiedRoles().stream()
-						.filter(role -> role.hasUser(discordUser))
-						.map(Role::getMentionTag).collect(Collectors.joining(", "));
+						.filter(r -> guildRoles.get(r.getGuild()).contains(r))
+						.map(Role::getAsMention).collect(Collectors.joining(", "));
 
 				yield Messages.get("info-access-linked-roles", Collections.singletonMap("<roles>", roles));
 			}
@@ -283,8 +286,9 @@ public class Info implements SlashCommandCreateListener, UserContextMenuCommandL
 				"access", access
 		);
 
-		return updater
-				.addEmbed(Messages.getEmbed("embed-info", replacements))
-				.addComponents(Messages.getMessageActionRow("info-actions", replacements).build());
+		return new MessageCreateBuilder()
+				.addEmbeds(Messages.getEmbed("embed-info", replacements))
+				.addComponents(Messages.getMessageButtons("info-actions", replacements))
+				.build();
 	}
 }

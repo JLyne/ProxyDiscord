@@ -46,7 +46,6 @@ public interface LoggingManager {
 	 * Logs a {@link LogEntry} to the relevant Discord channels.
 	 * Each channels settings for event types, visibility and servers are respected.
 	 * This method will not fire any events and will always be logged in relevant channels.
-	 * which can be cancelled by other plugins to prevent the log.
 	 * @param entry The log entry
 	 */
 	void logCustomEvent(LogEntry entry);

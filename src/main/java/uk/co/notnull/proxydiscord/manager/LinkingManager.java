@@ -23,11 +23,14 @@
 
 package uk.co.notnull.proxydiscord.manager;
 
+import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
+import com.google.common.collect.Maps;
 import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.proxy.Player;
+import net.dv8tion.jda.api.entities.User;
 import org.spongepowered.configurate.ConfigurationNode;
-import org.javacord.api.entity.user.User;
+
 import org.slf4j.Logger;
 import uk.co.notnull.proxydiscord.api.LinkResult;
 import uk.co.notnull.proxydiscord.ProxyDiscord;
@@ -52,8 +55,8 @@ public final class LinkingManager implements uk.co.notnull.proxydiscord.api.mana
     private final ProxyDiscord plugin;
     private final ProxyServer proxy;
 
-    private HashBiMap<UUID, Long> links;
-    private HashBiMap<String, UUID> pendingLinks;
+    private BiMap<UUID, Long> links;
+    private BiMap<String, UUID> pendingLinks;
     private String linkingSecret;
 
     private final Logger logger;
@@ -100,7 +103,7 @@ public final class LinkingManager implements uk.co.notnull.proxydiscord.api.mana
     }
 
     public UUID getLinked(User user) {
-        return this.links.inverse().get(user.getId());
+        return this.links.inverse().get(user.getIdLong());
     }
 
     public Long getLinked(Player player) {
@@ -272,11 +275,14 @@ public final class LinkingManager implements uk.co.notnull.proxydiscord.api.mana
                 FileInputStream saveStream = new FileInputStream(saveFile);
                 ObjectInputStream save = new ObjectInputStream(saveStream);
 
-                this.links = (HashBiMap<UUID, Long>) save.readObject();
-                this.pendingLinks = (HashBiMap<String, UUID>) save.readObject();
+                BiMap<UUID, Long> links = (BiMap<UUID, Long>) save.readObject();
+                BiMap<String, UUID> pendingLinks = (BiMap<String, UUID>) save.readObject();
+
+                this.links = Maps.synchronizedBiMap(links);
+                this.pendingLinks = Maps.synchronizedBiMap(pendingLinks);
             } else if(oldSaveFile.exists()) {
-                this.links = HashBiMap.create(1024);
-                this.pendingLinks = HashBiMap.create(1024);
+                this.links = Maps.synchronizedBiMap(HashBiMap.create(1024));
+                this.pendingLinks = Maps.synchronizedBiMap(HashBiMap.create(1024));
 
                 logger.info("Importing old links file...");
                 FileInputStream saveStream = new FileInputStream(oldSaveFile);
@@ -306,25 +312,13 @@ public final class LinkingManager implements uk.co.notnull.proxydiscord.api.mana
 				logger.info("Imported {} linked accounts and {} pending links.", this.links.size(),
 							this.pendingLinks.size());
             } else {
-                this.links = HashBiMap.create(1024);
-                this.pendingLinks = HashBiMap.create(1024);
+                this.links = Maps.synchronizedBiMap(HashBiMap.create(1024));
+                this.pendingLinks = Maps.synchronizedBiMap(HashBiMap.create(1024));
             }
         } catch (IOException | ClassNotFoundException | ClassCastException e) {
-            this.links = HashBiMap.create(1024);
-            this.pendingLinks = HashBiMap.create(1024);
+            this.links = Maps.synchronizedBiMap(HashBiMap.create(1024));
+            this.pendingLinks = Maps.synchronizedBiMap(HashBiMap.create(1024));
             logger.warn("Could not load linked accounts from disk");
-        }
-    }
-
-    private void removeCommands() {
-        if(linkCommand != null) {
-            linkCommand.remove();
-            linkCommand = null;
-        }
-
-        if(unlinkCommand != null) {
-            unlinkCommand.remove();
-            unlinkCommand = null;
         }
     }
 

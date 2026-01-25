@@ -35,10 +35,10 @@ import com.velocitypowered.api.command.CommandManager;
 import com.velocitypowered.api.command.CommandMeta;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
+import net.dv8tion.jda.api.entities.User;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.luckperms.api.model.user.UserManager;
-import org.javacord.api.entity.user.User;
 import uk.co.notnull.proxydiscord.api.LinkResult;
 import uk.co.notnull.proxydiscord.api.VerificationResult;
 import uk.co.notnull.proxydiscord.manager.LinkingManager;
@@ -84,7 +84,7 @@ public class Commands {
                               .requires(source -> source.hasPermission("discord.admin"))
                               .executes(context -> reload(context.getSource()))
                 )
-                .then(literalArgumentBuilder("reload")
+                .then(literalArgumentBuilder("refreshcommands")
                               .requires(source -> source.hasPermission("discord.admin"))
                               .executes(context -> recreateCommands(context.getSource()))
                 )
@@ -157,13 +157,14 @@ public class Commands {
                                                                               Collections.emptyMap());
                 } else {
                     //Attempt to get username of linked discord account
-                    plugin.getDiscord().getApi().getUserById(linkedDiscord)
+                    plugin.getDiscord().getJDA().retrieveUserById(linkedDiscord)
+                            .submit()
                             .thenAcceptAsync(user -> Messages.sendComponent(
                                     sender,
                                     "link-other-already-linked-known",
                                     Map.of("player", target, "discord", user.getName()),
                                     Collections.emptyMap()))
-                            .exceptionally(error -> {
+                            .exceptionally(_ -> {
                                 Messages.sendComponent(sender, "link-other-already-linked-unknown",
                                                        Collections.singletonMap("player", target),
                                                        Collections.emptyMap());
@@ -179,7 +180,8 @@ public class Commands {
             if (linkedMinecraft != null) {
                 final User[] discordUser = {null};
 
-                plugin.getDiscord().getApi().getUserById(discordId)
+                plugin.getDiscord().getJDA().retrieveUserById(discordId)
+                        .submit()
                         .thenComposeAsync(result -> {
                             discordUser[0] = result;
                             return userManager.lookupUsername(linkedMinecraft);
@@ -209,8 +211,8 @@ public class Commands {
             }
 
             //Attempt to link player
-            plugin.getDiscord().getApi().getUserById(discordId).thenAcceptAsync(user -> {
-                LinkResult result = linkingManager.manualLink(uuid, user.getId());
+            plugin.getDiscord().getJDA().retrieveUserById(discordId).submit().thenAcceptAsync(user -> {
+                LinkResult result = linkingManager.manualLink(uuid, user.getIdLong());
 
                 plugin.getLogger().debug(result.toString());
 
@@ -336,7 +338,7 @@ public class Commands {
     }
 
     private int recreateCommands(CommandSource sender) {
-        plugin.getDiscord().createSlashCommands(true)
+        plugin.getDiscord().createSlashCommands()
                 .thenAccept(_ -> Messages.sendComponent(sender, "refresh-commands-success"))
                 .exceptionally(e -> {
                     plugin.getLogger().error("Failed to refresh commands", e);

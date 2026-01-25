@@ -3,17 +3,17 @@ velocityApi = "3.4.0-SNAPSHOT"
 shadow = "9.3.0"
 vanishBridge = "2.0-SNAPSHOT"
 platformDetection="2.2"
-javacord="3.9.0-SNAPSHOT"
 discordReserializer="4.4.0"
 luckperms = "5.5"
+jda = "6.3.0"
 
 [libraries]
 velocityApi = { group = "com.velocitypowered", name = "velocity-api", version.ref="velocityApi" }
 vanishBridgeHelper = { group = "uk.co.notnull", name = "VanishBridge-helper", version.ref="vanishBridge" }
 platformDetection = { group = "uk.co.notnull", name = "PlatformDetection-velocity", version.ref="platformDetection" }
-javacord = { group = "uk.co.notnull", name = "javacord", version.ref="javacord" }
 discordReserializer = { group = "dev.vankka", name = "mcdiscordreserializer", version.ref="discordReserializer" }
 luckpermsApi = { group = "net.luckperms", name = "api", version.ref = "luckperms" }
+jda = { group = "net.dv8tion", name = "JDA", version.ref = "jda" }
 
 [plugins]
 shadow = { id = "com.gradleup.shadow", version.ref = "shadow" }

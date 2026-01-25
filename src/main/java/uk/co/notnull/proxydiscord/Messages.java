@@ -24,18 +24,20 @@
 package uk.co.notnull.proxydiscord;
 
 import com.velocitypowered.api.command.CommandSource;
+import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.components.actionrow.ActionRow;
+import net.dv8tion.jda.api.components.buttons.Button;
+import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.entities.Role;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentLike;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import org.spongepowered.configurate.ConfigurationNode;
-import org.javacord.api.entity.message.component.ActionRowBuilder;
-import org.javacord.api.entity.message.component.Button;
-import org.javacord.api.entity.message.embed.EmbedBuilder;
-import org.javacord.api.entity.permission.Role;
 import org.jetbrains.annotations.NotNull;
 
 import java.awt.Color;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -93,33 +95,32 @@ public class Messages {
         return Util.miniMessage.deserialize(message, placeholders.build());
     }
 
-    public static @NotNull EmbedBuilder getEmbed(String id) {
+    public static @NotNull MessageEmbed getEmbed(String id) {
         return getEmbed(id, Collections.emptyMap());
     }
 
-    public static @NotNull EmbedBuilder getEmbed(String id, Map<String, String> replacements) {
+    public static @NotNull MessageEmbed getEmbed(String id, Map<String, String> replacements) {
         Set<Role> verifiedRoles = ProxyDiscord.inst().getVerificationManager().getVerifiedRoles();
         String roleLink;
 
         if(verifiedRoles.size() > 1) {
-            roleLink = verifiedRoles.stream()
-                    .map((Role role) -> "<@&" + role.getIdAsString() + ">").collect(Collectors.joining(", "));
+            roleLink = verifiedRoles.stream().map(Role::getAsMention).collect(Collectors.joining(", "));
         } else {
-            roleLink = !verifiedRoles.isEmpty() ? "<@&" + verifiedRoles.iterator().next().getIdAsString() + ">" : "Unknown Role";
+            roleLink = !verifiedRoles.isEmpty() ? verifiedRoles.iterator().next().getAsMention() : "Unknown Role";
         }
 
         if(messages == null) {
-            return new EmbedBuilder().setTitle("Failed to load messages configuration file");
+            return new EmbedBuilder().setTitle("Failed to load messages configuration file").build();
         }
 
         if(!id.startsWith("embed")) {
-            return new EmbedBuilder().setTitle("Invalid embed id " + id);
+            return new EmbedBuilder().setTitle("Invalid embed id " + id).build();
         }
 
         ConfigurationNode message = messages.node(id);
 
         if(message.virtual()) {
-            return new EmbedBuilder().setTitle("Embed " + id + " does not exist");
+            return new EmbedBuilder().setTitle("Embed " + id + " does not exist").build();
         }
 
         Map<Object, ? extends ConfigurationNode> messageContent = message.childrenMap();
@@ -192,47 +193,39 @@ public class Messages {
             embed.setColor(color);
         }
 
-        return embed;
+        return embed.build();
     }
 
-    public static @NotNull ActionRowBuilder getMessageActionRow(String id) {
-        return getMessageActionRow(id, Collections.emptyMap());
-    }
-
-    public static @NotNull ActionRowBuilder getMessageActionRow(String id, Map<String, String> replacements) {
+    public static @NotNull ActionRow getMessageButtons(String id, Map<String, String> replacements) {
         if(messages == null) {
-            return new ActionRowBuilder();
+            return ActionRow.of(Collections.emptyList());
         }
 
         ConfigurationNode node = messages.node(id);
 
         if(node.virtual()) {
-            return new ActionRowBuilder();
+            return ActionRow.of(Collections.emptyList());
         }
 
-        List<? extends ConfigurationNode> components = node.childrenList();
-        ActionRowBuilder row = new ActionRowBuilder();
+        List<? extends ConfigurationNode> buttonsConfig = node.childrenList();
+        List<Button> buttons = new ArrayList<>();
 
-        for (ConfigurationNode component : components) {
-            String label = component.node("label").getString();
-            String url = component.node("url").getString();
+        for (ConfigurationNode component : buttonsConfig) {
+            String label = component.node("label").getString("");
+            String url = component.node("url").getString("");
 
-            if (label != null) {
-                for (Map.Entry<String, String> entry : replacements.entrySet()) {
-                    label = label.replace("<" + entry.getKey() + ">", entry.getValue());
-                }
+            for (Map.Entry<String, String> entry : replacements.entrySet()) {
+                label = label.replace("<" + entry.getKey() + ">", entry.getValue());
             }
 
-            if (url != null) {
-                for (Map.Entry<String, String> entry : replacements.entrySet()) {
-                    url = url.replace("<" + entry.getKey() + ">", entry.getValue());
-                }
+            for (Map.Entry<String, String> entry : replacements.entrySet()) {
+                url = url.replace("<" + entry.getKey() + ">", entry.getValue());
             }
 
-            row.addComponents(Button.link(url, label));
+            buttons.add(Button.link(url, label));
         }
 
-        return row;
+        return ActionRow.of(buttons);
     }
 
     public static void sendComponent(CommandSource recipient, String messageId) {

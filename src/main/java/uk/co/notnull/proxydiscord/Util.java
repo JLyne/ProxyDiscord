@@ -28,6 +28,7 @@ import dev.vankka.mcdiscordreserializer.minecraft.MinecraftSerializerOptions;
 import dev.vankka.mcdiscordreserializer.rules.DiscordMarkdownRules;
 import dev.vankka.simpleast.core.parser.Parser;
 import dev.vankka.simpleast.core.simple.SimpleMarkdownRules;
+import net.dv8tion.jda.api.entities.Message;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.TextReplacementConfig;
@@ -37,9 +38,6 @@ import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
-import org.javacord.api.entity.channel.ServerChannel;
-import org.javacord.api.entity.message.Message;
-import org.javacord.api.entity.message.MessageAttachment;
 import org.jetbrains.annotations.NotNull;
 import uk.co.notnull.proxydiscord.api.emote.EmoteProvider;
 import uk.co.notnull.proxydiscord.markdown.CustomMarkdownRules;
@@ -48,7 +46,6 @@ import uk.co.notnull.proxydiscord.emote.DefaultEmoteProvider;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.regex.MatchResult;
 import java.util.regex.Pattern;
 
@@ -110,32 +107,6 @@ public class Util {
 								 ProxyDiscord.inst().getEmoteProvider().provide(match.group(1), builder)).build();
 
 	/**
-	 * Returns a URL for the given discord server channel
-	 * @param channel The channel
-	 * @return The URL
-	 */
-	public static String getDiscordChannelURL(ServerChannel channel) {
-		return String.format("https://discord.com/channels/%s/%s",
-							 channel.getServer().getIdAsString(), channel.getIdAsString());
-	}
-
-	/**
-	 * Returns a URL for the given discord message
-	 * @param message The message
-	 * @return The URL
-	 */
-	public static String getDiscordMessageURL(Message message) {
-		Optional<ServerChannel> serverChannel = message.getChannel().asServerChannel();
-
-		return serverChannel.map(channel -> String.format("https://discord.com/channels/%s/%s/%s",
-														  channel.getServer().getIdAsString(),
-														  channel.getIdAsString(),
-														  message.getIdAsString())).orElseGet(
-				() -> String.format("https://discord.com/channels/@me/%s/%s", message.getChannel().getIdAsString(),
-									message.getIdAsString()));
-	}
-
-	/**
 	 * Removes any section-character formatting from the given string then deserializes it into a
 	 * component with formatted extracted URLs
 	 * @param message The message
@@ -152,9 +123,9 @@ public class Util {
 
 		String format = Messages.get("attachment");
 
-		for(MessageAttachment attachment: message.getAttachments()) {
+		for(Message.Attachment attachment: message.getAttachments()) {
 			// Put each attachment on new line
-			if(!first || !message.getContent().isEmpty()) {
+			if(!first || !message.getContentStripped().isEmpty()) {
 				result.append(Component.newline());
 			}
 
@@ -165,7 +136,7 @@ public class Util {
 
 			placeholders.resolver(Placeholder.unparsed("filename", attachment.getFileName()));
 			placeholders.resolver(Placeholder.styling("link", ClickEvent.openUrl(attachment.getUrl())));
-			placeholders.resolver(Placeholder.unparsed("url", attachment.getUrl().toString()));
+			placeholders.resolver(Placeholder.unparsed("url", attachment.getUrl()));
 			placeholders.resolver(Placeholder.unparsed("type", type));
 			placeholders.resolver(Placeholder.unparsed("type_icon", typeIcon));
 

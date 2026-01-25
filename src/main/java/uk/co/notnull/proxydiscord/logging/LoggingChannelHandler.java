@@ -26,19 +26,15 @@ package uk.co.notnull.proxydiscord.logging;
 import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.proxy.ServerConnection;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
+import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.channel.middleman.StandardGuildMessageChannel;
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.kyori.adventure.text.Component;
 import net.luckperms.api.model.user.User;
 import net.luckperms.api.model.user.UserManager;
 import org.spongepowered.configurate.ConfigurationNode;
-import org.javacord.api.entity.channel.ServerTextChannel;
-import org.javacord.api.entity.channel.TextChannel;
-import org.javacord.api.entity.message.Message;
-import org.javacord.api.entity.message.MessageBuilder;
-import org.javacord.api.entity.message.mention.AllowedMentions;
-import org.javacord.api.entity.message.mention.AllowedMentionsBuilder;
-import org.javacord.api.event.message.MessageCreateEvent;
-import org.javacord.api.listener.message.MessageCreateListener;
-import org.javacord.api.util.event.ListenerManager;
 import org.slf4j.Logger;
 import uk.co.notnull.proxydiscord.ProxyDiscord;
 import uk.co.notnull.proxydiscord.api.logging.LogEntry;
@@ -55,13 +51,12 @@ import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class LoggingChannelHandler {
+public class LoggingChannelHandler extends ListenerAdapter {
 	private final ProxyDiscord plugin;
 	private final ProxyServer proxy;
 	private final Logger logger;
 	private final LinkingManager linkingManager;
 
-	private final long channelId;
 	private boolean logSentMessages = false;
 	private boolean logIsPublic = true;
 	private final AtomicReference<Integer> lockDummy = new AtomicReference<>(0);
@@ -70,34 +65,37 @@ public class LoggingChannelHandler {
     private final Set<LogType> events = new HashSet<>();
     private final Set<RegisteredServer> servers = new HashSet<>();
 
-    private ListenerManager<MessageCreateListener> logListener;
 	private final AtomicInteger logsPerMessage = new AtomicInteger(1); //Number of logs to combine together into one message, to avoid rate limits and falling behind
     private final AtomicInteger unsentLogs = new AtomicInteger(0); //Number of unsent logs in current message
-    private final AtomicInteger queuedToSend = new AtomicInteger(0); //Number of messages waiting to be sent by javacord
-	private MessageBuilder currentMessage = new MessageBuilder();
+    private final AtomicInteger queuedToSend = new AtomicInteger(0); //Number of messages waiting to be sent by jda
+	private StringBuilder currentMessage = new StringBuilder();
 
 	public static ConfigurationNode defaultConfig;
-	private static final AllowedMentions allowedMentions;
+	private final StandardGuildMessageChannel loggingChannel;
 
-	static {
-		AllowedMentionsBuilder allowedMentionsBuilder = new AllowedMentionsBuilder();
-		allowedMentionsBuilder.setMentionRoles(false).setMentionUsers(false).setMentionEveryoneAndHere(false);
-        allowedMentions = allowedMentionsBuilder.build();
-	}
-
-	public LoggingChannelHandler(ProxyDiscord plugin, long channelId, ConfigurationNode config) {
+	public LoggingChannelHandler(ProxyDiscord plugin, StandardGuildMessageChannel channel, ConfigurationNode config) {
 		this.plugin = plugin;
 		this.proxy = plugin.getProxy();
 		this.logger = plugin.getLogger();
 		this.linkingManager = plugin.getLinkingManager();
-		this.channelId = channelId;
+		this.loggingChannel = channel;
 
-		plugin.getDiscord().getApi().addReconnectListener(event -> findChannel());
 		parseConfig(config);
-	}
 
-	public void init() {
-		findChannel();
+		String channelName = "#" + channel.getName();
+
+		logger.info("Activity logging enabled for channel: {} (id: {}) in {}", channelName, channel.getId(),
+					channel.getGuild().getName());
+
+		if (!channel.canTalk()) {
+			logger.warn("I don't have permission to send messages in {} (id: {}) in {}!", channelName, channel.getId(),
+						channel.getGuild().getName());
+		}
+
+		if (!channel.getGuild().getSelfMember().hasPermission(channel, Permission.MESSAGE_MANAGE)) {
+			logger.warn("I don't have permission to manage messages in {} (id: {}) in {}!", channelName, channel.getId(),
+						channel.getGuild().getName());
+		}
 	}
 
 	private void parseConfig(ConfigurationNode config) {
@@ -141,36 +139,6 @@ public class LoggingChannelHandler {
         this.formatter = new LoggingFormatter(config.node("formats"), defaultConfig.node("formats"));
 	}
 
-	private void findChannel() {
-        Optional<ServerTextChannel> loggingChannel = plugin.getDiscord().getApi().getServerTextChannelById(channelId);
-
-        if(loggingChannel.isEmpty()) {
-            logger.warn("Unable to find logging channel. Did you put a valid channel ID in the config?");
-            return;
-        }
-
-        if(logListener != null) {
-            logListener.remove();
-        }
-
-        logListener = loggingChannel.get().addMessageCreateListener(this::handleDiscordMessageEvent);
-        String channelName = "#" + loggingChannel.get().getName();
-
-		logger.info("Activity logging enabled for channel: {} (id: {})", channelName, channelId);
-
-        loggingChannel.ifPresent(channel -> {
-            if(!channel.canYouWrite()) {
-				logger.warn("I don't have permission to send messages in {} (id: {})!", channelName,
-							channel.getIdAsString());
-            }
-
-            if(!channel.canYouManageMessages()) {
-				logger.warn("I don't have permission to manage messages in {} (id: {})!", channelName,
-							channel.getIdAsString());
-            }
-        });
-    }
-
     private boolean shouldLogEvent(LogEntry entry) {
 		if(!events.isEmpty() && !events.contains(entry.getType())) {
 			return false;
@@ -210,9 +178,7 @@ public class LoggingChannelHandler {
 	}
 
     private void queueLogMessage(String message) {
-        Optional <TextChannel> loggingChannel = plugin.getDiscord().getApi().getTextChannelById(channelId);
-
-        if(loggingChannel.isEmpty() || message.isEmpty()) {
+        if(loggingChannel == null || message.isEmpty()) {
         	return;
         }
 
@@ -222,12 +188,12 @@ public class LoggingChannelHandler {
 
 			// If message is too long to append, send existing message and try again
 			if(!formatter.appendMessage(currentMessage, message)) {
-				sendLogMessage(loggingChannel.get());
+				sendLogMessage(loggingChannel);
 				formatter.appendMessage(currentMessage, message);
 			}
 
             if(unsentLogs.incrementAndGet() >= logsPerMessage.get()) {
-            	sendLogMessage(loggingChannel.get());
+            	sendLogMessage(loggingChannel);
             }
 
             //Increase logsPerMessage if many messages are queued, to help stop the log falling behind
@@ -238,37 +204,42 @@ public class LoggingChannelHandler {
         }
     }
 
-    private void sendLogMessage(TextChannel channel) {
+    private void sendLogMessage(StandardGuildMessageChannel channel) {
 		queuedToSend.incrementAndGet();
-		currentMessage.setAllowedMentions(allowedMentions);
-		currentMessage.send(channel).thenAcceptAsync(result -> queuedToSend.decrementAndGet()).exceptionally(error -> {
-			logger.warn("Failed to send log message: {}", error.getMessage());
-			queuedToSend.decrementAndGet();
-			return null;
-		});
+		channel.sendMessage(currentMessage).submit()
+				.thenAcceptAsync(_ -> queuedToSend.decrementAndGet())
+				.exceptionally(error -> {
+					logger.warn("Failed to send log message: {}", error.getMessage());
+					queuedToSend.decrementAndGet();
+					return null;
+				});
 
-		currentMessage = new MessageBuilder();
+		currentMessage = new StringBuilder();
 		unsentLogs.set(0);
 	}
 
-    private void handleDiscordMessageEvent(MessageCreateEvent event) {
-		String channelName = "#" + event.getServerTextChannel().map(ServerTextChannel::getName).orElse("Unknown channel");
-		String ignoreMessage = "Ignoring message from " + event.getMessageAuthor().getName() + " in " + channelName + ": ";
-
-		if(event.getMessageAuthor().isYourself()) {
+    public void onMessageReceived(MessageReceivedEvent event) {
+		if (!event.isFromGuild() || !event.getGuildChannel().equals(loggingChannel)) {
 			return;
 		}
 
-		if(!event.getMessageAuthor().isRegularUser()) {
+		String channelName = "#" + event.getChannel().getName();
+		String ignoreMessage = "Ignoring message from " + event.getAuthor().getName() + " in " + channelName + ": ";
+
+		if(event.getAuthor().equals(event.getJDA().getSelfUser())) {
+			return;
+		}
+
+		if(event.getAuthor().isBot() || event.getAuthor().isSystem()) {
 			plugin.getDebugLogger().info(ignoreMessage + "sent by bot user");
 			return;
 		}
 
-		if(logSentMessages) {
-			event.deleteMessage();
+		if(logSentMessages && event.getGuild().getSelfMember().hasPermission(loggingChannel, Permission.MESSAGE_MANAGE)) {
+			event.getMessage().delete().queue();
 		}
 
-		Long discordId = event.getMessageAuthor().getId();
+		Long discordId = event.getAuthor().getIdLong();
 		UUID linked = linkingManager.getLinked(discordId);
 
 		if(linked == null) {
@@ -277,7 +248,7 @@ public class LoggingChannelHandler {
 		}
 
 		Message message = event.getMessage();
-		String content = message.getReadableContent();
+		String content = message.getContentDisplay();
 
 		if(content.isEmpty() && message.getAttachments().isEmpty()) {
 			plugin.getDebugLogger().info(ignoreMessage + "empty message");
@@ -295,8 +266,8 @@ public class LoggingChannelHandler {
 
 			proxy.getEventManager().fire(new DiscordChatEvent(user, content, new HashSet<>(servers))).thenAccept(e -> {
 				if (!e.getResult().isAllowed()) {
-					if(!logSentMessages) {
-						event.deleteMessage();
+					if(!logSentMessages && event.getGuild().getSelfMember().hasPermission(loggingChannel, Permission.MESSAGE_MANAGE)) {
+						message.delete().queue();
 					}
 
 					plugin.getDebugLogger().info(ignoreMessage + "DiscordChatEvent got denied result");
@@ -335,12 +306,7 @@ public class LoggingChannelHandler {
 		});
     }
 
-    public void remove() {
-		logListener.remove();
-	}
-
 	public void update(ConfigurationNode config) {
 		parseConfig(config);
-		findChannel();
 	}
 }

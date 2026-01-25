@@ -26,29 +26,46 @@
 
 package uk.co.notnull.proxydiscord;
 
+import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.JDABuilder;
+import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.entities.Activity;
+import net.dv8tion.jda.api.events.GenericEvent;
+import net.dv8tion.jda.api.events.session.ReadyEvent;
+import net.dv8tion.jda.api.events.session.SessionDisconnectEvent;
+import net.dv8tion.jda.api.events.session.SessionRecreateEvent;
+import net.dv8tion.jda.api.events.session.SessionResumeEvent;
+import net.dv8tion.jda.api.exceptions.InvalidTokenException;
+import net.dv8tion.jda.api.hooks.EventListener;
+import net.dv8tion.jda.api.interactions.commands.Command;
+import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.build.Commands;
+import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
+import net.dv8tion.jda.api.requests.GatewayIntent;
+import net.dv8tion.jda.api.utils.ChunkingFilter;
+import net.dv8tion.jda.api.utils.MemberCachePolicy;
+import net.dv8tion.jda.api.utils.cache.CacheFlag;
+import org.jetbrains.annotations.NotNull;
 import org.spongepowered.configurate.ConfigurationNode;
-import org.javacord.api.entity.activity.ActivityType;
-import org.javacord.api.entity.intent.Intent;
-import org.javacord.api.DiscordApiBuilder;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionException;
+import java.util.concurrent.RejectedExecutionException;
 
-import org.javacord.api.DiscordApi;
-import org.javacord.api.entity.permission.PermissionType;
-import org.javacord.api.interaction.*;
 import org.slf4j.Logger;
 
-public class Discord {
+import uk.co.notnull.proxydiscord.bot.commands.Info;
+import uk.co.notnull.proxydiscord.bot.commands.Link;
+import uk.co.notnull.proxydiscord.bot.commands.Unlink;
+import uk.co.notnull.proxydiscord.bot.listeners.MemberListener;
+import uk.co.notnull.proxydiscord.bot.listeners.RoleListener;
+import uk.co.notnull.proxydiscord.bot.listeners.SessionListener;
+
+public final class Discord implements EventListener {
 	/**
 	 * Discord API Instance
 	 */
-	private DiscordApi api;
+	private JDA jda;
 
 	private boolean connected = false;
 
@@ -69,158 +86,136 @@ public class Discord {
 
 		try {
 			logger.info("Connecting to Discord...");
-			api = new DiscordApiBuilder().setToken(token)
-					.setIntents(Intent.GUILDS, Intent.GUILD_EMOJIS, Intent.GUILD_MEMBERS,
-								Intent.GUILD_MESSAGES, Intent.MESSAGE_CONTENT)
-					.setWaitForUsersOnStartup(true)
-					.setWaitForServersOnStartup(true)
-					.setShutdownHookRegistrationEnabled(false)
-					.login().join();
-
-			connected = true;
-		} catch (CompletionException e) {
-			logger.error("Failed to connect to Discord. Did you put a valid token in the config?", e);
-			return;
+			jda = JDABuilder.createLight(token,
+										 GatewayIntent.GUILD_MEMBERS, GatewayIntent.GUILD_EXPRESSIONS,
+										 GatewayIntent.GUILD_MESSAGES, GatewayIntent.MESSAGE_CONTENT)
+					.enableCache(CacheFlag.EMOJI)
+					.setMemberCachePolicy(MemberCachePolicy.ALL)
+					.setChunkingFilter(ChunkingFilter.ALL)
+					.addEventListeners(this,
+							new RoleListener(plugin),
+							new MemberListener(plugin),
+							new SessionListener(plugin),
+							new Link(plugin),
+							new Unlink(plugin),
+							new Info(plugin)
+					)
+					.setActivity(getActivity(config))
+					.build();
+		} catch (InvalidTokenException e) {
+			logger.error("Failed to connect to discord. Bot token is invalid.");
+		} catch(IllegalArgumentException e) {
+			logger.error("Failed to connect to discord.", e);
 		}
-
-		logger.info("Bot Invite Link: {}", api.createBotInvite());
-
-		//Don't cache any messages by default
-		api.setMessageCacheSize(0, 0);
-
-		updateActivity(config);
-		createSlashCommands(false).join();
-
-		//Handle disconnects/reconnects
-        api.addLostConnectionListener(event -> {
-			connected = false;
-			logger.warn("Lost connection to Discord");
-		});
-
-        api.addReconnectListener(event -> {
-			connected = true;
-			logger.info("Reconnected to Discord");
-			updateActivity(config);
-        });
-
-		api.addResumeListener(event -> {
-			connected = true;
-			logger.info("Resumed connection to Discord");
-			updateActivity(config);
-		});
 	}
 
-	private void updateActivity(ConfigurationNode config) {
-		String activity = config.node("bot", "activity").getString();
-		String activityType = config.node("bot", "activity-type").getString("");
-		ActivityType type = switch (activityType.toLowerCase()) {
-			case "streaming" -> ActivityType.STREAMING;
-			case "listening" -> ActivityType.LISTENING;
-			case "watching" -> ActivityType.WATCHING;
-			case "competing" -> ActivityType.COMPETING;
-			default -> ActivityType.PLAYING;
+	@Override
+	public void onEvent(@NotNull GenericEvent event) {
+		switch (event) {
+			case ReadyEvent _ -> {
+				connected = true;
+				logger.info("Connected to Discord");
+				logger.info("Bot Invite Link: {}", jda.getInviteUrl());
+				logger.info("Run /discord refreshcommands to register or update interactions");
+			}
+			case SessionDisconnectEvent _ -> {
+				connected = false;
+				logger.warn("Lost connection to Discord");
+			}
+			case SessionResumeEvent _ -> {
+				connected = true;
+				logger.info("Resumed connection to Discord");
+			}
+			case SessionRecreateEvent _ -> {
+				connected = true;
+				logger.info("Reconnected to Discord");
+			}
+			default -> {}
+		}
+	}
+
+	private Activity getActivity(ConfigurationNode config) {
+		String activityName = config.node("bot", "activity").getString("");
+		String activityType = config.node("bot", "activity-type").getString();
+		String activityUrl = config.node("bot", "activity-url").getString();
+
+		if(activityType == null) {
+			return null;
+		}
+
+		Activity.ActivityType type = switch (activityType.toLowerCase()) {
+			case "streaming" -> Activity.ActivityType.STREAMING;
+			case "listening" -> Activity.ActivityType.LISTENING;
+			case "watching" -> Activity.ActivityType.WATCHING;
+			case "competing" -> Activity.ActivityType.COMPETING;
+			case "custom" -> Activity.ActivityType.CUSTOM_STATUS;
+			default -> Activity.ActivityType.PLAYING;
 		};
 
-		if(activity != null && !activity.isEmpty()) {
-        	api.updateActivity(type, activity);
-		}
+		return Activity.of(type, activityName, activityUrl);
 	}
 
-	public DiscordApi getApi() {
-		return api;
+	public JDA getJDA() {
+		return jda;
 	}
 
 	public Boolean isConnected() {
 		return connected;
 	}
 
-	public CompletableFuture<Void> disconnect() {
-		if(api != null) {
-			return api.disconnect();
-		} else {
-			return CompletableFuture.completedFuture(null);
+	public void disconnect() {
+		if(jda != null) {
+			jda.shutdown();
 		}
 	}
 
-	public CompletableFuture<Void> createSlashCommands(boolean clean) {
-		if(clean) {
-			return api.getGlobalSlashCommands().thenCompose(commands -> {
-				List<CompletableFuture<Void>> futures = commands.stream()
-						.map(ApplicationCommand::delete).toList();
+	public CompletableFuture<Void> createSlashCommands() {
+		CompletableFuture<Void> future = new CompletableFuture<>();
 
-				return CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).exceptionally(e -> {
-					if(e != null) {
-						logger.warn("An error occurred while removing slash command. Changes may not be fully applied.", e);
-					}
-
-					return null;
-				}).thenCompose(_ -> createSlashCommands(false));
-			});
+		try {
+			jda.updateCommands().addCommands(
+							Commands.slash("link", Messages.get("slash-command-link-description"))
+									.addOption(OptionType.STRING, "token",
+											   Messages.get("slash-command-link-token-argument-description"), true)
+									.setDefaultPermissions(DefaultMemberPermissions.ENABLED),
+							Commands.slash("unlink", Messages.get("slash-command-unlink-description"))
+									.setDefaultPermissions(DefaultMemberPermissions.ENABLED),
+							Commands.slash("info", Messages.get("slash-command-info-description"))
+									.setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_ROLES))
+									.addSubcommands(
+											new SubcommandData("player", Messages.get("slash-command-info-player-description"))
+													.addOption(OptionType.STRING, "username_or_uuid",
+															   Messages.get("slash-command-info-username-argument-description"),
+															   true, true),
+											new SubcommandData("discord", Messages.get("slash-command-info-discord-description"))
+													.addOption(OptionType.USER, "user",
+															   Messages.get("slash-command-info-user-argument-description"),
+															   true)),
+							Commands.context(Command.Type.USER, Messages.get("context-menu-info-label")))
+					.queue(_ -> {
+						logger.info("Interactions registered.");
+						future.complete(null);
+					},
+					(e) -> {
+						logger.warn("An error occurred while registering interactions. Commands may not function correctly.", e);
+						future.completeExceptionally(e);
+					});
+		} catch (RejectedExecutionException e) {
+			future.completeExceptionally(e);
 		}
 
-		Set<ApplicationCommandBuilder<?, ?, ?>> commands = new HashSet<>();
-
-		commands.add(
-				SlashCommand.with("link", Messages.get("slash-command-link-description"))
-						.addOption(SlashCommandOption.create(
-								SlashCommandOptionType.STRING, "token",
-								Messages.get("slash-command-link-token-argument-description"),
-								true))
-						.setDefaultEnabledForEveryone());
-
-		commands.add(
-				SlashCommand.with("unlink", Messages.get("slash-command-unlink-description"))
-						.setDefaultDisabled());
-
-		List<SlashCommandOption> infoSubcommands = new ArrayList<>();
-
-		infoSubcommands.add(SlashCommandOption.createWithOptions(
-				SlashCommandOptionType.SUB_COMMAND, "player",
-				Messages.get("slash-command-info-player-description"),
-				Collections.singletonList(SlashCommandOption.createStringOption(
-						"username_or_uuid",
-						Messages.get("slash-command-info-username-argument-description"),
-						true, true))));
-
-//		infoSubcommands.add(SlashCommandOption.createWithOptions(
-//				SlashCommandOptionType.SUB_COMMAND, "server", "Returns information for a server",
-//				Collections.singletonList(
-//						SlashCommandOption.createStringOption("servername", "The server name",
-//															  true, true))));
-
-		infoSubcommands.add(SlashCommandOption.createWithOptions(
-				SlashCommandOptionType.SUB_COMMAND, "discord",
-				Messages.get("slash-command-info-discord-description"),
-				Collections.singletonList(
-						SlashCommandOption.create(SlashCommandOptionType.USER, "user",
-												  Messages.get("slash-command-info-user-argument-description"),
-												  true))));
-
-        commands.add(
-				SlashCommand.with("info", Messages.get("slash-command-info-description"), infoSubcommands)
-						.setDefaultEnabledForPermissions(PermissionType.MANAGE_ROLES));
-
-		commands.add(
-				UserContextMenu
-						.with(Messages.get("context-menu-info-label"))
-						.setDefaultEnabledForPermissions(PermissionType.MANAGE_ROLES));
-
-		return api.bulkOverwriteGlobalApplicationCommands(commands).thenAccept(_ -> {}).exceptionally(e -> {
-			logger.warn("An error occurred while registering slash commands. Commands may not function correctly.", e);
-			return null;
-		});
+		return future;
 	}
 
 	public void reload(ConfigurationNode config) {
-		if(connected && !api.getToken().equals(config.node("bot", "token").getString())) {
+		if(!jda.getToken().equals(config.node("bot", "token").getString())) {
 			logger.warn("You must restart the proxy for bot token changes to take effect");
 		}
 
 		if(connected) {
-			updateActivity(config);
-			createSlashCommands(false);
+			jda.getPresence().setActivity(getActivity(config));
 		}
 
-		logger.warn("If you have made changes to application command messages, you may also need to run /discord refreshcommands, or restart the proxy");
+		logger.warn("If you have made changes to application command messages, you will also need to run /discord refreshcommands");
 	}
 }

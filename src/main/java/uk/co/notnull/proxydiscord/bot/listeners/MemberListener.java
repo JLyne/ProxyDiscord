@@ -23,25 +23,33 @@
 
 package uk.co.notnull.proxydiscord.bot.listeners;
 
+import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent;
+import net.dv8tion.jda.api.events.guild.member.GuildMemberRemoveEvent;
+import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import org.jetbrains.annotations.NotNull;
 import uk.co.notnull.proxydiscord.ProxyDiscord;
 import uk.co.notnull.proxydiscord.manager.GroupSyncManager;
 import uk.co.notnull.proxydiscord.manager.VerificationManager;
-import org.javacord.api.event.server.member.ServerMemberBanEvent;
-import org.javacord.api.listener.server.member.ServerMemberBanListener;
 
-public class ServerMemberBan implements ServerMemberBanListener {
-    private final VerificationManager verificationManager;
-    private final GroupSyncManager groupSyncManager;
+public class MemberListener extends ListenerAdapter {
+	private final VerificationManager verificationManager;
+	private final GroupSyncManager groupSyncManager;
 
-    public ServerMemberBan(ProxyDiscord plugin) {
-        this.verificationManager = plugin.getVerificationManager();
-        this.groupSyncManager = plugin.getGroupSyncManager();
-    }
+	public MemberListener(ProxyDiscord plugin) {
+		this.verificationManager = plugin.getVerificationManager();
+		this.groupSyncManager = plugin.getGroupSyncManager();
+	}
 
     @Override
-    public void onServerMemberBan(ServerMemberBanEvent serverMemberBanEvent) {
-        verificationManager.handleServerMemberEvent(serverMemberBanEvent);
-        groupSyncManager.handleServerMemberEvent(serverMemberBanEvent);
+    public void onGuildMemberJoin(@NotNull GuildMemberJoinEvent event) {
+		verificationManager.handleRoleAdd(event.getUser(), event.getMember().getRoles());
+		groupSyncManager.handleMemberJoin(event.getMember());
+    }
+
+	@Override
+    public void onGuildMemberRemove(@NotNull GuildMemberRemoveEvent event) {
+		verificationManager.handleRoleRemove(event.getUser(), event.getGuild().getRoles());
+		groupSyncManager.handleMemberRemove(event.getUser(), event.getGuild());
     }
 }
 

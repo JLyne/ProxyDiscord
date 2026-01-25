@@ -23,16 +23,17 @@
 
 package uk.co.notnull.proxydiscord.bot.commands;
 
-import net.luckperms.api.model.user.UserManager;
-import org.javacord.api.entity.message.embed.EmbedBuilder;
-import org.javacord.api.event.interaction.SlashCommandCreateEvent;
-import org.javacord.api.interaction.SlashCommandInteraction;
-import org.javacord.api.listener.interaction.SlashCommandCreateListener;
-import org.javacord.api.util.event.ListenerManager;
+import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.interactions.commands.SlashCommandInteraction;
+import net.dv8tion.jda.api.utils.messages.MessageCreateData;
 import uk.co.notnull.proxydiscord.Messages;
 import uk.co.notnull.proxydiscord.api.LinkResult;
 import uk.co.notnull.proxydiscord.manager.LinkingManager;
 import uk.co.notnull.proxydiscord.ProxyDiscord;
+import uk.co.notnull.proxydiscord.manager.LuckPermsManager;
 import uk.co.notnull.proxydiscord.manager.VerificationManager;
 import uk.co.notnull.proxydiscord.api.VerificationResult;
 
@@ -41,53 +42,47 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
-public final class Link implements MessageCreateListener, SlashCommandCreateListener {
+public final class Link extends ListenerAdapter {
     private final LinkingManager linkingManager;
-    private final UserManager userManager;
+    private final LuckPermsManager luckPermsManager;
 
-    private ListenerManager<SlashCommandCreateListener> slashCommandListener;
-
-    public Link(LinkingManager linkingManager) {
-	    this.linkingManager = linkingManager;
-	    this.userManager = ProxyDiscord.inst().getLuckpermsManager().getUserManager();
+    public Link(ProxyDiscord plugin) {
+	    this.linkingManager = plugin.getLinkingManager();
+        this.luckPermsManager = plugin.getLuckpermsManager();
 	}
 
     @Override
-    public void onSlashCommandCreate(SlashCommandCreateEvent event) {
-        SlashCommandInteraction interaction = event.getSlashCommandInteraction();
+    public void onSlashCommandInteraction(SlashCommandInteractionEvent event) {
+        SlashCommandInteraction interaction = event.getInteraction();
         LinkResult result;
 
-        if(!interaction.getCommandName().equals("link")) {
+        if(!interaction.getName().equals("link")) {
             return;
         }
 
         try {
-            String token = interaction.getArgumentStringValueByIndex(0).orElse("").toUpperCase();
-            result = linkingManager.completeLink(token, interaction.getUser().getId());
+            String token = interaction.getOption("token").getAsString().toUpperCase();
+            result = linkingManager.completeLink(token, interaction.getUser().getIdLong());
         } catch (Exception e) {
             e.printStackTrace();
             result = LinkResult.UNKNOWN_ERROR;
         }
 
-        getResponse(result, interaction.getUser().getId())
-                .thenAccept((EmbedBuilder e) -> interaction.createImmediateResponder()
-                        .addEmbed(e)
-                        .respond())
+        getResponse(result, interaction.getUser())
+                .thenCompose(embed -> interaction.reply(MessageCreateData.fromEmbeds(embed)).submit())
                 .exceptionally((e) -> {
                     e.printStackTrace();
-                    interaction.createImmediateResponder()
-                            .addEmbed(Messages.getEmbed("embed-link-error"))
-                            .respond();
+                    interaction.reply(MessageCreateData.fromEmbeds(Messages.getEmbed("embed-link-error"))).queue();
                     return null;
                 });
     }
 
-    private CompletableFuture<EmbedBuilder> getResponse(LinkResult result, long userId) {
+    private CompletableFuture<MessageEmbed> getResponse(LinkResult result, User user) {
         VerificationManager verificationManager = ProxyDiscord.inst().getVerificationManager();
-        CompletableFuture<EmbedBuilder> embed = null;
-        UUID linked = linkingManager.getLinked(userId);
+        CompletableFuture<MessageEmbed> embed = null;
+        UUID linked = linkingManager.getLinked(user);
 
-        Map<String, String> replacements = new HashMap<>(Map.of("discord", "<@!" + userId + ">"));
+        Map<String, String> replacements = new HashMap<>(Map.of("discord", user.getAsMention()));
 
         switch(result) {
             case UNKNOWN_ERROR:
@@ -104,10 +99,10 @@ public final class Link implements MessageCreateListener, SlashCommandCreateList
 
             case ALREADY_LINKED:
                 embed = CompletableFuture.supplyAsync(() -> {
-                    String username = userManager.lookupUsername(linked).join();
+                    String username = luckPermsManager.getUserManager().lookupUsername(linked).join();
                     replacements.put("minecraft", (username != null) ? username : "Unknown account (" + linked + ")");
 
-                    VerificationResult verificationResult = verificationManager.checkVerificationStatus(userId);
+                    VerificationResult verificationResult = verificationManager.checkVerificationStatus(user);
 
                     if(verificationResult.isVerified()) {
                         return Messages.getEmbed("embed-link-already-linked", replacements);
@@ -119,10 +114,10 @@ public final class Link implements MessageCreateListener, SlashCommandCreateList
 
             case SUCCESS:
                 embed = CompletableFuture.supplyAsync(() -> {
-                    String username = userManager.lookupUsername(linked).join();
+                    String username = luckPermsManager.getUserManager().lookupUsername(linked).join();
                     replacements.put("minecraft", (username != null) ? username : "Unknown account (" + linked + ")");
 
-                    VerificationResult verificationResult = verificationManager.checkVerificationStatus(userId);
+                    VerificationResult verificationResult = verificationManager.checkVerificationStatus(user);
 
                     if(verificationResult.isVerified()) {
                         return Messages.getEmbed("embed-link-success", replacements);
@@ -134,11 +129,5 @@ public final class Link implements MessageCreateListener, SlashCommandCreateList
         }
 
         return embed;
-    }
-
-    public void remove() {
-        if(slashCommandListener != null) {
-            slashCommandListener.remove();
-        }
     }
 }

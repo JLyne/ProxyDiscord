@@ -23,120 +23,67 @@
 
 package uk.co.notnull.proxydiscord.bot.commands;
 
-import net.luckperms.api.model.user.UserManager;
-import org.javacord.api.entity.channel.ServerTextChannel;
-import org.javacord.api.entity.message.embed.EmbedBuilder;
-import org.javacord.api.event.interaction.SlashCommandCreateEvent;
-import org.javacord.api.event.message.MessageCreateEvent;
-import org.javacord.api.interaction.SlashCommandInteraction;
-import org.javacord.api.listener.interaction.SlashCommandCreateListener;
-import org.javacord.api.listener.message.MessageCreateListener;
-import org.javacord.api.util.event.ListenerManager;
+import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.interactions.commands.SlashCommandInteraction;
+import net.dv8tion.jda.api.utils.messages.MessageCreateData;
+
 import uk.co.notnull.proxydiscord.Messages;
 import uk.co.notnull.proxydiscord.ProxyDiscord;
 import uk.co.notnull.proxydiscord.manager.LinkingManager;
+import uk.co.notnull.proxydiscord.manager.LuckPermsManager;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
-public final class Unlink implements MessageCreateListener, SlashCommandCreateListener {
+public final class Unlink extends ListenerAdapter {
     private final LinkingManager linkingManager;
-    private final UserManager userManager;
+    private final LuckPermsManager luckPermsManager;
 
-    private ListenerManager<MessageCreateListener> messageListener;
-    private ListenerManager<SlashCommandCreateListener> slashCommandListener;
-    private long linkingChannelId;
-
-    public Unlink(LinkingManager linkingManager, ServerTextChannel linkingChannel) {
-	    this.linkingManager = linkingManager;
-	    this.userManager = ProxyDiscord.inst().getLuckpermsManager().getUserManager();
-
-	    setLinkingChannel(linkingChannel);
+    public Unlink(ProxyDiscord plugin) {
+	    this.linkingManager = plugin.getLinkingManager();
+	    this.luckPermsManager = plugin.getLuckpermsManager();
 	}
 
     @Override
-    public void onMessageCreate(MessageCreateEvent event) {
-        String content = event.getMessageContent();
+    public void onSlashCommandInteraction(SlashCommandInteractionEvent event) {
+        SlashCommandInteraction interaction = event.getInteraction();
 
-        //Ignore random messages
-        if(!event.getMessageAuthor().isRegularUser() || (!content.startsWith("!unlink") && !content.startsWith("/unlink"))) {
+        if(!interaction.getName().equals("unlink")) {
             return;
         }
 
-        if(event.getChannel().getId() != linkingChannelId) {
-            return;
-        }
-
-        long userId = event.getMessageAuthor().getId();
+        long userId = interaction.getUser().getIdLong();
         UUID linked = linkingManager.unlink(userId);
+        CompletableFuture<MessageEmbed> response = getResponse(interaction.getUser(), linked);
 
-        getResponse(userId, linked)
-                .thenAccept((EmbedBuilder e) -> event.getMessage().reply(e)).exceptionally((e) -> {
-                    e.printStackTrace();
-                    event.getMessage().reply(Messages.getEmbed("embed-unlink-error"));
-                    return null;
-                });
-    }
-
-    @Override
-    public void onSlashCommandCreate(SlashCommandCreateEvent event) {
-        SlashCommandInteraction interaction = event.getSlashCommandInteraction();
-
-        if(!interaction.getCommandName().equals("unlink")) {
-            return;
-        }
-
-        long userId = interaction.getUser().getId();
-        UUID linked = linkingManager.unlink(userId);
-
-        getResponse(userId, linked)
-                .thenAccept((EmbedBuilder e) -> interaction.createImmediateResponder()
-                        .addEmbed(e)
-                        .respond())
+        CompletableFuture.allOf(interaction.deferReply().submit(), response)
+                .thenCompose(_ -> event.getHook().sendMessage(MessageCreateData.fromEmbeds(response.join())).submit())
                 .exceptionally((e) -> {
                     e.printStackTrace();
-                    interaction.createImmediateResponder()
-                            .addEmbed(Messages.getEmbed("embed-unlink-error"))
-                            .respond();
+                    event.getHook().sendMessage(MessageCreateData.fromEmbeds(
+                            Messages.getEmbed("embed-unlink-error"))).queue();
                     return null;
                 });
     }
 
-    private CompletableFuture<EmbedBuilder> getResponse(long userId, UUID linked) {
-        Map<String, String> replacements = new HashMap<>(Map.of("discord", "<@!" + userId + ">"));
+    private CompletableFuture<MessageEmbed> getResponse(User user, UUID linked) {
+        Map<String, String> replacements = new HashMap<>(Map.of("discord", user.getAsMention()));
 
         //User was linked
         if(linked != null) {
             return CompletableFuture.supplyAsync(() -> {
-                String username = userManager.lookupUsername(linked).join();
+                String username = luckPermsManager.getUserManager().lookupUsername(linked).join();
                 replacements.put("minecraft", (username != null) ? username : "Unknown account (" + linked + ")");
 
                 return Messages.getEmbed("embed-unlink-success", replacements);
             });
         } else { //User wasn't linked
             return CompletableFuture.completedFuture(Messages.getEmbed("embed-unlink-not-linked", replacements));
-        }
-    }
-
-    public void setLinkingChannel(ServerTextChannel linkingChannel) {
-        remove();
-
-        if(linkingChannel != null) {
-            linkingChannelId = linkingChannel.getId();
-            messageListener = linkingChannel.addMessageCreateListener(this);
-            slashCommandListener = linkingChannel.getApi().addSlashCommandCreateListener(this);
-        }
-    }
-
-    public void remove() {
-        if(messageListener != null) {
-            messageListener.remove();
-        }
-
-        if(slashCommandListener != null) {
-            slashCommandListener.remove();
         }
     }
 }

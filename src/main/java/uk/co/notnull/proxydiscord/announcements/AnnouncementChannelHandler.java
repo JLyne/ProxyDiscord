@@ -29,56 +29,56 @@ import com.velocitypowered.api.event.player.ServerPostConnectEvent;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
+import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.channel.middleman.StandardGuildMessageChannel;
+import net.dv8tion.jda.api.events.message.MessageDeleteEvent;
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import net.dv8tion.jda.api.events.message.MessageUpdateEvent;
+import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
-import org.javacord.api.entity.channel.ServerTextChannel;
-import org.javacord.api.entity.channel.TextChannel;
-import org.javacord.api.entity.message.Message;
-import org.javacord.api.listener.message.MessageCreateListener;
-import org.javacord.api.listener.message.MessageDeleteListener;
-import org.javacord.api.listener.message.MessageEditListener;
-import org.javacord.api.util.event.ListenerManager;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import uk.co.notnull.proxydiscord.Messages;
 import uk.co.notnull.proxydiscord.ProxyDiscord;
 import uk.co.notnull.proxydiscord.Util;
 
+import javax.annotation.Nonnull;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
-public final class AnnouncementChannelHandler {
+public final class AnnouncementChannelHandler extends ListenerAdapter {
 	private final ProxyDiscord plugin;
 	private final ProxyServer proxy;
 	private final Logger logger;
 
-	private final String channelId;
+	private final StandardGuildMessageChannel channel;
 	private final Set<RegisteredServer> servers;
 
-	private String channelName;
-	private TextComponent channelComponent;
+	private final String channelName;
+	private final TextComponent channelComponent;
 
-	private ListenerManager<MessageCreateListener> createListener;
-	private ListenerManager<MessageDeleteListener> deleteListener;
-	private ListenerManager<MessageEditListener> editListener;
 	private final Set<UUID> sentLatestMessage;
 
 	private Message lastMessage;
 
-	public AnnouncementChannelHandler(String channelId) {
-		this(channelId, Collections.emptyList());
+	public AnnouncementChannelHandler(@NotNull StandardGuildMessageChannel channel) {
+		this(channel, Collections.emptyList());
 	}
 
-	public AnnouncementChannelHandler(String channelId, List<String> serverList) {
-		this.channelId = channelId;
+	public AnnouncementChannelHandler(@NotNull StandardGuildMessageChannel channel, List<String> serverList) {
+		Objects.requireNonNull(channel);
+		this.channel = channel;
 
 		this.plugin = ProxyDiscord.inst();
 		this.proxy = plugin.getProxy();
@@ -96,65 +96,51 @@ public final class AnnouncementChannelHandler {
 				if(server.isPresent()) {
 					servers.add(server.get());
 				} else {
-					logger.warn("Unknown server {} for announcement channel {}", name, channelId);
+					logger.warn("Unknown server {} for announcement channel {} in {}", name, channel.getId(),
+								channel.getGuild().getName());
 				}
 			});
 
 			this.servers = servers;
 		}
 
-		proxy.getEventManager().register(plugin, this);
+		channelName = "#" + channel.getName();
+		channelComponent = Component.text(channelName).clickEvent(ClickEvent.openUrl(channel.getJumpUrl()));
 
-		createListeners();
+		logger.info("Announcements enabled for channel: {} (id: {}) in {}", channelName, channel.getId(),
+					channel.getGuild().getName());
+
 		getLatestMessage();
 	}
 
-	private TextChannel getChannel() {
-		Optional<ServerTextChannel> announcementChannel = plugin.getDiscord().getApi()
-                    .getServerTextChannelById(channelId);
-
-		if(announcementChannel.isEmpty()) {
-			throw new RuntimeException("Channel " + channelId + " not found");
+	public void onMessageReceived(@Nonnull MessageReceivedEvent event) {
+		if (event.getChannel().equals(channel)) {
+			sendAnnouncement(event.getMessage());
 		}
-
-		channelName = "#" + announcementChannel.get().getName();
-		channelComponent = Component.text(channelName)
-				.clickEvent(ClickEvent.openUrl(Util.getDiscordChannelURL(announcementChannel.get())));
-
-		return announcementChannel.get();
 	}
 
-	private void createListeners() {
-		TextChannel channel = getChannel();
+	public void onMessageUpdate(@Nonnull MessageUpdateEvent event) {
+		if(event.getMessage().equals(lastMessage)) {
+			lastMessage = event.getMessage();
+		}
+	}
 
-		logger.info("Announcements enabled for channel: {} (id: {})", channelName, channelId);
-		createListener = channel.addMessageCreateListener(messageCreateEvent ->
-																sendAnnouncement(messageCreateEvent.getMessage()));
-
-		editListener = channel.addMessageEditListener(messageEditEvent -> {
-			if(messageEditEvent.getMessageId() == lastMessage.getId()) {
-				lastMessage = messageEditEvent.getMessage();
-			}
-		});
-
-		deleteListener = channel.addMessageDeleteListener(messageDeleteEvent -> {
-			if(messageDeleteEvent.getMessageId() == lastMessage.getId()) {
-				lastMessage = null;
-				getLatestMessage();
-			}
-		});
+	public void onMessageDelete(@Nonnull MessageDeleteEvent event) {
+		if(lastMessage == null || event.getMessageIdLong() == lastMessage.getIdLong()) {
+			getLatestMessage();
+		}
 	}
 
 	private void getLatestMessage() {
-		TextChannel channel = getChannel();
+		lastMessage = null;
 
-		channel.getMessages(1).thenAcceptAsync(messages -> {
-			if(messages.getNewestMessage().isPresent()) {
+		channel.getHistory().retrievePast(1).submit().thenAcceptAsync(messages -> {
+			if(messages.getFirst() != null) {
 				plugin.getDebugLogger().info("Retrieved latest announcement for " + channelName);
-				lastMessage = messages.getNewestMessage().get();
+				lastMessage = messages.getFirst();
 			}
 		}).exceptionally(e -> {
-			logger.warn("Failed to retrieve latest announcement for {}", channelName);
+			logger.warn("Failed to retrieve latest announcement for {} in {}", channelName, channel.getGuild().getName());
 			return null;
 		});
 	}
@@ -169,7 +155,7 @@ public final class AnnouncementChannelHandler {
         }
 
         lastMessage = message;
-        String content = message.getReadableContent();
+        String content = message.getContentDisplay();
         String headingKey = isNew ? "announcement-new" : "announcement-latest";
 
 		var state = new Object() {
@@ -198,7 +184,7 @@ public final class AnnouncementChannelHandler {
 			announcement.append(Util.prepareDiscordMessageAttachments(message));
 			announcement.append(Component.newline()).append(
 					Messages.getComponent("announcement-read-more")
-							.clickEvent(ClickEvent.openUrl(Util.getDiscordMessageURL(message)))
+							.clickEvent(ClickEvent.openUrl(message.getJumpUrl()))
 							.hoverEvent(HoverEvent.showText(Messages.getComponent("announcement-read-more-tooltip"))));
         } else {
 			announcement.append(Util.prepareDiscordMessage(text));
@@ -237,13 +223,6 @@ public final class AnnouncementChannelHandler {
 			});
 		}
     }
-
-    public void remove() {
-		createListener.remove();
-		editListener.remove();
-		deleteListener.remove();
-		proxy.getEventManager().unregisterListener(plugin, this);
-	}
 
 	@Subscribe(priority = Short.MIN_VALUE / 2)
 	public void onPlayerConnected(ServerPostConnectEvent event) {

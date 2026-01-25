@@ -26,46 +26,40 @@ package uk.co.notnull.proxydiscord.manager;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
+import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.Role;
+import net.dv8tion.jda.api.entities.User;
 import org.spongepowered.configurate.ConfigurationNode;
 import org.checkerframework.checker.nullness.qual.NonNull;
-import org.javacord.api.entity.permission.Role;
-import org.javacord.api.entity.user.User;
-import org.javacord.api.event.server.member.ServerMemberBanEvent;
-import org.javacord.api.event.server.member.ServerMemberEvent;
-import org.javacord.api.event.server.member.ServerMemberJoinEvent;
-import org.javacord.api.event.server.member.ServerMemberLeaveEvent;
-import org.javacord.api.event.server.role.UserRoleAddEvent;
-import org.javacord.api.event.server.role.UserRoleEvent;
 import org.slf4j.Logger;
 import uk.co.notnull.proxydiscord.ProxyDiscord;
 import uk.co.notnull.proxydiscord.api.events.PlayerLinkEvent;
 import uk.co.notnull.proxydiscord.api.events.PlayerUnlinkEvent;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 
 public final class GroupSyncManager implements uk.co.notnull.proxydiscord.api.manager.GroupSyncManager {
-	private final ProxyDiscord plugin;
 	private final Logger logger;
 	private final ProxyServer proxy;
 	private final LinkingManager linkingManager;
 	private final LuckPermsManager luckPermsManager;
 
-	private final Map<Long, Set<Long>> roleUsers;
 	private final Map<Long, Set<String>> syncSettings;
-
 	private final Set<Long> syncedRoles;
 	private final Set<String> groups;
+	private final Map<Role, Set<Long>> roleUsers;
+
 	private final VerificationManager verificationManager;
+	private final ProxyDiscord plugin;
 
 	public GroupSyncManager(ProxyDiscord plugin, ConfigurationNode config) {
 		this.plugin = plugin;
@@ -127,18 +121,16 @@ public final class GroupSyncManager implements uk.co.notnull.proxydiscord.api.ma
 				syncedRoles.add(roleId);
 				syncSettings.put(roleId, groupNames);
 			});
-
-			populateUsers();
 		}
 	}
 
-	public void populateUsers() {
-		roleUsers.clear();
+	public void populateUsers(Guild guild) {
+		removeUsers(guild, false);
 
 		syncedRoles.forEach((Long roleId) -> {
-			Optional<Role> role = plugin.getDiscord().getApi().getRoleById(roleId);
+			Role role = guild.getRoleById(roleId);
 
-			if (role.isEmpty()) {
+			if (role == null) {
 				logger.warn("Failed to load role ({}). Is the ID incorrect or is discord down?", roleId);
 
 				return;
@@ -146,18 +138,30 @@ public final class GroupSyncManager implements uk.co.notnull.proxydiscord.api.ma
 
 			Set<Long> userSet = ConcurrentHashMap.newKeySet();
 
-			logger.info("Role syncing enabled for role {}", role.get().getName());
+			logger.info("Role syncing enabled for role {}", role.getName());
 
-			Collection<User> users = role.get().getUsers();
+			List<Member> members = role.getGuild().getMembersWithRoles(role);
 
-			for (User user : users) {
-				userSet.add(user.getId());
+			for (Member member : members) {
+				userSet.add(member.getIdLong());
 			}
 
-			roleUsers.put(roleId, userSet);
+			roleUsers.put(role, userSet);
 		});
 
         proxy.getAllPlayers().forEach(this::syncPlayer);
+	}
+
+	public void removeUsers(Guild guild) {
+		removeUsers(guild, true);
+	}
+
+	public void removeUsers(Guild guild, boolean updateUsers) {
+		roleUsers.keySet().removeIf(role -> role.getGuild().equals(guild));
+
+		if (updateUsers) {
+			proxy.getAllPlayers().forEach(this::syncPlayer);
+		}
 	}
 
 	@Subscribe()
@@ -182,9 +186,9 @@ public final class GroupSyncManager implements uk.co.notnull.proxydiscord.api.ma
 
 		if (discordId != null) {
 			//Get set of synced groups the player should be in
-			roleUsers.forEach((Long roleId, Set<Long> users) -> {
+			roleUsers.forEach((Role role, Set<Long> users) -> {
 				if (users.contains(discordId)) {
-					groups.addAll(syncSettings.get(roleId));
+					groups.addAll(syncSettings.get(role.getIdLong()));
 				}
 			});
 		}
@@ -198,66 +202,98 @@ public final class GroupSyncManager implements uk.co.notnull.proxydiscord.api.ma
 	}
 
 	public boolean isSyncedRole(Role role) {
-		return syncedRoles.contains(role.getId());
+		return syncedRoles.contains(role.getIdLong());
 	}
 
-	public void handleRoleEvent(UserRoleEvent userRoleEvent) {
-		Role role = userRoleEvent.getRole();
-		User user = userRoleEvent.getUser();
-
-		if (!isSyncedRole(role)) {
-			return;
-		}
-
+	public void handleRoleRemove(User user, List<Role> roles) {
 		UUID uuid = linkingManager.getLinked(user);
+		boolean changed = false;
 
 		if (uuid == null) {
 			return;
 		}
 
-		if (userRoleEvent instanceof UserRoleAddEvent) {
-			// Add synced role
-			roleUsers.get(role.getId()).add(user.getId());
-		} else {
+		for(Role role : roles) {
+			if(!syncedRoles.contains(role.getIdLong())) {
+				continue;
+			}
+
 			// Remove synced role
-			roleUsers.get(role.getId()).remove(user.getId());
+			changed = changed || roleUsers.get(role).remove(user.getIdLong());
 		}
 
-		proxy.getPlayer(uuid).ifPresent(this::syncPlayer);
-	}
-
-	public void handleServerMemberEvent(ServerMemberEvent event) {
-		UUID uuid = linkingManager.getLinked(event.getUser());
-		User user = event.getUser();
-
-		if (uuid == null) {
-			return;
-		}
-
-		if(event instanceof ServerMemberLeaveEvent || event instanceof ServerMemberBanEvent) {
-			//Remove from all synced roles
-			roleUsers.forEach((Long roleId, Set<Long> users) -> users.remove(user.getId()));
-
-			proxy.getPlayer(uuid).ifPresent(player -> luckPermsManager
-					.updateUserGroups(player, Collections.emptySet(), this.groups)
-					.thenAccept((Boolean changed) -> {
-						if (changed) {
-							verificationManager.checkVerificationStatus(player);
-						}
-					}));
-		} else if(event instanceof ServerMemberJoinEvent) {
-			//Add to all synced roles the user has
-			user.getRoles(event.getServer()).forEach((Role role) -> {
-				if(isSyncedRole(role)) {
-					roleUsers.get(role.getId()).add(user.getId());
-				}
-			});
-
+		if(changed) {
 			proxy.getPlayer(uuid).ifPresent(this::syncPlayer);
 		}
 	}
 
+	public void handleRoleAdd(User user, List<Role> roles) {
+		UUID uuid = linkingManager.getLinked(user);
+		boolean changed = false;
+
+		if (uuid == null) {
+			return;
+		}
+
+		for(Role role : roles) {
+			if(!syncedRoles.contains(role.getIdLong())) {
+				continue;
+			}
+
+			// Add synced role
+			changed = changed || roleUsers.get(role).add(user.getIdLong());
+		}
+
+		if(changed) {
+			proxy.getPlayer(uuid).ifPresent(this::syncPlayer);
+		}
+	}
+
+	public void handleMemberRemove(User user, Guild guild) {
+		UUID uuid = linkingManager.getLinked(user);
+		boolean changed = false;
+
+		if (uuid == null) {
+			return;
+		}
+
+		//Remove from all synced roles for the guild
+		for (Map.Entry<Role, Set<Long>> entry : roleUsers.entrySet()) {
+			Role role = entry.getKey();
+			Set<Long> users = entry.getValue();
+			if (role.getGuild().equals(guild)) {
+				users.remove(user.getIdLong());
+				changed = true;
+			}
+		}
+
+		if(changed) {
+			proxy.getPlayer(uuid).ifPresent(this::syncPlayer);
+		}
+	}
+
+	public void handleMemberJoin(Member member) {
+		UUID uuid = linkingManager.getLinked(member.getUser());
+
+		if (uuid == null) {
+			return;
+		}
+
+		//Add to all synced roles the member has
+		member.getRoles().forEach((Role role) -> {
+			if(isSyncedRole(role)) {
+				roleUsers.get(role).add(member.getIdLong());
+			}
+		});
+
+		proxy.getPlayer(uuid).ifPresent(this::syncPlayer);
+	}
+
 	public void reload(ConfigurationNode config) {
         parseConfig(config);
+
+		for (Guild guild : plugin.getDiscord().getJDA().getGuilds()) {
+            populateUsers(guild);
+        }
     }
 }

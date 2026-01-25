@@ -27,14 +27,11 @@ import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
+import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.Role;
+import net.dv8tion.jda.api.entities.User;
 import org.spongepowered.configurate.ConfigurationNode;
-import org.javacord.api.entity.permission.Role;
-import org.javacord.api.entity.user.User;
-import org.javacord.api.event.server.member.ServerMemberBanEvent;
-import org.javacord.api.event.server.member.ServerMemberEvent;
-import org.javacord.api.event.server.member.ServerMemberJoinEvent;
-import org.javacord.api.event.server.member.ServerMemberLeaveEvent;
-import org.javacord.api.event.server.role.UserRoleEvent;
 import org.slf4j.Logger;
 import uk.co.notnull.proxydiscord.ProxyDiscord;
 import uk.co.notnull.proxydiscord.api.VerificationResult;
@@ -42,16 +39,14 @@ import uk.co.notnull.proxydiscord.api.events.PlayerLinkEvent;
 import uk.co.notnull.proxydiscord.api.events.PlayerUnlinkEvent;
 import uk.co.notnull.proxydiscord.api.events.PlayerVerifyStateChangeEvent;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public final class VerificationManager implements uk.co.notnull.proxydiscord.api.manager.VerificationManager {
     private final ProxyDiscord plugin;
@@ -63,8 +58,7 @@ public final class VerificationManager implements uk.co.notnull.proxydiscord.api
 
     private String bypassPermission;
     private Set<Long> verifiedRoleIds;
-
-    private final Set<Long> verifiedRoleUsers;
+    private final ConcurrentHashMap<Role, Set<Long>> verifiedRoleUsers;
 
     private final ProxyServer proxy;
     private final Logger logger;
@@ -75,7 +69,7 @@ public final class VerificationManager implements uk.co.notnull.proxydiscord.api
         this.proxy = plugin.getProxy();
         this.logger = plugin.getLogger();
 
-        verifiedRoleUsers = ConcurrentHashMap.newKeySet();
+        verifiedRoleUsers = new ConcurrentHashMap<>();
         linkingManager = plugin.getLinkingManager();
         lastKnownStatuses = new ConcurrentHashMap<>();
         publicServers = new HashSet<>();
@@ -99,7 +93,7 @@ public final class VerificationManager implements uk.co.notnull.proxydiscord.api
                         String roleId = child.getString();
 
                         try {
-                            verifiedRoleIds.add(Long.parseLong(roleId));
+                            verifiedRoleIds.add(Long.valueOf(roleId));
                         } catch(NumberFormatException e) {
 							logger.warn("Ignoring verified role '{}': Invalid role ID", roleId);
                         }
@@ -109,7 +103,7 @@ public final class VerificationManager implements uk.co.notnull.proxydiscord.api
                 String roleId = roleIds.getString();
 
                 try {
-                    verifiedRoleIds = Collections.singleton(Long.parseLong(roleId));
+                    verifiedRoleIds = Collections.singleton(Long.valueOf(roleId));
                 } catch(NumberFormatException e) {
 					logger.warn("Ignoring verified role '{}': Invalid role ID", roleId);
                     verifiedRoleIds = Collections.emptySet();
@@ -148,8 +142,6 @@ public final class VerificationManager implements uk.co.notnull.proxydiscord.api
         if(defaultVerifiedServer == null && defaultVerifiedServerName != null && !defaultVerifiedServerName.isEmpty()) {
 			logger.warn("Default verified server ({}) does not exist!", defaultVerifiedServerName);
         }
-
-        populateUsers();
     }
 
     @Subscribe()
@@ -160,16 +152,6 @@ public final class VerificationManager implements uk.co.notnull.proxydiscord.api
     @Subscribe()
     public void onPlayerUnlink(PlayerUnlinkEvent event) {
         event.getPlayer().ifPresent(this::checkVerificationStatus);
-    }
-
-    private void addUser(User user) {
-        verifiedRoleUsers.add(user.getId());
-        checkVerificationStatus(user.getId());
-    }
-
-    private void removeUser(User user) {
-        verifiedRoleUsers.remove(user.getId());
-        checkVerificationStatus(user.getId());
     }
 
     public VerificationResult checkVerificationStatus(Player player) {
@@ -183,7 +165,7 @@ public final class VerificationManager implements uk.co.notnull.proxydiscord.api
             Long linkedId = linkingManager.getLinked(player);
 
             if (linkedId != null) {
-                if(verifiedRoleUsers.contains(linkedId)) {
+                if(verifiedRoleUsers.values().stream().anyMatch(s -> s.contains(linkedId))) {
                     status = VerificationResult.VERIFIED;
                 } else {
                     status = VerificationResult.LINKED_NOT_VERIFIED;
@@ -198,6 +180,10 @@ public final class VerificationManager implements uk.co.notnull.proxydiscord.api
         updatePlayerStatus(player, status);
 
         return status;
+    }
+
+    public VerificationResult checkVerificationStatus(User user) {
+        return checkVerificationStatus(user.getIdLong());
     }
 
     public VerificationResult checkVerificationStatus(Long discordId) {
@@ -215,7 +201,7 @@ public final class VerificationManager implements uk.co.notnull.proxydiscord.api
 
             if(player.isPresent() && player.get().hasPermission(bypassPermission)) {
                 status = VerificationResult.BYPASSED;
-            } else if(verifiedRoleUsers.contains(discordId)) {
+            } else if(verifiedRoleUsers.values().stream().anyMatch(s -> s.contains(discordId))) {
                 status = VerificationResult.VERIFIED;
             } else {
                 status = VerificationResult.LINKED_NOT_VERIFIED;
@@ -229,32 +215,45 @@ public final class VerificationManager implements uk.co.notnull.proxydiscord.api
         return status;
     }
 
-    public void populateUsers() {
-        verifiedRoleUsers.clear();
+    public void populateUsers(Guild guild) {
+        removeUsers(guild, false);
 
         verifiedRoleIds.forEach((Long roleId) -> {
-            Optional<Role> verifiedRole = plugin.getDiscord().getApi().getRoleById(roleId);
+            Role verifiedRole = guild.getJDA().getRoleById(roleId);
 
-            if(verifiedRole.isEmpty()) {
-				logger.warn("Failed to load verified role ({}). Is the ID incorrect or is discord down?)", roleId);
-
+            if(verifiedRole == null) {
+				//logger.warn("Failed to load verified role ({}). Is the ID incorrect or is discord down?)", roleId);
                 return;
             }
 
-			logger.info("Role verification enabled for role {}", verifiedRole.get().getName());
+			logger.info("Role verification enabled for role {} in {}", verifiedRole.getName(), guild.getName());
 
-            Collection<User> users = verifiedRole.get().getUsers();
+            List<Member> members = verifiedRole.getGuild().getMembersWithRoles(verifiedRole);
+            Set<Long> value = verifiedRoleUsers.computeIfAbsent(verifiedRole, _ -> ConcurrentHashMap.newKeySet());
+            value.clear();
 
-            for(User user: users) {
-                verifiedRoleUsers.add(user.getId());
+            for(Member member: members) {
+                value.add(member.getIdLong());
             }
         });
 
         proxy.getAllPlayers().forEach(this::checkVerificationStatus);
     }
 
+    public void removeUsers(Guild guild) {
+        removeUsers(guild, true);
+    }
+
+    public void removeUsers(Guild guild, boolean updatePlayers) {
+        verifiedRoleUsers.keySet().removeIf(role -> role.getGuild().equals(guild));
+
+        if (updatePlayers) {
+            proxy.getAllPlayers().forEach(this::checkVerificationStatus);
+        }
+    }
+
     private void updatePlayerStatus(Player player, VerificationResult status) {
-        lastKnownStatuses.compute(player, (key, value) -> {
+        lastKnownStatuses.compute(player, (_, value) -> {
             if(value == null) {
                 proxy.getEventManager().fireAndForget(new PlayerVerifyStateChangeEvent(player, status));
             } else if(value != status) {
@@ -270,51 +269,41 @@ public final class VerificationManager implements uk.co.notnull.proxydiscord.api
 		lastKnownStatuses.remove(player);
 	}
 
-	public void handleRoleEvent(UserRoleEvent userRoleEvent) {
-		Role role = userRoleEvent.getRole();
-		User user = userRoleEvent.getUser();
+    public void handleRoleAdd(User user, List<Role> roles) {
+        AtomicBoolean changed = new AtomicBoolean(false);
 
-		if (!isVerifiedRole(role)) {
-			return;
-		}
+        for (Role role : roles) {
+            verifiedRoleUsers.computeIfPresent(role, (_, value) -> {
+                value.add(user.getIdLong());
+                changed.set(true);
+                return value;
+            });
+        }
 
-		List<Role> roles = user.getRoles(userRoleEvent.getServer());
-
-        if (Collections.disjoint(roles, getVerifiedRoles())) {
-            removeUser(user);
-        } else {
-            addUser(user);
+        if (changed.get()) {
+            checkVerificationStatus(user);
         }
 	}
 
-	public void handleServerMemberEvent(ServerMemberEvent event) {
-		User user = event.getUser();
+	public void handleRoleRemove(User user, List<Role> roles) {
+        AtomicBoolean changed = new AtomicBoolean(false);
 
-		if(event instanceof ServerMemberLeaveEvent || event instanceof ServerMemberBanEvent) {
-			removeUser(user);
-		} else if(event instanceof ServerMemberJoinEvent) { //TODO: Double check
-		    List<Role> roles = user.getRoles(event.getServer());
+        for (Role role : roles) {
+            verifiedRoleUsers.computeIfPresent(role, (_, value) -> {
+                if (value.remove(user.getIdLong())) {
+                    changed.set(true);
+                }
+                return value;
+            });
+        }
 
-            if(getVerifiedRoles().isEmpty()) {
-                return;
-            }
-
-			if(!Collections.disjoint(roles, getVerifiedRoles())) {
-			    addUser(user);
-            }
-		}
-	}
-
-    public boolean isVerifiedRole(Role role) {
-        return verifiedRoleIds.contains(role.getId());
+        if (changed.get()) {
+            checkVerificationStatus(user);
+        }
 	}
 
     public Set<Role> getVerifiedRoles() {
-        return verifiedRoleIds.stream().map((Long roleId) -> {
-            Optional<Role> role = plugin.getDiscord().getApi().getRoleById(roleId);
-
-            return role.orElse(null);
-        }).filter(Objects::nonNull).collect(Collectors.toSet());
+        return Collections.unmodifiableSet(verifiedRoleUsers.keySet());
     }
 
     public Set<RegisteredServer> getPublicServers() {
@@ -339,5 +328,9 @@ public final class VerificationManager implements uk.co.notnull.proxydiscord.api
 
     public void reload(ConfigurationNode config) {
         parseConfig(config);
+
+        for (Guild guild : plugin.getDiscord().getJDA().getGuilds()) {
+            populateUsers(guild);
+        }
     }
 }

@@ -3,8 +3,9 @@ bot:
   token: # Bot token here
 
   # Activity to show in Discord
-  activity-type: 'playing' # Valid values: playing, streaming, listening, watching, competing
-  activity: 'Minecraft'
+  activity-type: 'playing' # Valid values: playing, streaming, listening, watching, competing, custom
+  activity-name: 'Minecraft'
+  activity-url: '' # Required for streaming activity type
 
 # Settings for linking discord accounts and verification
 linking:

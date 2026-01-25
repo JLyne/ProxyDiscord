@@ -26,6 +26,7 @@ package uk.co.notnull.proxydiscord.api.logging;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ServerConnection;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
+import net.kyori.adventure.text.Component;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Collections;
@@ -43,6 +44,7 @@ public class LogEntry {
 	private final Player player;
 	private final RegisteredServer server;
 	private final Map<String, String> replacements;
+	private final Map<String, Component> componentReplacements;
 
 	/**
 	 * Constructs a LogEntry.
@@ -54,6 +56,7 @@ public class LogEntry {
 		this.player = builder.player;
 		this.server = builder.server;
 		this.replacements = builder.replacements;
+		this.componentReplacements = builder.componentReplacements;
 	}
 
 	/**
@@ -100,20 +103,29 @@ public class LogEntry {
 		return replacements;
 	}
 
+	/**
+	 * Gets the list of replacements to apply to the log entry format before logging
+	 * @return the replacements
+	 */
+	public Map<String, Component> getComponentReplacements() {
+		return componentReplacements;
+	}
+
 	@Override
 	public boolean equals(Object o) {
 		if (this == o) return true;
 		if (o == null || getClass() != o.getClass()) return false;
 		LogEntry logEntry = (LogEntry) o;
-		return getType() == logEntry.getType() && getVisibility() == logEntry.getVisibility() && getPlayer().equals(
-				logEntry.getPlayer()) && Objects.equals(getServer(),
-														logEntry.getServer()) && Objects.equals(
-				getReplacements(), logEntry.getReplacements());
+		return getType() == logEntry.getType() && getVisibility() == logEntry.getVisibility()
+				&& getPlayer().equals(logEntry.getPlayer())
+				&& Objects.equals(getServer(), logEntry.getServer())
+				&& Objects.equals(getReplacements(), logEntry.getReplacements())
+				&& Objects.equals(getComponentReplacements(), logEntry.getComponentReplacements());
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(getType(), getVisibility(), getPlayer(), getServer(), getReplacements());
+		return Objects.hash(getType(), getVisibility(), getPlayer(), getServer(), getReplacements(), getComponentReplacements());
 	}
 
 	@Override
@@ -124,6 +136,7 @@ public class LogEntry {
 				", player=" + player +
 				", server=" + server +
 				", replacements=" + replacements +
+				", componentReplacements=" + componentReplacements +
 				'}';
 	}
 
@@ -163,6 +176,7 @@ public class LogEntry {
 		private Player player;
 		private RegisteredServer server = null;
 		private Map<String, String> replacements = Collections.emptyMap();
+		private Map<String, Component> componentReplacements = Collections.emptyMap();
 
 		/**
 		 * Constructs an empty Builder.
@@ -180,6 +194,7 @@ public class LogEntry {
 			this.player = builder.player;
 			this.server = builder.server;
 			this.replacements = builder.replacements;
+			this.componentReplacements = builder.componentReplacements;
 		}
 
 		/**
@@ -192,6 +207,7 @@ public class LogEntry {
 			this.player = entry.getPlayer();
 			this.server = entry.getServer().orElse(null);
 			this.replacements = entry.getReplacements();
+			this.componentReplacements = entry.getComponentReplacements();
 		}
 
 		/**
@@ -231,11 +247,20 @@ public class LogEntry {
 		}
 
 		/**
-		 * Set the format replacements fro the final log entry
+		 * Set the format replacements for the final log entry
 		 * @return the builder
 		 */
 		public Builder replacements(@NonNull Map<String, String> replacements) {
 			this.replacements = Objects.requireNonNull(replacements);
+			return this;
+		}
+
+		/**
+		 * Set the component format replacements for the final log entry
+		 * @return the builder
+		 */
+		public Builder componentReplacements(@NonNull Map<String, Component> componentReplacements) {
+			this.componentReplacements = Objects.requireNonNull(componentReplacements);
 			return this;
 		}
 

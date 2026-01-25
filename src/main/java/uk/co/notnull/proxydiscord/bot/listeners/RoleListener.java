@@ -23,25 +23,33 @@
 
 package uk.co.notnull.proxydiscord.bot.listeners;
 
+import net.dv8tion.jda.api.events.guild.member.GuildMemberRoleAddEvent;
+import net.dv8tion.jda.api.events.guild.member.GuildMemberRoleRemoveEvent;
+import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import org.jetbrains.annotations.NotNull;
 import uk.co.notnull.proxydiscord.ProxyDiscord;
 import uk.co.notnull.proxydiscord.manager.GroupSyncManager;
 import uk.co.notnull.proxydiscord.manager.VerificationManager;
-import org.javacord.api.event.server.role.UserRoleRemoveEvent;
-import org.javacord.api.listener.server.role.UserRoleRemoveListener;
 
-public class UserRoleRemove implements UserRoleRemoveListener {
+public class RoleListener extends ListenerAdapter {
     private final VerificationManager verificationManager;
     private final GroupSyncManager groupSyncManager;
 
-    public UserRoleRemove(ProxyDiscord plugin) {
+    public RoleListener(ProxyDiscord plugin) {
         this.verificationManager = plugin.getVerificationManager();
         this.groupSyncManager = plugin.getGroupSyncManager();
     }
 
     @Override
-    public void onUserRoleRemove(UserRoleRemoveEvent userRoleRemoveEvent) {
-        verificationManager.handleRoleEvent(userRoleRemoveEvent);
-        groupSyncManager.handleRoleEvent(userRoleRemoveEvent);
+    public void onGuildMemberRoleAdd(@NotNull GuildMemberRoleAddEvent event) {
+        verificationManager.handleRoleAdd(event.getUser(), event.getRoles());
+        groupSyncManager.handleRoleAdd(event.getUser(), event.getRoles());
+    }
+
+    @Override
+    public void onGuildMemberRoleRemove(@NotNull GuildMemberRoleRemoveEvent event) {
+        verificationManager.handleRoleRemove(event.getUser(), event.getRoles());
+        groupSyncManager.handleRoleRemove(event.getUser(), event.getRoles());
     }
 }
 
