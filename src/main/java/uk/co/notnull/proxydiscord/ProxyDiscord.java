@@ -26,6 +26,7 @@
 
 package uk.co.notnull.proxydiscord;
 
+import com.google.inject.Inject;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
 import com.velocitypowered.api.event.proxy.ProxyShutdownEvent;
@@ -50,7 +51,6 @@ import com.google.common.io.ByteStreams;
 import org.spongepowered.configurate.ConfigurationNode;
 import org.slf4j.Logger;
 
-import javax.inject.Inject;
 import org.spongepowered.configurate.yaml.YamlConfigurationLoader;
 import uk.co.notnull.proxydiscord.manager.AnnouncementManager;
 import uk.co.notnull.proxydiscord.manager.GroupSyncManager;

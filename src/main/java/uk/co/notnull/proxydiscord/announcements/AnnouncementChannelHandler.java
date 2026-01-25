@@ -40,12 +40,12 @@ import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
 import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import uk.co.notnull.proxydiscord.Messages;
 import uk.co.notnull.proxydiscord.ProxyDiscord;
 import uk.co.notnull.proxydiscord.Util;
 
-import javax.annotation.Nonnull;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -113,19 +113,19 @@ public final class AnnouncementChannelHandler extends ListenerAdapter {
 		getLatestMessage();
 	}
 
-	public void onMessageReceived(@Nonnull MessageReceivedEvent event) {
+	public void onMessageReceived(MessageReceivedEvent event) {
 		if (event.getChannel().equals(channel)) {
 			sendAnnouncement(event.getMessage());
 		}
 	}
 
-	public void onMessageUpdate(@Nonnull MessageUpdateEvent event) {
+	public void onMessageUpdate(MessageUpdateEvent event) {
 		if(event.getMessage().equals(lastMessage)) {
 			lastMessage = event.getMessage();
 		}
 	}
 
-	public void onMessageDelete(@Nonnull MessageDeleteEvent event) {
+	public void onMessageDelete(@NonNull MessageDeleteEvent event) {
 		if(lastMessage == null || event.getMessageIdLong() == lastMessage.getIdLong()) {
 			getLatestMessage();
 		}
