@@ -46,9 +46,11 @@ import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.utils.ChunkingFilter;
 import net.dv8tion.jda.api.utils.MemberCachePolicy;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
+import net.dv8tion.jda.api.utils.messages.MessageRequest;
 import org.jetbrains.annotations.NotNull;
 import org.spongepowered.configurate.ConfigurationNode;
 
+import java.util.Collections;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.RejectedExecutionException;
 
@@ -85,7 +87,8 @@ public final class Discord implements EventListener {
 		}
 
 		try {
-			logger.info("Connecting to Discord...");
+			MessageRequest.setDefaultMentions(Collections.emptyList());
+											  logger.info("Connecting to Discord...");
 			jda = JDABuilder.createLight(token,
 										 GatewayIntent.GUILD_MEMBERS, GatewayIntent.GUILD_EXPRESSIONS,
 										 GatewayIntent.GUILD_MESSAGES, GatewayIntent.MESSAGE_CONTENT)

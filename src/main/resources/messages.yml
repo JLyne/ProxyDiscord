@@ -94,177 +94,412 @@ refresh-commands-success: '<green>Bot application commands have been recreated'
 
 refresh-commands-error: '<red>An error occurred while recreating commands. Check the console for details.'
 
-embed-link-success:
-  title: 'Accounts linked successfully'
-  description: |-
-    Your accounts <discord> and **<minecraft>** have been linked, and you may now play on the server.
-    Have fun.
-  thumbnail: 'https://cdn.discordapp.com/attachments/457984159458000908/608397929081864233/success_3.png'
-  colour: '#22d518'
+discord-link-success: |-
+  [
+    {
+      "type": 17,
+      "accent_color": 2282776,
+      "spoiler": false,
+      "components": [
+        {
+          "type": 9,
+          "components": [
+            {
+              "type": 10,
+              "content": "# Accounts linked successfully\nYour accounts <discord> and **<minecraft>** have been linked, and you may now play on the server.\nHave fun."
+            }
+          ],
+          "accessory": {
+            "type": 11,
+            "media": {
+              "url": "https://cdn.discordapp.com/attachments/457984159458000908/608397929081864233/success_3.png"
+              "proxy_url": "https://cdn.discordapp.com/attachments/457984159458000908/608397929081864233/success_3.png"
+            }
+          }
+        }
+      ]
+    }
+  ]
 
-embed-link-no-token:
-  title: 'No token provided'
-  description: |-
-    You didn't provide a token in your message.
-  fields:
-    - name: |-
-        What's my token?
-      value: |-
-        You can get your token by connecting to the server, and following the instructions.
-    - name: Will my Minecraft username work instead?
-      value: |-
-        No. Only tokens generated via the above method will work.
-        This is to help prevent typos, and prove that you have access to the account you are trying to link.
-    - name: Still Stuck?
-      value: |-
-        If you still need help, ask a mod.
-  thumbnail: 'https://cdn.discordapp.com/attachments/457984159458000908/608397931678007317/error_3.png'
-  colour: '#d52a18'
+discord-link-invalid-token: |-
+  [ 
+    {
+      "type": 17,
+      "accent_color": 13969944,
+      "spoiler": false,
+      "components": [
+        {
+          "type": 9,
+          "components": [
+            {
+              "type": 10,
+              "content": "# Invalid token\nThe token you provided is invalid, please double check it.\n## What's my token?\nYou can get your token by connecting to the server, and following the instructions.\n## Will my Minecraft username work instead?\nNo. Only tokens generated via the above method will work.\nThis is to help prevent typos, and prove that you have access to the account you are trying to link.\n## Still Stuck?\nIf you still need help, ask a mod."
+            }
+          ],
+          "accessory": {
+            "type": 11,
+            "media": {
+              "url": "https://cdn.discordapp.com/attachments/457984159458000908/608397931678007317/error_3.png"
+              "proxy_url": "https://cdn.discordapp.com/attachments/457984159458000908/608397931678007317/error_3.png"
+            }
+          }
+        }
+      ]
+    }
+  ] 
 
-embed-link-invalid-token:
-  title: Invalid token
-  description: |-
-    The token you provided is invalid, please double check it.
-  fields:
-    - name: |-
-        What's my token?
-      value: |-
-        You can get your token by connecting to the server, and following the instructions.
-    - name: Will my Minecraft username work instead?
-      value: |-
-        No. Only tokens generated via the above method will work.
-        This is to help prevent typos, and prove that you have access to the account you are trying to link.
-    - name: Still Stuck?
-      value: |-
-        If you still need help, ask a mod.
-  thumbnail: 'https://cdn.discordapp.com/attachments/457984159458000908/608397931678007317/error_3.png'
-  colour: '#d52a18'
+discord-link-already-linked: |-
+  [ 
+    {
+      "type": 17,
+      "accent_color": 16755746,
+      "spoiler": false,
+      "components": [
+        {
+          "type": 9,
+          "components": [
+            {
+              "type": 10,
+              "content": "# Account already linked'\nYour Discord account <discord> is already linked to the Minecraft account **<minecraft>**.\nIf this is correct, no further action is required, and you can play on the server.\nIf this is incorrect, please connect to the server using **<minecraft>**, and type `/unlink` in chat to unlink this account. You can then link another account.\nIf you do not recognise or have access to the **<minecraft>** account, please ask a mod for assistance."
+            }
+          ],
+          "accessory": {
+            "type": 11,
+            "media": {
+              "url": "https://cdn.discordapp.com/attachments/457984159458000908/608397930151542785/alert_3.png"
+              "proxy_url": "https://cdn.discordapp.com/attachments/457984159458000908/608397930151542785/alert_3.png"
+            }
+          }
+        }
+      ]
+    }
+  ]
 
-embed-link-already-linked:
-  title: 'Account already linked'
-  description: |-
-    Your Discord account <discord> is already linked to the Minecraft account **<minecraft>**.
+discord-link-success-not-verified: |-
+  [ 
+    {
+      "type": 17,
+      "accent_color": 16755746,
+      "spoiler": false,
+      "components": [
+        {
+          "type": 9,
+          "components": [
+            {
+              "type": 10,
+              "content": "# Half way there\nYour accounts <discord> and **<minecraft>** have been linked, but you do not have any of the roles required to play on the server (<role>).\n## Things to try\n**1)** Thing 1\n**2)** Thing 2\n## Still Stuck\nPlease ensure you have **tried the above suggestions** before asking for help, they are likely to solve your problem.\nIf you have tried the above and still need help, ask a mod for assistance."
+            }
+          ],
+          "accessory": {
+            "type": 11,
+            "media": {
+              "url": "https://cdn.discordapp.com/attachments/457984159458000908/608397930151542785/alert_3.png"
+              "proxy_url": "https://cdn.discordapp.com/attachments/457984159458000908/608397930151542785/alert_3.png"
+            }
+          }
+        }
+      ]
+    }
+  ]
 
-    If this is correct, no further action is required, and you can play on the server.
+discord-link-error: |-
+  [ 
+    {
+      "type": 17,
+      "accent_color": 3365830,
+      "spoiler": false,
+      "components": [
+        {
+          "type": 9,
+          "components": [
+            {
+              "type": 10,
+              "content": "# An error occurred\nAn unexpected error occurred while trying to link your accounts.\nPlease try again later. If problems persist, ask a mod for help."
+            }
+          ],
+          "accessory": {
+            "type": 11,
+            "media": {
+              "url": "https://cdn.discordapp.com/attachments/457984159458000908/608397934773665852/misc_3.png"
+              "proxy_url": "https://cdn.discordapp.com/attachments/457984159458000908/608397934773665852/misc_3.png"
+            }
+          }
+        }
+      ]
+    }
+  ]
 
-    If this is incorrect, please connect to the server using **<minecraft>**, and type `/unlink` in chat to unlink this account. You can then link another account.
+discord-unlink-success: |-
+  [
+    {
+      "type": 17,
+      "accent_color": 2282776,
+      "spoiler": false,
+      "components": [
+        {
+          "type": 9,
+          "components": [
+            {
+              "type": 10,
+              "content": "# Accounts unlinked successfully\nYour accounts <discord> and **<minecraft>** have been unlinked."
+            }
+          ],
+          "accessory": {
+            "type": 11,
+            "media": {
+              "url": "https://cdn.discordapp.com/attachments/457984159458000908/608397929081864233/success_3.png"
+              "proxy_url": "https://cdn.discordapp.com/attachments/457984159458000908/608397929081864233/success_3.png"
+            }
+          }
+        }
+      ]
+    }
+  ]
 
-    If you do not recognise or have access to the **<minecraft>** account, please ask a mod for assistance.
-  thumbnail: 'https://cdn.discordapp.com/attachments/457984159458000908/608397930151542785/alert_3.png'
-  colour: '#ffac22'
+discord-unlink-not-linked: |-
+  [ 
+    {
+      "type": 17,
+      "accent_color": 16755746,
+      "spoiler": false,
+      "components": [
+        {
+          "type": 9,
+          "components": [
+            {
+              "type": 10,
+              "content": "# Account not linked\nYour Discord account <discord> is not currently linked to a Minecraft account."
+            }
+          ],
+          "accessory": {
+            "type": 11,
+            "media": {
+              "url": "https://cdn.discordapp.com/attachments/457984159458000908/608397930151542785/alert_3.png"
+              "proxy_url": "https://cdn.discordapp.com/attachments/457984159458000908/608397930151542785/alert_3.png"
+            }
+          }
+        }
+      ]
+    }
+  ]
 
-embed-link-success-not-verified:
-  title: 'Half way there'
-  description: |-
-    Your accounts <discord> and **<minecraft>** have been linked, but you do not have any of the roles required to play on the server (<role>).
-  fields:
-    - name: Things to try
-      value: |-
-        **1)** Thing 1
-        **2)** Thing 2
-    - name: Still Stuck?
-      value: |-
-        Please ensure you have **tried the above suggestions** before asking for help, they are likely to solve your problem.
-        If you have tried the above and still need help, ask a mod for assistance.
-  thumbnail: 'https://cdn.discordapp.com/attachments/457984159458000908/608397930151542785/alert_3.png'
-  colour: '#ffac22'
+discord-unlink-error: |-
+  [ 
+    {
+      "type": 17,
+      "accent_color": 3365830,
+      "spoiler": false,
+      "components": [
+        {
+          "type": 9,
+          "components": [
+            {
+              "type": 10,
+              "content": "# An error occurred\nAn unexpected error occurred while trying to unlink your accounts.\nPlease try again later. If problems persist, ask a mod for help."
+            }
+          ],
+          "accessory": {
+            "type": 11,
+            "media": {
+              "url": "https://cdn.discordapp.com/attachments/457984159458000908/608397934773665852/misc_3.png"
+              "proxy_url": "https://cdn.discordapp.com/attachments/457984159458000908/608397934773665852/misc_3.png"
+            }
+          }
+        }
+      ]
+    }
+  ]
 
-embed-link-error:
-  title: 'An error occurred'
-  description: |-
-    An unexpected error occurred while trying to link your accounts.
-    Please try again later. If problems persist, ask a mod for help.
-  thumbnail: 'https://cdn.discordapp.com/attachments/457984159458000908/608397934773665852/misc_3.png'
-  colour: '#335bc6'
+discord-info-error: |-
+  [ 
+    {
+      "type": 17,
+      "accent_color": 3365830,
+      "spoiler": false,
+      "components": [
+        {
+          "type": 9,
+          "components": [
+            {
+              "type": 10,
+              "content": "# An error occurred\nAn unexpected error occurred while handling this command.\nPlease try again later. If problems persist, ask a mod for help."
+            }
+          ],
+          "accessory": {
+            "type": 11,
+            "media": {
+              "url": "https://cdn.discordapp.com/attachments/457984159458000908/608397934773665852/misc_3.png"
+              "proxy_url": "https://cdn.discordapp.com/attachments/457984159458000908/608397934773665852/misc_3.png"
+            }
+          }
+        }
+      ]
+    }
+  ]
 
-embed-unlink-success:
-  title: 'Accounts unlinked successfully'
-  description: |-
-    Your accounts <discord> and **<minecraft>** have been unlinked.
-  thumbnail: 'https://cdn.discordapp.com/attachments/457984159458000908/608397929081864233/success_3.png'
-  colour: '#22d518'
+discord-info-player-not-found: |-
+  [ 
+    {
+      "type": 17,
+      "accent_color": 3365830,
+      "spoiler": false,
+      "components": [
+        {
+          "type": 9,
+          "components": [
+            {
+              "type": 10,
+              "content": "# Player not found\nThis player has never joined the server."
+            }
+          ],
+          "accessory": {
+            "type": 11,
+            "media": {
+              "url": "https://cdn.discordapp.com/attachments/457984159458000908/608397934773665852/misc_3.png"
+              "proxy_url": "https://cdn.discordapp.com/attachments/457984159458000908/608397934773665852/misc_3.png"
+            }
+          }
+        }
+      ]
+    }
+  ]
 
-embed-unlink-not-linked:
-  title: 'Account not linked'
-  description: |-
-    Your Discord account <discord> is not currently linked to a Minecraft account.
-  thumbnail: 'https://cdn.discordapp.com/attachments/457984159458000908/608397930151542785/alert_3.png'
-  colour: '#ffac22'
+discord-info-not-linked: |-
+  [ 
+    {
+      "type": 17,
+      "accent_color": 3365830,
+      "spoiler": false,
+      "components": [
+        {
+          "type": 9,
+          "components": [
+            {
+              "type": 10,
+              "content": "# No linked account\n<discord> has not linked a Minecraft account"
+            }
+          ],
+          "accessory": {
+            "type": 11,
+            "media": {
+              "url": "https://cdn.discordapp.com/attachments/457984159458000908/608397934773665852/misc_3.png"
+              "proxy_url": "https://cdn.discordapp.com/attachments/457984159458000908/608397934773665852/misc_3.png"
+            }
+          }
+        }
+      ]
+    }
+  ]
 
-embed-unlink-error:
-  title: 'An error occurred'
-  description: |-
-    An unexpected error occurred while trying to unlink your accounts.
-    Please try again later. If problems persist, ask a mod for help.
-  thumbnail: 'https://cdn.discordapp.com/attachments/457984159458000908/608397934773665852/misc_3.png'
-  colour: '#335bc6'
+discord-info-success: |-
+  [
+    {
+      "type": 17,
+      "accent_color": 3365830,
+      "spoiler": false,
+      "components": [
+        {
+          "type": 9,
+          "components": [
+            {
+              "type": 10,
+              "content": "# <minecraft>\n <online_status>"
+            }
+          ],
+          "accessory": {
+            "type": 11,
+            "media": {
+              "url": "https://crafatar.com/avatars/<uuid>",
+              "proxy_url": "https://crafatar.com/avatars/<uuid>"
+            }
+          }
+        },
+        {
+          "type": 14,
+          "spacing": 1,
+          "divider": true
+        },
+        {
+          "type": 10,
+          "content": "**Username**\n<minecraft>"
+        },
+        {
+          "type": 14,
+          "spacing": 1,
+          "divider": true
+        },
+        {
+          "type": 10,
+          "content": "**UUID**\n<uuid>"
+        },
+        {
+          "type": 14,
+          "spacing": 1,
+          "divider": true
+        },
+        {
+          "type": 10,
+          "content": "**Discord**\n<discord_status>"
+        },
+        {
+          "type": 14,
+          "spacing": 1,
+          "divider": true
+        },
+        {
+          "type": 10,
+          "content": "** Server Access**\n<access>"
+        }
+      ]
+    },
+    {
+      "type": 1,
+      "components": [
+        {
+          "type": 2,
+          "style": 5,
+          "url": "https://minecraft.rtgame.co.uk/stats/player/<uuid>",
+          "label": "Stats"
+        }
+      ]
+    },
+    {
+      "type": 1,
+      "components": [
+        {
+          "type": 2,
+          "style": 5,
+          "url": "https://minecraft.rtgame.co.uk/bans/history.php?uuid=<uuid>",
+          "label": "Punishments"
+        }
+      ]
+    }
+  ]
 
-embed-info-error:
-  title: 'An error occurred'
-  description: |-
-    An unexpected error occurred while handling this command.
-    Please try again later. If problems persist, ask a mod for help.
-  thumbnail: 'https://cdn.discordapp.com/attachments/457984159458000908/608397931678007317/error_3.png'
-  colour: '#335bc6'
+discord-info-status-offline: ':red_circle: **Offline**'
+discord-info-status-offline-last-seen: ':red_circle: **Offline**, last seen <last_seen>'
+discord-info-status-online: ':green_circle: **Online**'
+discord-info-status-online-server: ':green_circle: **Online**, playing on <server>'
+discord-info-status-queueing: ':yellow_circle: **Online**, queueing for <server> (<position>)'
 
-embed-info-player-not-found:
-  title: 'Player not found'
-  description: 'This player has never joined the server.'
-  colour: '#d52a18'
+discord-info-discord-not-linked: 'Not linked'
+discord-info-discord-linked: 'Linked to <discord>'
 
-embed-info-discord-not-linked:
-  title: 'No linked account'
-  description: <discord> has not linked a Minecraft account
-  colour: '#d52a18'
-
-embed-info-discord:
-  title: 'Info for <minecraft>'
-  description: '<online_status>'
-  fields:
-    - name: 'Username'
-      value: '<minecraft>'
-      inline: true
-    - name: 'Discord'
-      value:  '<discord_status>'
-      inline: true
-    - name: 'UUID'
-      value: '<uuid>'
-    - name: 'Server Access'
-      value: '<access>'
-
-  thumbnail: 'https://crafatar.com/avatars/<uuid>'
-  colour: '#d52a18'
-
-info-status-offline: ':red_circle: **Offline**'
-info-status-offline-last-seen: ':red_circle: **Offline**, last seen <last_seen>'
-info-status-online: ':green_circle: **Online**'
-info-status-online-server: ':green_circle: **Online**, playing on <server>'
-info-status-queueing: ':yellow_circle: **Online**, queueing for <server> (<position>)'
-
-info-discord-not-linked: 'Not linked'
-info-discord-linked: 'Linked to <discord>'
-
-info-access-not-linked: |-
+discord-info-access-not-linked: |-
   :negative_squared_cross_mark: Limited access
    ∟ No Discord account linked.
-info-access-linked-missing-roles: |-
+discord-info-access-linked-missing-roles: |-
   :negative_squared_cross_mark: Limited access
    ∟ Discord account missing required role(s).
-info-access-linked-roles: |-
+discord-info-access-linked-roles: |-
   :white_check_mark: Full access
    ∟ Discord account has <roles>.
-info-access-linked-bypassed: |-
+discord-info-access-linked-bypassed: |-
   :white_check_mark: Full access
    ∟ Discord role check bypassed.
-info-access-not-configured: |-
+discord-info-access-not-configured: |-
   :white_check_mark: Full access
    ∟ No role requirements have been configured.
-
-info-actions:
-  - label: 'Stats'
-    url: 'https://minecraft.rtgame.co.uk/stats/player/<uuid>'
-  - label: 'Punishments'
-    url: 'https://minecraft.rtgame.co.uk/bans/history.php?uuid=<uuid>'
 
 announcement-new: |-
   <dark_green>New announcement in <channel>:

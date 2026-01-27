@@ -23,12 +23,13 @@
 
 package uk.co.notnull.proxydiscord.bot.commands;
 
-import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.components.tree.MessageComponentTree;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.commands.SlashCommandInteraction;
-import net.dv8tion.jda.api.utils.messages.MessageCreateData;
+import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
+
 import uk.co.notnull.proxydiscord.Messages;
 import uk.co.notnull.proxydiscord.api.LinkResult;
 import uk.co.notnull.proxydiscord.manager.LinkingManager;
@@ -43,10 +44,12 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 public final class Link extends ListenerAdapter {
+    private final ProxyDiscord plugin;
     private final LinkingManager linkingManager;
     private final LuckPermsManager luckPermsManager;
 
     public Link(ProxyDiscord plugin) {
+        this.plugin = plugin;
 	    this.linkingManager = plugin.getLinkingManager();
         this.luckPermsManager = plugin.getLuckpermsManager();
 	}
@@ -64,70 +67,82 @@ public final class Link extends ListenerAdapter {
             String token = interaction.getOption("token").getAsString().toUpperCase();
             result = linkingManager.completeLink(token, interaction.getUser().getIdLong());
         } catch (Exception e) {
-            e.printStackTrace();
+            ProxyDiscord.inst().getLogger().warn("Exception while handling /link command", e);
             result = LinkResult.UNKNOWN_ERROR;
         }
 
         getResponse(result, interaction.getUser())
-                .thenCompose(embed -> interaction.reply(MessageCreateData.fromEmbeds(embed)).submit())
+                .thenCompose(component -> interaction.reply(
+                        new MessageCreateBuilder()
+                                .useComponentsV2()
+                                .mention(event.getUser())
+                                .addComponents(component)
+                                .build())
+                        .submit())
                 .exceptionally((e) -> {
-                    e.printStackTrace();
-                    interaction.reply(MessageCreateData.fromEmbeds(Messages.getEmbed("embed-link-error"))).queue();
+                    plugin.getLogger().warn("Exception while handling /link command", e);
+                    interaction.reply(
+                            new MessageCreateBuilder()
+                                    .useComponentsV2()
+                                    .mention(event.getUser())
+                                    .addComponents(Messages.getMessageComponents("discord-link-error"))
+                                    .build())
+                            .queue();
                     return null;
                 });
     }
 
-    private CompletableFuture<MessageEmbed> getResponse(LinkResult result, User user) {
+    private CompletableFuture<MessageComponentTree> getResponse(LinkResult result, User user) {
         VerificationManager verificationManager = ProxyDiscord.inst().getVerificationManager();
-        CompletableFuture<MessageEmbed> embed = null;
+        CompletableFuture<MessageComponentTree> component = null;
         UUID linked = linkingManager.getLinked(user);
 
         Map<String, String> replacements = new HashMap<>(Map.of("discord", user.getAsMention()));
 
         switch(result) {
             case UNKNOWN_ERROR:
-                embed = CompletableFuture.completedFuture(Messages.getEmbed("embed-link-error"));
+                component = CompletableFuture.completedFuture(Messages.getMessageComponents("discord-link-error"));
                 break;
 
             case NO_TOKEN:
-                embed = CompletableFuture.completedFuture(Messages.getEmbed("embed-link-no-token"));
+                component = CompletableFuture.completedFuture(Messages.getMessageComponents("discord-link-no-token"));
                 break;
 
             case INVALID_TOKEN:
-                embed = CompletableFuture.completedFuture(Messages.getEmbed("embed-link-invalid-token"));
+                component = CompletableFuture.completedFuture(Messages.getMessageComponents("discord-link-invalid-token"));
                 break;
 
             case ALREADY_LINKED:
-                embed = CompletableFuture.supplyAsync(() -> {
+                component = CompletableFuture.supplyAsync(() -> {
                     String username = luckPermsManager.getUserManager().lookupUsername(linked).join();
                     replacements.put("minecraft", (username != null) ? username : "Unknown account (" + linked + ")");
 
                     VerificationResult verificationResult = verificationManager.checkVerificationStatus(user);
 
                     if(verificationResult.isVerified()) {
-                        return Messages.getEmbed("embed-link-already-linked", replacements);
+                        return Messages.getMessageComponents("discord-link-already-linked", replacements);
                     } else {
-                        return Messages.getEmbed("embed-link-success-not-verified", replacements);
+                        return Messages.getMessageComponents("discord-link-success-not-verified", replacements);
                     }
                 });
                 break;
 
             case SUCCESS:
-                embed = CompletableFuture.supplyAsync(() -> {
+                component = CompletableFuture.supplyAsync(() -> {
                     String username = luckPermsManager.getUserManager().lookupUsername(linked).join();
                     replacements.put("minecraft", (username != null) ? username : "Unknown account (" + linked + ")");
 
                     VerificationResult verificationResult = verificationManager.checkVerificationStatus(user);
 
                     if(verificationResult.isVerified()) {
-                        return Messages.getEmbed("embed-link-success", replacements);
+                        return Messages.getMessageComponents("discord-link-success", replacements);
                     } else {
-                        return Messages.getEmbed("embed-link-success-not-verified", replacements);
+                        return Messages.getMessageComponents("discord-link-success-not-verified", replacements);
                     }
                 });
                 break;
         }
 
-        return embed;
+        return component;
     }
 }

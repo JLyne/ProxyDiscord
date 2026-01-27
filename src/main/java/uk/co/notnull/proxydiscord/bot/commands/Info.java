@@ -25,9 +25,9 @@ package uk.co.notnull.proxydiscord.bot.commands;
 
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ServerConnection;
+import net.dv8tion.jda.api.components.tree.MessageComponentTree;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
@@ -140,8 +140,8 @@ public class Info extends ListenerAdapter {
 		UUID uuid = linkingManager.getLinked(user.getIdLong());
 
 		if(uuid == null) {
-			respondWithEmbed(event, Messages.getEmbed(
-					"embed-info-discord-not-linked",
+			respondWithComponent(event, Messages.getMessageComponents(
+					"discord-info-not-linked",
 					Collections.singletonMap("discord", user.getAsMention())));
 		} else {
 			respondWithPlayerInfo(event, uuid);
@@ -159,7 +159,7 @@ public class Info extends ListenerAdapter {
 		} else {
 			luckPermsManager.getUserManager().lookupUniqueId(usernameOrUUID).thenAccept(uuid -> {
 				if(uuid == null) {
-					respondWithEmbed(event, Messages.getEmbed("embed-info-player-not-found"));
+					respondWithComponent(event, Messages.getMessageComponents("discord-info-player-not-found"));
 				} else {
 					respondWithPlayerInfo(event, uuid);
 				}
@@ -172,11 +172,17 @@ public class Info extends ListenerAdapter {
 	 * @param event - The command event to respond to
 	 * @param embed - The embed to respond with
 	 */
-	private void respondWithEmbed(@NotNull GenericCommandInteractionEvent event, MessageEmbed embed) {
-		event.reply(MessageCreateData.fromEmbeds(embed)).queue(null, e -> {
-			plugin.getLogger().warn("Failed to immediately respond to interaction", e);
-//			builder.removeAllEmbeds().addEmbed(Messages.getEmbed("embed-info-error")).respond(); //FIXME
-		});
+	private void respondWithComponent(@NotNull GenericCommandInteractionEvent event, @NotNull MessageComponentTree embed) {
+		event.reply(
+				new MessageCreateBuilder()
+						.useComponentsV2()
+						.mention(event.getUser())
+						.addComponents(embed)
+						.build())
+				.queue(null, e -> {
+					plugin.getLogger().warn("Failed to immediately respond to interaction", e);
+					//builder.removeAllEmbeds().addEmbed(Messages.getMessageComponent()("discord-info-error")).respond(); //FIXME
+			});
 	}
 
 	/**
@@ -218,7 +224,11 @@ public class Info extends ListenerAdapter {
 			return plugin.getProxy().getEventManager().fire(new PlayerInfoEvent(playerInfo));
 		}).thenApply(result -> {
 			if (result == null) {
-				return MessageCreateData.fromEmbeds(Messages.getEmbed("embed-info-player-not-found"));
+				return new MessageCreateBuilder()
+						.useComponentsV2()
+						.mention(event.getUser())
+						.addComponents(Messages.getMessageComponents("discord-info-player-not-found"))
+						.build();
 			}
 
 			return preparePlayerInfoResponse(result.getPlayerInfo(), discordFuture.join());
@@ -226,7 +236,12 @@ public class Info extends ListenerAdapter {
 			plugin.getLogger().warn("Failed to respond to interaction", e);
 
 			event.getHook().sendMessage(
-					MessageCreateData.fromEmbeds(Messages.getEmbed("embed-info-error"))).queue();
+					new MessageCreateBuilder()
+							.useComponentsV2()
+							.mention(event.getUser())
+							.addComponents(Messages.getMessageComponents("discord-info-error"))
+							.build())
+					.queue();
 
 			return null;
 		});
@@ -234,18 +249,18 @@ public class Info extends ListenerAdapter {
 
 	private MessageCreateData preparePlayerInfoResponse(PlayerInfo info, User discordUser) {
 		String discord = discordUser != null ?
-				Messages.get("info-discord-linked",
+				Messages.get("discord-info-discord-linked",
 							 Collections.singletonMap("<discord>", discordUser.getAsMention())) :
-				Messages.get("info-discord-not-linked");
+				Messages.get("discord-info-discord-not-linked");
 
-		String status = Messages.get("info-status-offline");
+		String status = Messages.get("discord-info-status-offline");
 		VerificationResult verifyStatus = discordUser != null ?
 				verificationManager.checkVerificationStatus(discordUser) :
 				VerificationResult.NOT_LINKED;
 
 		String access = switch (verifyStatus) {
-			case UNKNOWN, NOT_LINKED -> Messages.get("info-access-not-linked");
-			case LINKED_NOT_VERIFIED -> Messages.get("info-access-linked-missing-roles");
+			case UNKNOWN, NOT_LINKED -> Messages.get("discord-info-access-not-linked");
+			case LINKED_NOT_VERIFIED -> Messages.get("discord-info-access-linked-missing-roles");
 			case VERIFIED -> {
 				Set<Role> verifiedRoles = verificationManager.getVerifiedRoles();
 				Map<Guild, Set<Role>> guildRoles = new HashMap<>();
@@ -259,19 +274,19 @@ public class Info extends ListenerAdapter {
 						.filter(r -> guildRoles.get(r.getGuild()).contains(r))
 						.map(Role::getAsMention).collect(Collectors.joining(", "));
 
-				yield Messages.get("info-access-linked-roles", Collections.singletonMap("<roles>", roles));
+				yield Messages.get("discord-info-access-linked-roles", Collections.singletonMap("<roles>", roles));
 			}
-			case BYPASSED -> Messages.get("info-access-linked-bypassed");
-			case NOT_REQUIRED -> Messages.get("info-access-not-configured");
+			case BYPASSED -> Messages.get("discord-info-access-linked-bypassed");
+			case NOT_REQUIRED -> Messages.get("discord-info-access-not-configured");
 		};
 
 		if (info.isOnline() && !info.isVanished()) {
 			if(info.getQueueInfo() != null) {
-				status = Messages.get("info-status-queueing", Map.of(
+				status = Messages.get("discord-info-status-queueing", Map.of(
 						"<server>", info.getQueueInfo().server().getServerInfo().getName(),
 						"<position>", info.getQueueInfo().position()));
 			} else if (info.getCurrentServer() != null) {
-				status = Messages.get("info-status-online-server", Collections.singletonMap(
+				status = Messages.get("discord-info-status-online-server", Collections.singletonMap(
 						"<server>", info.getCurrentServer().getServerInfo().getName()));
 			} else {
 				status = Messages.get("info-status-online");
@@ -287,8 +302,8 @@ public class Info extends ListenerAdapter {
 		);
 
 		return new MessageCreateBuilder()
-				.addEmbeds(Messages.getEmbed("embed-info", replacements))
-				.addComponents(Messages.getMessageButtons("info-actions", replacements))
+				.useComponentsV2()
+				.addComponents(Messages.getMessageComponents("discord-info-success", replacements))
 				.build();
 	}
 }

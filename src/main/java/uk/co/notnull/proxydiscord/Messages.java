@@ -24,11 +24,15 @@
 package uk.co.notnull.proxydiscord;
 
 import com.velocitypowered.api.command.CommandSource;
-import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.components.actionrow.ActionRow;
 import net.dv8tion.jda.api.components.buttons.Button;
-import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.components.replacer.ComponentReplacer;
+import net.dv8tion.jda.api.components.textdisplay.TextDisplay;
+import net.dv8tion.jda.api.components.thumbnail.Thumbnail;
+import net.dv8tion.jda.api.components.tree.MessageComponentTree;
+import net.dv8tion.jda.api.components.utils.ComponentDeserializer;
 import net.dv8tion.jda.api.entities.Role;
+import net.dv8tion.jda.api.exceptions.ParsingException;
+import net.dv8tion.jda.api.utils.data.DataArray;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentLike;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
@@ -36,18 +40,20 @@ import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import org.spongepowered.configurate.ConfigurationNode;
 import org.jetbrains.annotations.NotNull;
 
-import java.awt.Color;
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class Messages {
     private static ConfigurationNode messages;
 
+    private static final Map<String, MessageComponentTree> componentCache = new ConcurrentHashMap<>();
+
     public static void set(ConfigurationNode messages) {
+        componentCache.clear();
         Messages.messages = messages;
     }
 
@@ -95,11 +101,11 @@ public class Messages {
         return Util.miniMessage.deserialize(message, placeholders.build());
     }
 
-    public static @NotNull MessageEmbed getEmbed(String id) {
-        return getEmbed(id, Collections.emptyMap());
+    public static @NotNull MessageComponentTree getMessageComponents(String id) {
+        return getMessageComponents(id, Collections.emptyMap());
     }
 
-    public static @NotNull MessageEmbed getEmbed(String id, Map<String, String> replacements) {
+    public static MessageComponentTree getMessageComponents(String id, Map<String, String> replacements) {
         Set<Role> verifiedRoles = ProxyDiscord.inst().getVerificationManager().getVerifiedRoles();
         String roleLink;
 
@@ -109,123 +115,64 @@ public class Messages {
             roleLink = !verifiedRoles.isEmpty() ? verifiedRoles.iterator().next().getAsMention() : "Unknown Role";
         }
 
-        if(messages == null) {
-            return new EmbedBuilder().setTitle("Failed to load messages configuration file").build();
-        }
-
-        if(!id.startsWith("embed")) {
-            return new EmbedBuilder().setTitle("Invalid embed id " + id).build();
-        }
-
-        ConfigurationNode message = messages.node(id);
-
-        if(message.virtual()) {
-            return new EmbedBuilder().setTitle("Embed " + id + " does not exist").build();
-        }
-
-        Map<Object, ? extends ConfigurationNode> messageContent = message.childrenMap();
-        EmbedBuilder embed = new EmbedBuilder();
-
-        if(messageContent.containsKey("title")) {
-            String title = messageContent.get("title").getString("").replace("<role>", roleLink);
-
-            for (Map.Entry<String, String> entry : replacements.entrySet()) {
-                title = title.replace("<" + entry.getKey() + ">", entry.getValue());
+        MessageComponentTree message = componentCache.computeIfAbsent(id, _ -> {
+            if(messages == null) {
+                return MessageComponentTree.of(TextDisplay.of("Failed to load messages configuration file"));
             }
 
-            embed.setTitle(title);
-        }
-
-        if(messageContent.containsKey("description")) {
-            String description = messageContent.get("description").getString("").replace("<role>", roleLink);
-
-            for (Map.Entry<String, String> entry : replacements.entrySet()) {
-                description = description.replace("<" + entry.getKey() + ">", entry.getValue());
+            if(!id.startsWith("discord-")) {
+                return MessageComponentTree.of(TextDisplay.of("Invalid message id " + id));
             }
 
-            embed.setDescription(description);
-        }
+            ConfigurationNode node = messages.node(id);
 
-        if(messageContent.containsKey("thumbnail")) {
-            String thumbnail = messageContent.get("thumbnail").getString();
-
-            if(thumbnail != null) {
-                for (Map.Entry<String, String> entry : replacements.entrySet()) {
-                    thumbnail = thumbnail.replace("<" + entry.getKey() + ">", entry.getValue());
-                }
-
-                embed.setThumbnail(thumbnail);
+            if(node.virtual()) {
+                return MessageComponentTree.of(TextDisplay.of("Message " + id + " does not exist"));
             }
-        }
-
-        if(messageContent.containsKey("fields")) {
-            List<? extends ConfigurationNode> fields = messageContent.get("fields").childrenList();
-
-            for (ConfigurationNode field : fields) {
-                String name = field.node("name").getString();
-                String value = field.node("value").getString();
-
-                if (name != null) {
-                    for (Map.Entry<String, String> entry : replacements.entrySet()) {
-                        name = name.replace("<" + entry.getKey() + ">", entry.getValue());
-                    }
-                }
-
-                if (value != null) {
-                    for (Map.Entry<String, String> entry : replacements.entrySet()) {
-                        value = value.replace("<" + entry.getKey() + ">", entry.getValue());
-                    }
-                }
-
-                embed.addField(name, value, field.node("inline").getBoolean(false));
-            }
-        }
-
-        if(messageContent.containsKey("colour")) {
-            Color color;
 
             try {
-                color = Color.decode(message.node("colour").getString(""));
-            } catch (NumberFormatException e) {
-                color = Color.LIGHT_GRAY;
+                return new ComponentDeserializer(Collections.emptyList())
+                        .deserializeAsTree(MessageComponentTree.class, DataArray.fromJson(node.getString("")));
+            } catch (ParsingException e) {
+                ProxyDiscord.inst().getLogger().warn("Exception while parsing message {}", id, e);
+                return MessageComponentTree.of(TextDisplay.of("Failed to parse message " + id));
+            }
+        });
+
+
+        Function<String, String> replace = s -> {
+            if (s == null) {
+                return null;
             }
 
-            embed.setColor(color);
-        }
-
-        return embed.build();
-    }
-
-    public static @NotNull ActionRow getMessageButtons(String id, Map<String, String> replacements) {
-        if(messages == null) {
-            return ActionRow.of(Collections.emptyList());
-        }
-
-        ConfigurationNode node = messages.node(id);
-
-        if(node.virtual()) {
-            return ActionRow.of(Collections.emptyList());
-        }
-
-        List<? extends ConfigurationNode> buttonsConfig = node.childrenList();
-        List<Button> buttons = new ArrayList<>();
-
-        for (ConfigurationNode component : buttonsConfig) {
-            String label = component.node("label").getString("");
-            String url = component.node("url").getString("");
+            s = s.replace("<role>", roleLink);
 
             for (Map.Entry<String, String> entry : replacements.entrySet()) {
-                label = label.replace("<" + entry.getKey() + ">", entry.getValue());
+                s = s.replace("<" + entry.getKey() + ">", entry.getValue());
             }
 
-            for (Map.Entry<String, String> entry : replacements.entrySet()) {
-                url = url.replace("<" + entry.getKey() + ">", entry.getValue());
+            return s;
+        };
+
+        ComponentReplacer componentReplacer = (net.dv8tion.jda.api.components.Component oldComponent) -> {
+            switch (oldComponent) {
+                case TextDisplay td -> {
+                    return td.withContent(replace.apply(td.getContent()));
+                }
+                case Thumbnail t -> {
+                    return Thumbnail.fromUrl(replace.apply(t.getUrl()))
+                            .withDescription(replace.apply(t.getDescription()));
+                }
+                case Button b -> {
+                    return b.withLabel(replace.apply(b.getLabel())).withUrl(replace.apply(b.getUrl()));
+                }
+                default -> {
+                    return oldComponent;
+                }
             }
+        };
 
-            buttons.add(Button.link(url, label));
-        }
-
-        return ActionRow.of(buttons);
+        return message.replace(componentReplacer);
     }
 
     public static void sendComponent(CommandSource recipient, String messageId) {

@@ -23,12 +23,12 @@
 
 package uk.co.notnull.proxydiscord.bot.commands;
 
-import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.components.tree.MessageComponentTree;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.commands.SlashCommandInteraction;
-import net.dv8tion.jda.api.utils.messages.MessageCreateData;
+import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
 
 import uk.co.notnull.proxydiscord.Messages;
 import uk.co.notnull.proxydiscord.ProxyDiscord;
@@ -41,10 +41,12 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 public final class Unlink extends ListenerAdapter {
+    private final ProxyDiscord plugin;
     private final LinkingManager linkingManager;
     private final LuckPermsManager luckPermsManager;
 
     public Unlink(ProxyDiscord plugin) {
+        this.plugin = plugin;
 	    this.linkingManager = plugin.getLinkingManager();
 	    this.luckPermsManager = plugin.getLuckpermsManager();
 	}
@@ -59,19 +61,30 @@ public final class Unlink extends ListenerAdapter {
 
         long userId = interaction.getUser().getIdLong();
         UUID linked = linkingManager.unlink(userId);
-        CompletableFuture<MessageEmbed> response = getResponse(interaction.getUser(), linked);
+        CompletableFuture<MessageComponentTree> response = getResponse(interaction.getUser(), linked);
 
         CompletableFuture.allOf(interaction.deferReply().submit(), response)
-                .thenCompose(_ -> event.getHook().sendMessage(MessageCreateData.fromEmbeds(response.join())).submit())
+                .thenCompose(_ -> event.getHook().sendMessage(
+                        new MessageCreateBuilder()
+                                .useComponentsV2()
+                                .mention(event.getUser())
+                                .addComponents(response.join())
+                                .build())
+                        .submit())
                 .exceptionally((e) -> {
-                    e.printStackTrace();
-                    event.getHook().sendMessage(MessageCreateData.fromEmbeds(
-                            Messages.getEmbed("embed-unlink-error"))).queue();
+                    plugin.getLogger().warn("Exception while handling /unlink command", e);
+                    event.getHook().sendMessage(
+                            new MessageCreateBuilder()
+                                    .useComponentsV2()
+                                    .mention(event.getUser())
+                                    .addComponents(Messages.getMessageComponents("discord-unlink-error"))
+                                    .build())
+                            .queue();
                     return null;
                 });
     }
 
-    private CompletableFuture<MessageEmbed> getResponse(User user, UUID linked) {
+    private CompletableFuture<MessageComponentTree> getResponse(User user, UUID linked) {
         Map<String, String> replacements = new HashMap<>(Map.of("discord", user.getAsMention()));
 
         //User was linked
@@ -80,10 +93,10 @@ public final class Unlink extends ListenerAdapter {
                 String username = luckPermsManager.getUserManager().lookupUsername(linked).join();
                 replacements.put("minecraft", (username != null) ? username : "Unknown account (" + linked + ")");
 
-                return Messages.getEmbed("embed-unlink-success", replacements);
+                return Messages.getMessageComponents("discord-unlink-success", replacements);
             });
         } else { //User wasn't linked
-            return CompletableFuture.completedFuture(Messages.getEmbed("embed-unlink-not-linked", replacements));
+            return CompletableFuture.completedFuture(Messages.getMessageComponents("discord-unlink-not-linked", replacements));
         }
     }
 }
