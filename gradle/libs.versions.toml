@@ -5,7 +5,7 @@ vanishBridge = "2.0-SNAPSHOT"
 platformDetection="2.2"
 discordReserializer="4.4.0"
 luckperms = "5.5"
-jda = "6.3.0"
+jda = "6.3.1"
 
 [libraries]
 velocityApi = { group = "com.velocitypowered", name = "velocity-api", version.ref="velocityApi" }
