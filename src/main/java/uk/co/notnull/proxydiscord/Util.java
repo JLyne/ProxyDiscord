@@ -29,6 +29,8 @@ import dev.vankka.mcdiscordreserializer.rules.DiscordMarkdownRules;
 import dev.vankka.simpleast.core.parser.Parser;
 import dev.vankka.simpleast.core.simple.SimpleMarkdownRules;
 import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.sticker.Sticker;
+import net.dv8tion.jda.api.entities.sticker.StickerItem;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.TextReplacementConfig;
@@ -107,6 +109,14 @@ public class Util {
 			.replacement((MatchResult match, TextComponent.Builder builder) ->
 								 ProxyDiscord.inst().getEmoteProvider().provide(match.group(1), builder)).build();
 
+	public static boolean isMessageEmpty(Message message) {
+		return message.getContentStripped().isBlank()
+				&& message.getAttachments().isEmpty()
+				&& message.getStickers().isEmpty()
+				&& message.getMessageSnapshots().isEmpty();
+	}
+
+
 	/**
 	 * Removes any section-character formatting from the given string then deserializes it into a
 	 * component with formatted extracted URLs
@@ -121,12 +131,15 @@ public class Util {
 	public static Component prepareDiscordMessageAttachments(Message message) {
 		TextComponent.@NotNull Builder result = Component.text();
 		boolean first = true;
+		boolean emptyMessage = message.getContentStripped().isEmpty();
 
-		String format = Messages.get("attachment");
+		String attachmentFormat = Messages.get("attachment");
+		String stickerFormat = Messages.get("sticker");
+		String lottieStickerFormat = Messages.get("sticker-lottie");
 
 		for(Message.Attachment attachment: message.getAttachments()) {
 			// Put each attachment on new line
-			if(!first || !message.getContentStripped().isEmpty()) {
+			if(!first || !emptyMessage) {
 				result.append(Component.newline());
 			}
 
@@ -137,11 +150,32 @@ public class Util {
 
 			placeholders.resolver(Placeholder.unparsed("filename", attachment.getFileName()));
 			placeholders.resolver(Placeholder.styling("link", ClickEvent.openUrl(attachment.getUrl())));
+			placeholders.resolver(Placeholder.unparsed("message_link", message.getJumpUrl()));
 			placeholders.resolver(Placeholder.unparsed("url", attachment.getUrl()));
 			placeholders.resolver(Placeholder.unparsed("type", type));
 			placeholders.resolver(Placeholder.unparsed("type_icon", typeIcon));
 
-			result.append(miniMessage.deserialize(format, placeholders.build()));
+			result.append(miniMessage.deserialize(attachmentFormat, placeholders.build()));
+		}
+
+
+		for(StickerItem sticker: message.getStickers()) {
+			// Put each sticker on new line
+			if(!first || !emptyMessage) {
+				result.append(Component.newline());
+			}
+
+			first = false;
+			TagResolver.@NotNull Builder placeholders = TagResolver.builder();
+
+			placeholders.resolver(Placeholder.unparsed("name", sticker.getName()));
+			placeholders.resolver(Placeholder.styling("link", ClickEvent.openUrl(sticker.getIconUrl())));
+			placeholders.resolver(Placeholder.styling("message_link", ClickEvent.openUrl(message.getJumpUrl())));
+			placeholders.resolver(Placeholder.unparsed("url", sticker.getIconUrl()));
+
+			result.append(miniMessage.deserialize(
+					sticker.getFormatType() == Sticker.StickerFormat.LOTTIE ? lottieStickerFormat : stickerFormat,
+					placeholders.build()));
 		}
 
 		return result.build();

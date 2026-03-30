@@ -37,6 +37,7 @@ import net.luckperms.api.model.user.UserManager;
 import org.spongepowered.configurate.ConfigurationNode;
 import org.slf4j.Logger;
 import uk.co.notnull.proxydiscord.ProxyDiscord;
+import uk.co.notnull.proxydiscord.Util;
 import uk.co.notnull.proxydiscord.api.logging.LogEntry;
 import uk.co.notnull.proxydiscord.api.logging.LogType;
 import uk.co.notnull.proxydiscord.api.events.DiscordChatEvent;
@@ -250,7 +251,7 @@ public class LoggingChannelHandler extends ListenerAdapter {
 		Message message = event.getMessage();
 		String content = message.getContentDisplay();
 
-		if(content.isEmpty() && message.getAttachments().isEmpty()) {
+		if(Util.isMessageEmpty(message)) {
 			plugin.getDebugLogger().info(ignoreMessage + "empty message");
 			return;
 		}

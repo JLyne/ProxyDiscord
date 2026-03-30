@@ -26,6 +26,7 @@ package uk.co.notnull.proxydiscord.logging;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.emoji.RichCustomEmoji;
+import net.dv8tion.jda.api.entities.sticker.Sticker;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
@@ -240,22 +241,33 @@ public class LoggingFormatter {
 	}
 
 	/**
-	 * Formats a message's attachments.
+	 * Formats a message's attachments and stickers.
 	 * @param message The message to format the attachments for
 	 * @return the formatted string
 	 */
 	private static String formatDiscordMessageAttachments(Message message) {
 		StringBuilder result = new StringBuilder();
 		boolean first = true;
+		boolean emptyMessage = message.getContentStripped().isEmpty();
 
 		for(Message.Attachment attachment: message.getAttachments()) {
 			// Put each attachment on new line
-			if(!first || !message.getContentStripped().isEmpty()) {
+			if(!first || !emptyMessage) {
 				result.append("\n");
 			}
 
 			first = false;
 			result.append(formatDiscordMessageAttachment(attachment));
+		}
+
+		for(Sticker sticker: message.getStickers()) {
+			// Put each attachment on new line
+			if(!first || !emptyMessage) {
+				result.append("\n");
+			}
+
+			first = false;
+			result.append(formatDiscordMessageSticker(sticker));
 		}
 
 		return result.toString();
@@ -280,6 +292,24 @@ public class LoggingFormatter {
 		result = result.replace("<type_icon>", typeIcon);
 		result = result.replace("<filename>", attachment.getFileName());
 		result = result.replace("<url>", attachment.getUrl());
+
+        return result;
+	}
+
+	/**
+	 * Formats a message sticker.
+	 * @param sticker The sticker to format
+	 * @return the formatted string
+	 */
+	private static String formatDiscordMessageSticker(Sticker sticker) {
+		String result = Messages.get("sticker-log");
+
+		if(result.isEmpty()) {
+			return null;
+		}
+
+		result = result.replace("<name>", sticker.getName());
+		result = result.replace("<url>", sticker.getIconUrl());
 
         return result;
 	}
