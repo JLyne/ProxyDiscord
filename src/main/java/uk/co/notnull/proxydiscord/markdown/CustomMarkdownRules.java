@@ -164,7 +164,7 @@ public class CustomMarkdownRules {
 			}
 
 			public String getFull() {
-				return FORMAT_DEFAULT.format(date);
+				return FORMAT_FULL_DATE_SHORT_TIME.format(date);
 			}
 
 			public enum Format {
