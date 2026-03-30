@@ -30,6 +30,7 @@ dependencies {
     implementation(project(":ProxyDiscordAPI"))
     implementation(libs.vanishBridgeHelper)
     implementation(libs.discordReserializer)
+    implementation(libs.timeAgo)
     implementation(libs.jda) {
         exclude(module="opus-java")
     }

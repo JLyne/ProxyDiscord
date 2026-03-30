@@ -91,6 +91,7 @@ public class Util {
 							DiscordMarkdownRules.createSpoilerRule(),
 							DiscordMarkdownRules.createCodeBlockRule(),
 							DiscordMarkdownRules.createCodeStringRule(),
+							CustomMarkdownRules.createTimestampRule(),
 //							DiscordMarkdownRules.createSpecialTextRule(), //Needed for quotes
 							SimpleMarkdownRules.createTextRule()
 					),

@@ -6,6 +6,7 @@ platformDetection="2.2"
 discordReserializer="4.4.0"
 luckperms = "5.5"
 jda = "6.4.0"
+timeAgo = "4.2.0"
 
 [libraries]
 velocityApi = { group = "com.velocitypowered", name = "velocity-api", version.ref="velocityApi" }
@@ -14,6 +15,7 @@ platformDetection = { group = "uk.co.notnull", name = "PlatformDetection-velocit
 discordReserializer = { group = "dev.vankka", name = "mcdiscordreserializer", version.ref="discordReserializer" }
 luckpermsApi = { group = "net.luckperms", name = "api", version.ref = "luckperms" }
 jda = { group = "net.dv8tion", name = "JDA", version.ref = "jda" }
+timeAgo = { group = "com.github.marlonlom", name = "timeago", version.ref = "timeAgo" }
 
 [plugins]
 shadow = { id = "com.gradleup.shadow", version.ref = "shadow" }
