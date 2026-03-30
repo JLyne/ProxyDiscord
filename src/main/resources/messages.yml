@@ -539,3 +539,10 @@ sticker: '<link><hover:show_text:''Click to view sticker''><#8194e4>[Sticker: 
 sticker-lottie: '<hover:show_text:''<gray><italic>Sticker type cannot be viewed''><gray>[Sticker: <name>]'
 sticker-log: "[Sticker <name> - <url>]"
 
+forwarded-message: |-
+  ↪️ <gray><italic>Forwarded<reset>
+  <message>
+  ↪️ <gray>From <server> - #<channel>
+forwarded-message-log: |- 
+  Forwarded from <server> #<channel>
+  <message>

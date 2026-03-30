@@ -25,7 +25,9 @@ package uk.co.notnull.proxydiscord.logging;
 
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.MessageReference;
 import net.dv8tion.jda.api.entities.emoji.RichCustomEmoji;
+import net.dv8tion.jda.api.entities.messages.MessageSnapshot;
 import net.dv8tion.jda.api.entities.sticker.Sticker;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
@@ -33,6 +35,7 @@ import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import net.luckperms.api.cacheddata.CachedMetaData;
 import net.luckperms.api.model.user.User;
 import net.luckperms.api.query.QueryOptions;
+import org.jspecify.annotations.Nullable;
 import org.spongepowered.configurate.ConfigurationNode;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.slf4j.Logger;
@@ -270,7 +273,55 @@ public class LoggingFormatter {
 			result.append(formatDiscordMessageSticker(sticker));
 		}
 
+		for(MessageSnapshot snapshot: message.getMessageSnapshots()) {
+			// Put each attachment on new line
+			if(!first || !emptyMessage) {
+				result.append("\n");
+			}
+
+			first = false;
+			result.append(prepareDiscordMessageSnapshot(snapshot, message.getMessageReference()));
+		}
+
 		return result.toString();
+	}
+
+	public static String prepareDiscordMessageSnapshot(MessageSnapshot message, @Nullable MessageReference reference) {
+		boolean first = true;
+		boolean emptyMessage = message.getContentRaw().isEmpty();
+
+		StringBuilder attachments = new StringBuilder();
+
+		for(Message.Attachment attachment: message.getAttachments()) {
+			// Put each attachment on new line
+			if(!first || !emptyMessage) {
+				attachments.append("\n");
+			}
+
+			first = false;
+			attachments.append(formatDiscordMessageAttachment(attachment));
+		}
+
+		for(Sticker sticker: message.getStickers()) {
+			// Put each attachment on new line
+			if(!first || !emptyMessage) {
+				attachments.append("\n");
+			}
+
+			first = false;
+			attachments.append(formatDiscordMessageSticker(sticker));
+		}
+
+		String channelName = reference != null && reference.getChannel() != null ? reference.getChannel().getName() : "Unknown Channel";
+		String serverName = reference != null && reference.getGuild() != null ? reference.getGuild().getName() : "Unknown Server";
+		String messageText = message.getContentRaw() + attachments;
+
+		String result = Messages.get("forwarded-message-log");
+		result = result.replace("<server>", serverName);
+		result = result.replace("<channel>", channelName);
+		result = result.replace("<message>", messageText);
+
+		return result;
 	}
 
 	/**

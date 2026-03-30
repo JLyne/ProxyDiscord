@@ -29,6 +29,8 @@ import dev.vankka.mcdiscordreserializer.rules.DiscordMarkdownRules;
 import dev.vankka.simpleast.core.parser.Parser;
 import dev.vankka.simpleast.core.simple.SimpleMarkdownRules;
 import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.MessageReference;
+import net.dv8tion.jda.api.entities.messages.MessageSnapshot;
 import net.dv8tion.jda.api.entities.sticker.Sticker;
 import net.dv8tion.jda.api.entities.sticker.StickerItem;
 import net.kyori.adventure.text.Component;
@@ -41,6 +43,8 @@ import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.Nullable;
+
 import uk.co.notnull.proxydiscord.api.emote.EmoteProvider;
 import uk.co.notnull.proxydiscord.markdown.CustomMarkdownRules;
 import uk.co.notnull.proxydiscord.markdown.CustomMinecraftRenderer;
@@ -133,9 +137,15 @@ public class Util {
 		boolean first = true;
 		boolean emptyMessage = message.getContentStripped().isEmpty();
 
-		String attachmentFormat = Messages.get("attachment");
-		String stickerFormat = Messages.get("sticker");
-		String lottieStickerFormat = Messages.get("sticker-lottie");
+		for(MessageSnapshot snapshot: message.getMessageSnapshots()) {
+			// Put each snapshot on new line
+			if(!first || !emptyMessage) {
+				result.append(Component.newline());
+			}
+
+			first = false;
+			result.append(prepareDiscordMessageSnapshot(snapshot, message.getMessageReference(), message.getJumpUrl()));
+		}
 
 		for(Message.Attachment attachment: message.getAttachments()) {
 			// Put each attachment on new line
@@ -144,20 +154,8 @@ public class Util {
 			}
 
 			first = false;
-			TagResolver.@NotNull Builder placeholders = TagResolver.builder();
-			String type = attachment.isImage() ? Messages.get("attachment-type-image") : Messages.get("attachment-type-generic");
-			String typeIcon = attachment.isImage() ? Messages.get("attachment-type-image-icon") : Messages.get("attachment-type-generic-icon");
-
-			placeholders.resolver(Placeholder.unparsed("filename", attachment.getFileName()));
-			placeholders.resolver(Placeholder.styling("link", ClickEvent.openUrl(attachment.getUrl())));
-			placeholders.resolver(Placeholder.unparsed("message_link", message.getJumpUrl()));
-			placeholders.resolver(Placeholder.unparsed("url", attachment.getUrl()));
-			placeholders.resolver(Placeholder.unparsed("type", type));
-			placeholders.resolver(Placeholder.unparsed("type_icon", typeIcon));
-
-			result.append(miniMessage.deserialize(attachmentFormat, placeholders.build()));
+			result.append(prepareDiscordMessageAttachment(attachment, message.getJumpUrl()));
 		}
-
 
 		for(StickerItem sticker: message.getStickers()) {
 			// Put each sticker on new line
@@ -166,19 +164,79 @@ public class Util {
 			}
 
 			first = false;
-			TagResolver.@NotNull Builder placeholders = TagResolver.builder();
-
-			placeholders.resolver(Placeholder.unparsed("name", sticker.getName()));
-			placeholders.resolver(Placeholder.styling("link", ClickEvent.openUrl(sticker.getIconUrl())));
-			placeholders.resolver(Placeholder.styling("message_link", ClickEvent.openUrl(message.getJumpUrl())));
-			placeholders.resolver(Placeholder.unparsed("url", sticker.getIconUrl()));
-
-			result.append(miniMessage.deserialize(
-					sticker.getFormatType() == Sticker.StickerFormat.LOTTIE ? lottieStickerFormat : stickerFormat,
-					placeholders.build()));
+			result.append(prepareDiscordMessageSticker(sticker, message.getJumpUrl()));
 		}
 
 		return result.build();
+	}
+
+	public static Component prepareDiscordMessageSnapshot(MessageSnapshot snapshot, @Nullable MessageReference reference, String jumpUrl) {
+		boolean first = true;
+		boolean emptyMessage = snapshot.getContentRaw().isEmpty();
+		TagResolver.@NotNull Builder placeholders = TagResolver.builder();
+
+		Component message = prepareDiscordMessage(snapshot.getContentRaw());
+		TextComponent.@NotNull Builder attachments = Component.text();
+
+		for(Message.Attachment attachment: snapshot.getAttachments()) {
+			// Put each attachment on new line
+			if(!first || !emptyMessage) {
+				attachments.append(Component.newline());
+			}
+
+			first = false;
+			attachments.append(prepareDiscordMessageAttachment(attachment, jumpUrl));
+		}
+
+		for(StickerItem sticker: snapshot.getStickers()) {
+			// Put each sticker on new line
+			if(!first || !emptyMessage) {
+				attachments.append(Component.newline());
+			}
+
+			first = false;
+			attachments.append(prepareDiscordMessageSticker(sticker, jumpUrl));
+		}
+
+		String channelName = reference != null && reference.getChannel() != null ? reference.getChannel().getName() : "Unknown Channel";
+		String serverName = reference != null && reference.getGuild() != null ? reference.getGuild().getName() : "Unknown Server";
+		message = message.append(attachments.build());
+
+		placeholders.resolver(Placeholder.unparsed("server", serverName));
+		placeholders.resolver(Placeholder.unparsed("channel", channelName));
+		placeholders.resolver(Placeholder.component("message", message));
+		placeholders.resolver(Placeholder.unparsed("message_link", jumpUrl));
+
+		return miniMessage.deserialize(Messages.get("forwarded-message"), placeholders.build());
+	}
+
+	public static Component prepareDiscordMessageAttachment(Message.Attachment attachment, String jumpUrl) {
+		TagResolver.@NotNull Builder placeholders = TagResolver.builder();
+		String type = attachment.isImage() ? Messages.get("attachment-type-image") : Messages.get("attachment-type-generic");
+		String typeIcon = attachment.isImage() ? Messages.get("attachment-type-image-icon") : Messages.get("attachment-type-generic-icon");
+
+		placeholders.resolver(Placeholder.unparsed("filename", attachment.getFileName()));
+		placeholders.resolver(Placeholder.styling("link", ClickEvent.openUrl(attachment.getUrl())));
+		placeholders.resolver(Placeholder.unparsed("message_link", jumpUrl));
+		placeholders.resolver(Placeholder.unparsed("url", attachment.getUrl()));
+		placeholders.resolver(Placeholder.unparsed("type", type));
+		placeholders.resolver(Placeholder.unparsed("type_icon", typeIcon));
+
+		return miniMessage.deserialize(Messages.get("attachment"), placeholders.build());
+	}
+
+	public static Component prepareDiscordMessageSticker(StickerItem sticker, String jumpUrl) {
+		TagResolver.@NotNull Builder placeholders = TagResolver.builder();
+
+		placeholders.resolver(Placeholder.unparsed("name", sticker.getName()));
+		placeholders.resolver(Placeholder.styling("link", ClickEvent.openUrl(sticker.getIconUrl())));
+		placeholders.resolver(Placeholder.styling("message_link", ClickEvent.openUrl(jumpUrl)));
+		placeholders.resolver(Placeholder.unparsed("url", sticker.getIconUrl()));
+
+		return miniMessage.deserialize(
+				sticker.getFormatType() == Sticker.StickerFormat.LOTTIE ?
+						Messages.get("sticker-lottie") : Messages.get("sticker"),
+				placeholders.build());
 	}
 
 	public static boolean isValidUUID(String uuid) {
