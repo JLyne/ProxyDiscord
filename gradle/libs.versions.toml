@@ -5,7 +5,7 @@ vanishBridge = "2.0-SNAPSHOT"
 platformDetection="2.2"
 discordReserializer="4.4.0"
 luckperms = "5.5"
-jda = "6.4.0"
+jda = "6.4.1"
 timeAgo = "4.2.0"
 
 [libraries]
