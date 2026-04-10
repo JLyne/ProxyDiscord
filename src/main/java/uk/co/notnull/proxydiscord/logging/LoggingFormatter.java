@@ -76,6 +76,7 @@ public class LoggingFormatter {
             ConfigurationNode deathFormat = logFormats.node("death");
             ConfigurationNode advancementFormat = logFormats.node("advancement");
             ConfigurationNode ingameChatFormat = logFormats.node("discord-chat-ingame");
+            ConfigurationNode genericEventChatFormat = logFormats.node("generic-event");
 
             ConfigurationNode defaultDateFormat = defaultLogFormats.node("date");
             ConfigurationNode defaultCodeBlock = defaultLogFormats.node("code-block");
@@ -87,6 +88,7 @@ public class LoggingFormatter {
             ConfigurationNode defaultDeathFormat = defaultLogFormats.node("death");
             ConfigurationNode defaultAdvancementFormat = defaultLogFormats.node("advancement");
             ConfigurationNode defaultIngameChatFormat = defaultLogFormats.node("discord-chat-ingame");
+            ConfigurationNode defaultGenericEventChatFormat = defaultLogFormats.node("generic-event");
 
             try {
                  this.dateFormat = new SimpleDateFormat(dateFormat.getString(defaultDateFormat.getString("")));
@@ -103,6 +105,7 @@ public class LoggingFormatter {
             formats.put(LogType.COMMAND, commandFormat.getString(defaultCommandFormat.getString("")));
             formats.put(LogType.DEATH, deathFormat.getString(defaultDeathFormat.getString("")));
             formats.put(LogType.ADVANCEMENT, advancementFormat.getString(defaultAdvancementFormat.getString("")));
+            formats.put(LogType.GENERIC_EVENT, genericEventChatFormat.getString(defaultGenericEventChatFormat.getString("")));
             this.ingameChatFormat = ingameChatFormat.getString(defaultIngameChatFormat.getString(""));
         }
 	}

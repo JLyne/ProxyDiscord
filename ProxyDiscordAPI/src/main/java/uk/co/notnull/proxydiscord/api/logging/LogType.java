@@ -60,5 +60,10 @@ public enum LogType {
 	/**
 	 * Player advancement
 	 */
-	ADVANCEMENT
+	ADVANCEMENT,
+
+	/**
+	 * Raw message sent from another plugin or backend server
+	 */
+	GENERIC_EVENT
 }

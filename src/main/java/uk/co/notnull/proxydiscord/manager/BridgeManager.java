@@ -26,7 +26,6 @@ package uk.co.notnull.proxydiscord.manager;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ServerConnection;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
-import org.slf4j.Logger;
 import org.spongepowered.configurate.ConfigurationNode;
 
 import uk.co.notnull.proxydiscord.ProxyDiscord;
@@ -38,11 +37,9 @@ import java.util.Map;
 
 public class BridgeManager {
 	private final ProxyDiscord plugin;
-	private final Logger logger;
 
 	public BridgeManager(ProxyDiscord plugin, ConfigurationNode config) {
         this.plugin = plugin;
-        this.logger = plugin.getLogger();
     }
 
 	public void handleEvent(ServerConnection connection, Map<String, String> data) {
@@ -67,6 +64,10 @@ public class BridgeManager {
 			case "death" -> {
 				entry.type(LogType.DEATH);
 				entry.replacements(Map.of("death_message", data.get("death_message")));
+			}
+			case "generic" -> {
+				entry.type(LogType.GENERIC_EVENT);
+				entry.replacements(Map.of("message", data.get("message")));
 			}
 			case null, default -> plugin.getLogger().warn("Ignoring invalid event type {}", data.get("type"));
 		}
