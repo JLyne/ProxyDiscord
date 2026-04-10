@@ -49,12 +49,14 @@ events:
 # Settings for chat and event logging
 logging:
   default: # Default settings which can be overridden for an individual log channel
-    # Event types to log. Valid events are 'join', 'leave', 'command', 'chat', 'discord-chat'
+    # Event types to log. Valid events are 'join', 'leave', 'command', 'chat', 'discord-chat', 'death', 'advancement'
     events:
       - 'join'
       - 'leave'
       - 'command'
       - 'chat'
+      - 'death'
+      - 'advancement'
       - 'discord-chat' # If enabled, messages sent by users on discord in the log channel will be deleted and then logged using the 'discord-chat' log format.
 
     # Optional list of servers to log, will log all server if not specified
@@ -92,6 +94,14 @@ logging:
       command: |-
         ```md
         [COMMAND] <date> [<server>][<player>](<discord_mention>) <command>```
+      # Player deaths. Also accepts <death_message>
+      death: |-
+        ```md
+        <date> [<server>][<player>](<discord_mention>) <death_message>```
+      # Player advancements. Also accepts <advancement_title>, <advancement_description>, <advancement_message>
+      advancement: |-
+        ```md
+        <date> [<server>][<player>](<discord_mention>) <advancement_message>```
   # 'channelid':
   #   events:
   #     - 'chat'

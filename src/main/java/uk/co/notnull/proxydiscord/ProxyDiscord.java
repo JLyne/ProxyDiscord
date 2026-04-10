@@ -35,6 +35,7 @@ import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.proxy.messages.MinecraftChannelIdentifier;
 import uk.co.notnull.proxydiscord.api.emote.EmoteProvider;
+import uk.co.notnull.proxydiscord.listeners.Bridge;
 import uk.co.notnull.proxydiscord.listeners.JoinLeave;
 import uk.co.notnull.proxydiscord.listeners.SendStatus;
 import uk.co.notnull.proxydiscord.listeners.ServerConnect;
@@ -53,6 +54,7 @@ import org.slf4j.Logger;
 
 import org.spongepowered.configurate.yaml.YamlConfigurationLoader;
 import uk.co.notnull.proxydiscord.manager.AnnouncementManager;
+import uk.co.notnull.proxydiscord.manager.BridgeManager;
 import uk.co.notnull.proxydiscord.manager.GroupSyncManager;
 import uk.co.notnull.proxydiscord.manager.LinkingManager;
 import uk.co.notnull.proxydiscord.manager.LoggingManager;
@@ -81,6 +83,7 @@ public final class ProxyDiscord implements uk.co.notnull.proxydiscord.api.ProxyD
 	private static LoggingManager loggingManager;
 	private static LuckPermsManager luckPermsManager;
 	private GroupSyncManager groupSyncManager;
+	private BridgeManager bridgeManager;
 
 	private boolean platformDetectionEnabled = false;
 	private PlatformDetectionHandler platformDetectionHandler;
@@ -109,6 +112,7 @@ public final class ProxyDiscord implements uk.co.notnull.proxydiscord.api.ProxyD
 		loggingManager = new LoggingManager(this, configuration);
 		redirectManager = new RedirectManager(this);
 		announcementManager = new AnnouncementManager(this, configuration);
+		bridgeManager = new BridgeManager(this, configuration);
 
 		discord = new Discord(this, configuration);
 	}
@@ -182,6 +186,7 @@ public final class ProxyDiscord implements uk.co.notnull.proxydiscord.api.ProxyD
 		proxy.getEventManager().register(this, new ServerConnect(this));
 		proxy.getEventManager().register(this, new SendStatus(this));
 		proxy.getEventManager().register(this, new JoinLeave(this));
+		proxy.getEventManager().register(this, new Bridge(this));
 	}
 
 	private void loadResource(String resource) {
@@ -269,6 +274,10 @@ public final class ProxyDiscord implements uk.co.notnull.proxydiscord.api.ProxyD
 	 */
 	public AnnouncementManager getAnnouncementManager() {
 		return announcementManager;
+	}
+
+	public BridgeManager getBridgeManager() {
+		return bridgeManager;
 	}
 
 	public Logger getLogger() {

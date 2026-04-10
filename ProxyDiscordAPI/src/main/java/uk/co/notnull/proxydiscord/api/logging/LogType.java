@@ -50,5 +50,15 @@ public enum LogType {
 	/**
 	 * Player leaving a server
 	 */
-	LEAVE
+	LEAVE,
+
+	/**
+	 * Player death
+	 */
+	DEATH,
+
+	/**
+	 * Player advancement
+	 */
+	ADVANCEMENT
 }

@@ -73,6 +73,8 @@ public class LoggingFormatter {
             ConfigurationNode joinFormat = logFormats.node("join");
             ConfigurationNode leaveFormat = logFormats.node("leave");
             ConfigurationNode commandFormat = logFormats.node("command");
+            ConfigurationNode deathFormat = logFormats.node("death");
+            ConfigurationNode advancementFormat = logFormats.node("advancement");
             ConfigurationNode ingameChatFormat = logFormats.node("discord-chat-ingame");
 
             ConfigurationNode defaultDateFormat = defaultLogFormats.node("date");
@@ -82,6 +84,8 @@ public class LoggingFormatter {
             ConfigurationNode defaultJoinFormat = defaultLogFormats.node("join");
             ConfigurationNode defaultLeaveFormat = defaultLogFormats.node("leave");
             ConfigurationNode defaultCommandFormat = defaultLogFormats.node("command");
+            ConfigurationNode defaultDeathFormat = defaultLogFormats.node("death");
+            ConfigurationNode defaultAdvancementFormat = defaultLogFormats.node("advancement");
             ConfigurationNode defaultIngameChatFormat = defaultLogFormats.node("discord-chat-ingame");
 
             try {
@@ -97,6 +101,8 @@ public class LoggingFormatter {
             formats.put(LogType.JOIN, joinFormat.getString(defaultJoinFormat.getString("")));
             formats.put(LogType.LEAVE, leaveFormat.getString(defaultLeaveFormat.getString("")));
             formats.put(LogType.COMMAND, commandFormat.getString(defaultCommandFormat.getString("")));
+            formats.put(LogType.DEATH, deathFormat.getString(defaultDeathFormat.getString("")));
+            formats.put(LogType.ADVANCEMENT, advancementFormat.getString(defaultAdvancementFormat.getString("")));
             this.ingameChatFormat = ingameChatFormat.getString(defaultIngameChatFormat.getString(""));
         }
 	}
