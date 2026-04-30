@@ -64,7 +64,6 @@ public class AnnouncementManager {
             }
 
             try {
-                plugin.getLogger().info(channelID);
                 StandardGuildMessageChannel channel = guild.getChannelById(StandardGuildMessageChannel.class, channelID);
                 AnnouncementChannelHandler handler;
 

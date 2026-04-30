@@ -52,21 +52,18 @@ public class Bridge {
 	
 	@Subscribe
 	public void onPluginMessage(PluginMessageEvent e) {
-		plugin.getLogger().info("PluginMessageEvent");
 		if (!e.getIdentifier().equals(channel)) {
-			plugin.getLogger().info("Wrong channel {}", e.getIdentifier());
 			return;
 		}
 
 		e.setResult(PluginMessageEvent.ForwardResult.handled());
 
 		if (!(e.getSource() instanceof ServerConnection connection)) {
-			plugin.getLogger().info("Not from server?");
 			return;
 		}
 
 		Map<String, String> data = gson.fromJson(new String(e.getData(), StandardCharsets.UTF_8), mapType.getType());
-		plugin.getLogger().info("Do thing");
+		plugin.getDebugLogger().info("Received plugin message " + data.toString());
 		bridgeManager.handleEvent(connection, data);
 	}
 }
