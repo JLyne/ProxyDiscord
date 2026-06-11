@@ -1,12 +1,12 @@
 [versions]
 velocityApi = "3.5.0-SNAPSHOT"
-shadow = "9.4.1"
+shadow = "9.4.2"
 vanishBridge = "2.0-SNAPSHOT"
 platformDetection="2.2"
 discordReserializer="4.4.0"
 luckperms = "5.5"
-jda = "6.4.1"
-timeAgo = "4.2.0"
+jda = "6.4.2"
+timeAgo = "4.3.0"
 
 [libraries]
 velocityApi = { group = "com.velocitypowered", name = "velocity-api", version.ref="velocityApi" }
