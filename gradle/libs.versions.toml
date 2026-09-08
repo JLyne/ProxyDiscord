@@ -1,11 +1,11 @@
 [versions]
-velocityApi = "4.1.0-SNAPSHOT"
-shadow = "9.6.0"
+velocityApi = "4.1.2-SNAPSHOT"
+shadow = "9.6.1"
 vanishBridge = "2.0-SNAPSHOT"
 platformDetection="2.2"
 discordReserializer="4.4.0"
 luckperms = "5.5"
-jda = "6.5.0"
+jda = "6.6.0"
 timeAgo = "4.3.0"
 
 [libraries]
